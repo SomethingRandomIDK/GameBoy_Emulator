@@ -3,6 +3,7 @@ TODO.md
 
 # Build Stuff
 build/
+redocmake.sh
 
 # Prerequisites
 *.d
