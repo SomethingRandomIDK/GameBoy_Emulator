@@ -2,6 +2,7 @@
 #define _CPU_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef struct {
     uint8_t a;
@@ -20,10 +21,15 @@ typedef struct {
     registers_t regs;
 } cpu_t;
 
-uint16_t regAF ();
-uint16_t regBC ();
-uint16_t regDE ();
-uint16_t regHL ();
+uint16_t regAF();
+uint16_t regBC();
+uint16_t regDE();
+uint16_t regHL();
+
+bool flagZ();
+bool flagN();
+bool flagH();
+bool flagC();
 
 void initCPU();
 

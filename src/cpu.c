@@ -26,6 +26,22 @@ uint16_t regHL() {
     return ret;
 }
 
+bool flagZ() {
+    return (gbcpu.regs.f >> 7) | 1;
+}
+
+bool flagN() {
+    return (gbcpu.regs.f >> 6) | 1;
+}
+
+bool flagH() {
+    return (gbcpu.regs.f >> 5) | 1;
+}
+
+bool flagC() {
+    return (gbcpu.regs.f >> 4) | 1;
+}
+
 void initCPU() {
     gbcpu.regs.a = 0xaa;
     gbcpu.regs.b = 0xbb;
