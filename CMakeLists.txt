@@ -7,6 +7,7 @@ include(GNUInstallDirs)
 add_executable(gbemu
     src/main.c
     src/cpu.c
+    src/cart.c
 )
 
 target_link_libraries(gbemu
