@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 
 #include "./include/cpu.h"
+#include "./include/cart.h"
 
 int main(int argv, char **argc) {
     initCPU();
@@ -17,6 +18,13 @@ int main(int argv, char **argc) {
     assert(flagN());
     assert(flagH());
     assert(flagC());
+
+    if (argv == 2)
+	cartInit(argc[1]);
+    else {
+	printf("This program requires one cli input\n");
+	exit(1);
+    }
 
     printf("This compiles fine\n");
     return 0;
