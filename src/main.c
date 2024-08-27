@@ -26,7 +26,6 @@ int main(int argv, char **argc) {
 	exit(1);
     }
 
-    printf("This compiles fine\n");
     return 0;
 }
 
