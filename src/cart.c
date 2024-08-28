@@ -7,128 +7,134 @@ struct romHeader header;
 
 static const char *newLicenseeText() {
     switch(header.newLicenseeCode) {
-	case 0x00:
+	case 0x3030:
 	    return "None";
-	case 0x01:
+	case 0x3031:
 	    return "Nintendo Research & Development 1";
-	case 0x08:
+	case 0x3038:
 	    return "Capcom";
-	case 0x13:
+	case 0x3133:
 	    return "EA (Electronic Arts)";
-	case 0x18:
+	case 0x3138:
 	    return "Hudson Soft";
-	case 0x19:
+	case 0x3139:
 	    return "B-AI";
-	case 0x20:
+	case 0x3230:
 	    return "KSS";
-	case 0x22:
+	case 0x3232:
 	    return "Planning Office WADA";
-	case 0x24:
+	case 0x3234:
 	    return "PCM Complete";
-	case 0x25:
+	case 0x3235:
 	    return "San-X";
-	case 0x28:
+	case 0x3238:
 	    return "Kemco";
-	case 0x29:
+	case 0x3239:
 	    return "SETA Corporation";
-	case 0x30:
+	case 0x3330:
 	    return "Viacom";
-	case 0x31:
+	case 0x3331:
 	    return "Nintendo";
-	case 0x32:
+	case 0x3332:
 	    return "Bandai";
-	case 0x33:
+	case 0x3333:
 	    return "Ocean Software//Acclaim Entertainment";
-	case 0x34:
+	case 0x3334:
 	    return "Konami";
-	case 0x35:
+	case 0x3335:
 	    return "HectorSoft";
-	case 0x37:
+	case 0x3337:
 	    return "Taito";
-	case 0x38:
+	case 0x3338:
 	    return "Hudson Soft";
-	case 0x39:
+	case 0x3339:
 	    return "Banpresto";
-	case 0x41:
+	case 0x3431:
 	    return "Ubi Soft";
-	case 0x42:
+	case 0x3432:
 	    return "Atlus";
-	case 0x44:
+	case 0x3434:
 	    return "Malibu Interactive";
-	case 0x46:
+	case 0x3436:
 	    return "Angel";
-	case 0x47:
+	case 0x3437:
 	    return "Bullet-Proof Software";
-	case 0x49:
+	case 0x3439:
 	    return "Irem";
-	case 0x50:
+	case 0x3530:
 	    return "Absolute";
-	case 0x51:
+	case 0x3531:
 	    return "Acclaim Entertainment";
-	case 0x52:
+	case 0x3532:
 	    return "Activision";
-	case 0x53:
+	case 0x3533:
 	    return "Sammy USA Corporation";
-	case 0x54:
+	case 0x3534:
 	    return "Konami";
-	case 0x55:
+	case 0x3535:
 	    return "Hi Tech Expression";
-	case 0x56:
+	case 0x3536:
 	    return "LJN";
-	case 0x57:
+	case 0x3537:
 	    return "Matchbox";
-	case 0x58:
+	case 0x3538:
 	    return "Mattel";
-	case 0x59:
+	case 0x3539:
 	    return "Milton Bradley Company";
-	case 0x60:
+	case 0x3630:
 	    return "Titus Interactive";
-	case 0x61:
+	case 0x3631:
 	    return "Virgin Games Ltd.";
-	case 0x64:
+	case 0x3634:
 	    return "Lucasfilm Games";
-	case 0x67:
+	case 0x3637:
 	    return "Ocean Software";
-	case 0x69:
+	case 0x3639:
 	    return "EA (Electronic Arts)";
-	case 0x70:
+	case 0x3730:
 	    return "Infogrames";
-	case 0x71:
+	case 0x3731:
 	    return "Interplay Entertainment";
-	case 0x72:
+	case 0x3732:
 	    return "Broderbund";
-	case 0x73:
+	case 0x3733:
 	    return "Sculptured Software";
-	case 0x75:
+	case 0x3735:
 	    return "The Sales Curve Limited";
-	case 0x78:
+	case 0x3738:
 	    return "THQ";
-	case 0x79:
+	case 0x3739:
 	    return "Accolade";
-	case 0x80:
+	case 0x3830:
 	    return "Misawa Entertainment";
-	case 0x83:
+	case 0x3833:
 	    return "lozc";
-	case 0x86:
+	case 0x3836:
 	    return "Tokuma Shoten";
-	case 0x87:
+	case 0x3837:
 	    return "Tsukuda Original";
-	case 0x91:
+	case 0x3931:
 	    return "Chunsoft Co.";
-	case 0x92:
+	case 0x3932:
 	    return "Video System";
-	case 0x93:
+	case 0x3933:
 	    return "Ocean Software/Acclaim Entertainment";
-	case 0x95:
+	case 0x3935:
 	    return "Varie";
-	case 0x96:
+	case 0x3936:
 	    return "Yonezawa/S'pal";
-	case 0x97:
+	case 0x3937:
 	    return "Kaneko";
-	case 0x99:
+	case 0x3939:
 	    return "Pack-In-Video";
-	case 0xa4:
+	case 0x3948:
+	    return "Bottom Up";
+	case 0x4134:
 	    return "Konami (Yu-Gi-Oh!)";
+	case 0x424c:
+	    return "MTO";
+	case 0x444b:
+	    return "Kodansha";
 	default:
 	    return "Not Found";
     }
