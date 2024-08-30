@@ -26,6 +26,11 @@ uint16_t regBC();
 uint16_t regDE();
 uint16_t regHL();
 
+void setAF(uint16_t val);
+void setBC(uint16_t val);
+void setDE(uint16_t val);
+void setHL(uint16_t val);
+
 bool flagZ();
 bool flagN();
 bool flagH();
