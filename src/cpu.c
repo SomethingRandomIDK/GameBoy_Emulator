@@ -1,8 +1,20 @@
 #include <stdio.h>
 
 #include "./include/cpu.h"
+#include "./include/bus.h"
 
-cpu_t gbcpu;
+gb_t gbcpu;
+
+static void sPush(uint16_t val){
+    busWrite8(--gbcpu.regs.sp, (val >> 8) & 0xff);
+    busWrite8(--gbcpu.regs.sp, val & 0xff);
+}
+
+static uint16_t sPop(){
+    uint16_t ret = busRead16(gbcpu.regs.sp);
+    gbcpu.regs.sp += 2;
+    return ret;
+}
 
 // This will do everything that the bootrom is supposed to do on start up
 static void bootRom() {

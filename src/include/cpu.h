@@ -19,7 +19,7 @@ typedef struct {
 
 typedef struct {
     registers_t regs;
-} cpu_t;
+} gb_t;
 
 uint16_t regAF();
 uint16_t regBC();
