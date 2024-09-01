@@ -22,8 +22,8 @@ static void bootRom() {
     gbcpu.regs.a = 0x00;
     setHL(0x9fff);
     while (regHL() > 0x7fff) {
-	break;
-	// bus write the entire VRAM to zero
+	busWrite8(regHL(), gbcpu.regs.a);
+	setHL(regHL() - 1);
     }
     printf("boot rom not fully implemented yet\n");
 }
@@ -86,6 +86,14 @@ bool flagH() {
 
 bool flagC() {
     return (gbcpu.regs.f >> 4) & 1;
+}
+
+uint8_t wramRead(uint16_t addr) {
+    return 0;
+}
+
+void wramWrite(uint16_t addr, uint8_t val) {
+    return;
 }
 
 void initCPU() {

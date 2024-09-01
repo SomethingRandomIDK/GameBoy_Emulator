@@ -19,6 +19,8 @@ typedef struct {
 
 typedef struct {
     registers_t regs;
+    uint8_t[0x2000] wram;
+    uint8_t[0x7f] hram;
 } gb_t;
 
 uint16_t regAF();
@@ -35,6 +37,12 @@ bool flagZ();
 bool flagN();
 bool flagH();
 bool flagC();
+
+uint8_t wramRead(uint16_t addr);
+void wramWrite(uint16_t addr, uint8_t val);
+
+uint8_t hramRead(uint16_t addr);
+void hramWrite(uint16_t addr, uint8_t val);
 
 void initCPU();
 
