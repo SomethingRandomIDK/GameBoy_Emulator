@@ -2,6 +2,7 @@
 #define _CART_H_
 
 #include <stdint.h>
+#include <stdlib.h>
 
 struct romHeader{
     // size of 4
@@ -21,6 +22,14 @@ struct romHeader{
     uint8_t checksum;
     uint16_t globalChecksum;
 };
+
+typedef struct {
+    struct romHeader header;
+    char *filename;
+    size_t filenameSize;
+    uint8_t *cartridge;
+    size_t cartSize;
+} rom_t;
 
 void cartInit(char *file);
 

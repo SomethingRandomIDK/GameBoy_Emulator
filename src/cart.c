@@ -1,12 +1,12 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 
 #include "./include/cart.h"
 
-struct romHeader header;
+rom_t rom;
 
 static const char *newLicenseeText() {
-    switch(header.newLicenseeCode) {
+    switch(rom.header.newLicenseeCode) {
 	case 0x3030:
 	    return "None";
 	case 0x3031:
@@ -141,7 +141,7 @@ static const char *newLicenseeText() {
 }
 
 static const char *licenseeText() {
-    switch(header.oldLicenseeCode) {
+    switch(rom.header.oldLicenseeCode) {
 	case 0x00:
 	    return "None";
 	case 0x01:
@@ -442,7 +442,7 @@ static const char *licenseeText() {
 }
 
 static const char *typeText() {
-    switch(header.type){
+    switch(rom.header.type){
 	case 0x00:
 	    return "ROM only";
 	case 0x01:
@@ -505,7 +505,7 @@ static const char *typeText() {
 }
 
 static const char *romSizeText() {
-    switch(header.romSize) {
+    switch(rom.header.romSize) {
 	case 0x00:
 	    return "32kb 2 banks (no banking)";
 	case 0x01:
@@ -538,7 +538,7 @@ static const char *romSizeText() {
 }
 
 static const char *ramSizeText() {
-    switch(header.ramSize) {
+    switch(rom.header.ramSize) {
 	// If cartride type does not equal ram it should default to 0x00
 	case 0x00:
 	    return "No RAM";
@@ -560,7 +560,7 @@ static const char *ramSizeText() {
 }
 
 static const char *destText() {
-    switch(header.dest) {
+    switch(rom.header.dest) {
 	case 0x00:
 	    return "Japan (and possibly overseas)";
 	case 0x01:
@@ -571,54 +571,58 @@ static const char *destText() {
 }
 
 static void displayInfo() {
-    printf("Title: %s\n", header.title);
+    printf("Title: %s\n", rom.header.title);
     printf("Publisher: %s\n", licenseeText());
-    printf("SGB Flag: %d\n", header.sgbFlag);
+    printf("SGB Flag: %d\n", rom.header.sgbFlag);
     printf("ROM type: %s\n", typeText());
     printf("ROM size: %s\n", romSizeText());
     printf("RAM size: %s\n", ramSizeText());
     printf("Destination: %s\n", destText());
-    printf("Version: %d\n", header.version);
-    printf("Checksum: %d\n", header.checksum);
-    printf("Global Checksum: %d\n", header.globalChecksum);
+    printf("Version: %d\n", rom.header.version);
+    printf("Checksum: %d\n", rom.header.checksum);
+    printf("Global Checksum: %d\n", rom.header.globalChecksum);
 }
 
 void cartInit(char *file) {
-    uint8_t *cartridge;
-    size_t cartSize;
+    rom.filenameSize = strlen(file);
+    rom.filename = malloc(rom.filenameSize + 1);
+    strncpy(rom.filename, file, rom.filenameSize);
+    rom.filename[rom.filenameSize] = 0;
 
-    FILE *f = fopen(file, "r");
+    FILE *f = fopen(rom.filename, "r");
     if (f == NULL) {
 	printf("File Failed to Open\n");
 	exit(1);
     }
 
     fseek(f, 0, SEEK_END);
-    cartSize = ftell(f);
+    rom.cartSize = ftell(f);
     rewind(f);
-    cartridge = malloc(cartSize);
-    fread(cartridge, cartSize, 1, f);
+    rom.cartridge = malloc(rom.cartSize);
+    fread(rom.cartridge, rom.cartSize, 1, f);
     fclose(f);
 
-    header.entry = (uint8_t *)(cartridge + 0x100);
-    header.logo = (uint8_t *)(cartridge + 0x104);
-    header.title = (char *)(cartridge + 0x134);
+    rom.header.entry = (uint8_t *)(rom.cartridge + 0x100);
+    rom.header.logo = (uint8_t *)(rom.cartridge + 0x104);
+    rom.header.title = (char *)(rom.cartridge + 0x134);
 
-    header.title[0xf] = 0;
+    rom.header.title[0xf] = 0;
 
-    header.newLicenseeCode = (*(cartridge + 0x144) << 8) | (*(cartridge + 0x145));
-    header.sgbFlag = *(cartridge + 0x146);
-    header.type = *(cartridge + 0x147);
-    header.romSize = *(cartridge + 0x148);
-    header.ramSize = *(cartridge + 0x149);
-    header.dest = *(cartridge + 0x14a);
-    header.oldLicenseeCode = *(cartridge + 0x14b);
-    header.version = *(cartridge + 0x14c);
-    header.checksum = *(cartridge + 0x14d);
-    header.globalChecksum = (*(cartridge + 0x14e) << 8) | (*(cartridge + 0x14f));
+    rom.header.newLicenseeCode = (*(rom.cartridge + 0x144) << 8) | (*(rom.cartridge + 0x145));
+    rom.header.sgbFlag = *(rom.cartridge + 0x146);
+    rom.header.type = *(rom.cartridge + 0x147);
+    rom.header.romSize = *(rom.cartridge + 0x148);
+    rom.header.ramSize = *(rom.cartridge + 0x149);
+    rom.header.dest = *(rom.cartridge + 0x14a);
+    rom.header.oldLicenseeCode = *(rom.cartridge + 0x14b);
+    rom.header.version = *(rom.cartridge + 0x14c);
+    rom.header.checksum = *(rom.cartridge + 0x14d);
+    rom.header.globalChecksum = (*(rom.cartridge + 0x14e) << 8) | (*(rom.cartridge + 0x14f));
 
     displayInfo();
 
-    free(cartridge);
+    // Need to move these to the exit function When made
+    free(rom.cartridge);
+    free(rom.filename);
 }
 
