@@ -19,8 +19,8 @@ typedef struct {
 
 typedef struct {
     registers_t regs;
-    uint8_t[0x2000] wram;
-    uint8_t[0x7f] hram;
+    uint8_t wram[0x2000];
+    uint8_t hram[0x7f];
 } gb_t;
 
 uint16_t regAF();

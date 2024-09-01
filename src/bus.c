@@ -1,4 +1,5 @@
 #include "./include/bus.h"
+#include "./include/cpu.h"
 
 uint8_t busRead8(uint16_t addr) {
     if (addr < 0x8000) {
@@ -12,11 +13,11 @@ uint8_t busRead8(uint16_t addr) {
 	return 0;
     } else if (addr < 0xe000) {
 	// read from WRAM
-	return 0;
+	return wramRead(addr);
     } else if (addr < 0xfe00) {
 	// Echo Ram but it wraps around so reading or writing from here should
 	// do the same thing as reading and writing to 0xc000 to 0xddff
-	return 0;
+	return wramRead(addr - 0x2000);
     } else if (addr < 0xfea0) {
 	// OAM (Object attribute memory) I think this is where the sprites are
 	// saved
@@ -33,7 +34,7 @@ uint8_t busRead8(uint16_t addr) {
 	return 0;
     } else if (addr < 0xffff) {
 	// HRAM
-	return 0;
+	return hramRead(addr);
     } else {
 	// Interupt register
 	return 0;
@@ -53,11 +54,11 @@ void busWrite8(uint16_t addr, uint8_t val){
 	return;
     } else if (addr < 0xe000) {
 	// Write from WRAM
-	return;
+	wramWrite(addr, val);
     } else if (addr < 0xfe00) {
 	// Echo Ram but it wraps around so reading or writing from here should
 	// do the same thing as reading and writing to 0xc000 to 0xddff
-	return;
+	wramWrite(addr - 0x2000, val);
     } else if (addr < 0xfea0) {
 	// OAM (Object attribute memory) I think this is where the sprites are
 	// saved
@@ -74,7 +75,7 @@ void busWrite8(uint16_t addr, uint8_t val){
 	return;
     } else if (addr < 0xffff) {
 	// HRAM
-	return;
+	hramWrite(addr, val);
     } else {
 	// Interupt register
 	return;

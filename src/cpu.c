@@ -89,11 +89,20 @@ bool flagC() {
 }
 
 uint8_t wramRead(uint16_t addr) {
-    return 0;
+    // From where it is used the addr variable should never exceed 0xe000
+    return gbcpu.wram[addr - 0xc000];
 }
 
 void wramWrite(uint16_t addr, uint8_t val) {
-    return;
+    gbcpu.wram[addr - 0xc000] = val;
+}
+
+uint8_t hramRead(uint16_t addr) {
+    return gbcpu.hram[addr - 0xff80];
+}
+
+void hramWrite(uint16_t addr, uint8_t val){ 
+    gbcpu.hram[addr - 0xff80] = val;
 }
 
 void initCPU() {
