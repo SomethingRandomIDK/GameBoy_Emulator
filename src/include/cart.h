@@ -1,6 +1,7 @@
 #ifndef _CART_H_
 #define _CART_H_
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -23,13 +24,43 @@ struct romHeader{
     uint16_t globalChecksum;
 };
 
+enum cartType {
+    ROM,
+    MBC1,
+    MBC2,
+    MBC3,
+    MBC5,
+    MBC6,
+    MBC7,
+    MMM01,
+    HUC1,
+    HUC3
+};
+
 typedef struct {
     struct romHeader header;
     char *filename;
     size_t filenameSize;
     uint8_t *cartridge;
     size_t cartSize;
+
+    enum cartType cType;
+    bool ramAvail;
+    // This will also act to determine whether the ram is ram or IR register, 
+    // with ram indicated by true and IR register indicated by false
+    bool ramEnable;
+    uint8_t **ram;
+    uint8_t *curRomBank;
 } rom_t;
+
+typedef uint8_t (*memMapRead_t)(uint16_t);
+typedef void (*memMapWrite_t)(uint16_t, uint8_t);
+
+uint8_t romRead(uint16_t addr);
+void romWrite(uint16_t addr, uint8_t val);
+
+uint8_t cartRamRead(uint16_t addr);
+void cartRamWrite(uint16_t addr, uint8_t val);
 
 void cartInit(char *file);
 

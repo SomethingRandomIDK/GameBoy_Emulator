@@ -583,6 +583,83 @@ static void displayInfo() {
     printf("Global Checksum: %d\n", rom.header.globalChecksum);
 }
 
+static void cartTypeSelector() {
+    switch(rom.header.type) {
+        case 0x00:
+        case 0x08:
+        case 0x09:
+            rom.cType = ROM;
+            break;
+        case 0x01:
+        case 0x02:
+        case 0x03:
+            rom.cType = MBC1;
+            break;
+        case 0x05:
+        case 0x06:
+            rom.cType = MBC2;
+            break;
+        case 0x0b:
+        case 0x0c:
+        case 0x0d:
+            rom.cType = MMM01;
+            break;
+        case 0x0f:
+        case 0x10:
+        case 0x11:
+        case 0x12:
+        case 0x13:
+            rom.cType = MBC3;
+            break;
+        case 0x19:
+        case 0x1a:
+        case 0x1b:
+        case 0x1c:
+        case 0x1d:
+        case 0x1e:
+            rom.cType = MBC5;
+            break;
+        case 0x20:
+            rom.cType = MBC6;
+            break;
+        case 0x22:
+            rom.cType = MBC7;
+            break;
+        case 0xfe:
+            rom.cType = HUC3;
+            break;
+        case 0xff:
+            rom.cType = HUC1;
+            break;
+        default:
+            printf("Invalid Rom Type\n");
+            exit(1);
+    }
+
+    switch(rom.header.type) {
+        case 0x02:
+        case 0x03:
+        case 0x08:
+        case 0x09:
+        case 0x0c:
+        case 0x0d:
+        case 0x10:
+        case 0x12:
+        case 0x13:
+        case 0x1a:
+        case 0x1b:
+        case 0x1d:
+        case 0x1e:
+        case 0x22:
+        case 0xff:
+            rom.ramAvail = true;
+            break;
+        default:
+            rom.ramAvail = false;
+            break;
+    }
+}
+
 void cartInit(char *file) {
     rom.filenameSize = strlen(file);
     rom.filename = malloc(rom.filenameSize + 1);
