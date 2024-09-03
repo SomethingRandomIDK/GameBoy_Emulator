@@ -632,7 +632,7 @@ static void cartTypeSelector() {
             rom.cType = HUC1;
             break;
         default:
-            printf("Invalid Rom Type\n");
+            printf("INVALID ROM TYPE\n");
             exit(1);
     }
 
@@ -653,6 +653,33 @@ static void cartTypeSelector() {
         case 0x22:
         case 0xff:
             rom.ramAvail = true;
+            switch(rom.header.ramSize) {
+                case 0x00:
+                    rom.ramAvail = false;
+                    break;
+                case 0x02:
+                    rom.ram = (uint8_t **)malloc(sizeof(uint8_t *));
+                    *rom.ram = (uint8_t *)calloc(0x2000, 1);
+                    break;
+                case 0x03:
+                    rom.ram = (uint8_t **)malloc(4 * sizeof(uint8_t *));
+                    for (int i = 0; i < 4; ++i)
+                        *(rom.ram + i) = (uint8_t *)calloc(0x2000, 1);
+                    break;
+                case 0x04:
+                    rom.ram = (uint8_t **)malloc(16 * sizeof(uint8_t *));
+                    for (int i = 0; i < 16; ++i)
+                        *(rom.ram + i) = (uint8_t *)calloc(0x2000, 1);
+                    break;
+                case 0x05:
+                    rom.ram = (uint8_t **)malloc(8 * sizeof(uint8_t *));
+                    for (int i = 0; i < 8; ++i)
+                        *(rom.ram + i) = (uint8_t *)calloc(0x2000, 1);
+                    break;
+                default:
+                    printf("INVALID CART SIZE\n");
+                    exit(1);
+            }
             break;
         default:
             rom.ramAvail = false;
@@ -697,6 +724,7 @@ void cartInit(char *file) {
     rom.header.globalChecksum = (*(rom.cartridge + 0x14e) << 8) | (*(rom.cartridge + 0x14f));
 
     displayInfo();
+    cartTypeSelector();
 
     // Need to move these to the exit function When made
     free(rom.cartridge);
