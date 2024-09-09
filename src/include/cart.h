@@ -53,6 +53,7 @@ typedef struct {
     uint8_t *curRamBank;
     uint8_t *curRomBank;
     int numRomBanks;
+    int curRamNum;
 } rom_t;
 
 typedef uint8_t (*memMapRead_t)(uint16_t);

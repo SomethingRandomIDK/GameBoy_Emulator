@@ -596,10 +596,6 @@ static void cartTypeSelector() {
             rom.cType = MBC1;
             // Set the pointer for curRomBank to the first Rom Bank
             rom.curRomBank = rom.cartridge + 0x4000;
-            // Set the number of the rom banks
-            // It is possible that romSize is 0x52, 0x53, 0x54, but that is only
-            // recorded in unofficial docs so I won't support it
-            rom.numRomBanks = 1 << rom.header.romSize;
             break;
         case 0x05:
         case 0x06:
@@ -675,6 +671,7 @@ static void cartTypeSelector() {
         case 0x22:
         case 0xff:
             rom.ramAvail = true;
+            rom.ramEnable = false;
             switch(rom.header.ramSize) {
                 case 0x00:
                     rom.ramAvail = false;
@@ -718,6 +715,37 @@ static uint8_t mapperRomRead(uint16_t addr) {
 
 static void mapperRomWrite(uint16_t addr, uint8_t val) {
     return;
+}
+
+// Read and Write function for the MBC1 cartridge
+static uint8_t mapperMBC1Read(uint16_t addr) {
+    if (addr < 0x4000)
+        return rom.cartridge[addr];
+    else if (addr < 0x8000)
+        return rom.curRomBank[addr - 0x4000];
+    else if (addr > 0x9fff && addr < 0xc000) {
+        if (rom.ramAvail && rom.ramEnable)
+            return rom.curRamBank[addr - 0xa000];
+        else
+            return 0xff;
+    }
+    return 0xff;
+}
+
+static void mapperMBC1Write(uint16_t addr, uint8_t val) {
+    if (addr < 0x2000) {
+        rom.ramEnable = (val & 0xf) == 0xa;
+        return;
+    } else if (addr < 0x4000) {
+        // There are a few unofficial docs that use values where this won't be
+        // supported, but it's unofficial so I don't want to make support for it
+        // rn
+        int shiftAmt = 8 - rom.header.romSize;
+        uint8_t selectedBank = (val & (0xff >> (shiftAmt)));
+        if (selectedBank == 0) {
+            selectedBank = 1;
+        }
+    }
 }
 
 void cartInit(char *file) {
