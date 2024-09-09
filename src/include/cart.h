@@ -60,9 +60,6 @@ typedef void (*memMapWrite_t)(uint16_t, uint8_t);
 uint8_t romRead(uint16_t addr);
 void romWrite(uint16_t addr, uint8_t val);
 
-uint8_t cartRamRead(uint16_t addr);
-void cartRamWrite(uint16_t addr, uint8_t val);
-
 void cartInit(char *file);
 
 #endif

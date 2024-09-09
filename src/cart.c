@@ -711,7 +711,12 @@ static void cartTypeSelector() {
 
 // NO Mapper/ Just ROM read and write functions
 static uint8_t mapperRomRead(uint16_t addr) {
-    return rom.cartridge[addr];
+    if (addr < 0x8000) {
+        return rom.cartridge[addr];
+    } else if (rom.ramAvail) {
+        return rom.ram[0][addr - 0xa000];
+    }
+    return 0;
 }
 
 static void mapperRomWrite(uint16_t addr, uint8_t val) {
