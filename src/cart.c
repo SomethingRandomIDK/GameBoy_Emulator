@@ -709,6 +709,15 @@ static void cartTypeSelector() {
     }
 }
 
+// NO Mapper/ Just ROM read and write functions
+static uint8_t mapperRomRead(uint16_t addr) {
+    return rom.cartridge[addr];
+}
+
+static void mapperRomWrite(uint16_t addr, uint8_t val) {
+    return;
+}
+
 void cartInit(char *file) {
     rom.filenameSize = strlen(file);
     rom.filename = malloc(rom.filenameSize + 1);
