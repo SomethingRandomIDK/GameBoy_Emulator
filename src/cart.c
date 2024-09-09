@@ -594,15 +594,25 @@ static void cartTypeSelector() {
         case 0x02:
         case 0x03:
             rom.cType = MBC1;
+            // Set the pointer for curRomBank to the first Rom Bank
+            rom.curRomBank = rom.cartridge + 0x4000;
+            // Set the number of the rom banks
+            // It is possible that romSize is 0x52, 0x53, 0x54, but that is only
+            // recorded in unofficial docs so I won't support it
+            rom.numRomBanks = 1 << rom.header.romSize;
             break;
         case 0x05:
         case 0x06:
             rom.cType = MBC2;
+            rom.curRomBank = rom.cartridge + 0x4000;
+            rom.numRomBanks = 1 << rom.header.romSize;
             break;
         case 0x0b:
         case 0x0c:
         case 0x0d:
             rom.cType = MMM01;
+            rom.curRomBank = rom.cartridge + 0x4000;
+            rom.numRomBanks = 1 << rom.header.romSize;
             break;
         case 0x0f:
         case 0x10:
@@ -610,6 +620,8 @@ static void cartTypeSelector() {
         case 0x12:
         case 0x13:
             rom.cType = MBC3;
+            rom.curRomBank = rom.cartridge + 0x4000;
+            rom.numRomBanks = 1 << rom.header.romSize;
             break;
         case 0x19:
         case 0x1a:
@@ -618,18 +630,28 @@ static void cartTypeSelector() {
         case 0x1d:
         case 0x1e:
             rom.cType = MBC5;
+            rom.curRomBank = rom.cartridge + 0x4000;
+            rom.numRomBanks = 1 << rom.header.romSize;
             break;
         case 0x20:
             rom.cType = MBC6;
+            rom.curRomBank = rom.cartridge + 0x4000;
+            rom.numRomBanks = 1 << rom.header.romSize;
             break;
         case 0x22:
             rom.cType = MBC7;
+            rom.curRomBank = rom.cartridge + 0x4000;
+            rom.numRomBanks = 1 << rom.header.romSize;
             break;
         case 0xfe:
             rom.cType = HUC3;
+            rom.curRomBank = rom.cartridge + 0x4000;
+            rom.numRomBanks = 1 << rom.header.romSize;
             break;
         case 0xff:
             rom.cType = HUC1;
+            rom.curRomBank = rom.cartridge + 0x4000;
+            rom.numRomBanks = 1 << rom.header.romSize;
             break;
         default:
             printf("INVALID ROM TYPE\n");

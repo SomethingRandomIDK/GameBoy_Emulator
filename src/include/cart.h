@@ -51,6 +51,7 @@ typedef struct {
     bool ramEnable;
     uint8_t **ram;
     uint8_t *curRomBank;
+    int numRomBanks;
 } rom_t;
 
 typedef uint8_t (*memMapRead_t)(uint16_t);
