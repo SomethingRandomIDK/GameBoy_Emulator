@@ -680,23 +680,20 @@ static void cartTypeSelector() {
                     rom.ramAvail = false;
                     break;
                 case 0x02:
-                    rom.ram = (uint8_t **)malloc(sizeof(uint8_t *));
-                    *rom.ram = (uint8_t *)calloc(0x2000, 1);
+                    rom.ram = (uint8_t *)calloc(0x2000, 1);
+                    rom.curRamBank = rom.ram;
                     break;
                 case 0x03:
-                    rom.ram = (uint8_t **)malloc(4 * sizeof(uint8_t *));
-                    for (int i = 0; i < 4; ++i)
-                        *(rom.ram + i) = (uint8_t *)calloc(0x2000, 1);
+                    rom.ram = (uint8_t *)calloc(0x4 * 0x2000, 1);
+                    rom.curRamBank = rom.ram;
                     break;
                 case 0x04:
-                    rom.ram = (uint8_t **)malloc(16 * sizeof(uint8_t *));
-                    for (int i = 0; i < 16; ++i)
-                        *(rom.ram + i) = (uint8_t *)calloc(0x2000, 1);
+                    rom.ram = (uint8_t *)calloc(0x10 * 0x2000, 1);
+                    rom.curRamBank = rom.ram;
                     break;
                 case 0x05:
-                    rom.ram = (uint8_t **)malloc(8 * sizeof(uint8_t *));
-                    for (int i = 0; i < 8; ++i)
-                        *(rom.ram + i) = (uint8_t *)calloc(0x2000, 1);
+                    rom.ram = (uint8_t *)calloc(0x8 * 0x2000, 1);
+                    rom.curRamBank = rom.ram;
                     break;
                 default:
                     printf("INVALID CART SIZE\n");
@@ -714,7 +711,7 @@ static uint8_t mapperRomRead(uint16_t addr) {
     if (addr < 0x8000) {
         return rom.cartridge[addr];
     } else if (rom.ramAvail) {
-        return rom.ram[0][addr - 0xa000];
+        return rom.ram[addr - 0xa000];
     }
     return 0;
 }

@@ -49,7 +49,8 @@ typedef struct {
     // This will also act to determine whether the ram is ram or IR register, 
     // with ram indicated by true and IR register indicated by false
     bool ramEnable;
-    uint8_t **ram;
+    uint8_t *ram;
+    uint8_t *curRamBank;
     uint8_t *curRomBank;
     int numRomBanks;
 } rom_t;
