@@ -710,11 +710,12 @@ static uint8_t mapperRomRead(uint16_t addr) {
     } else if (rom.ramAvail) {
         return rom.ram[addr - 0xa000];
     }
-    return 0;
+    return 0xff;
 }
 
 static void mapperRomWrite(uint16_t addr, uint8_t val) {
-    return;
+    if (rom.ramAvail)
+        rom.ram[addr - 0xa000] = val;
 }
 
 // Read and Write function for the MBC1 cartridge
