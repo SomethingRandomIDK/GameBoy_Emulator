@@ -49,11 +49,16 @@ typedef struct {
     // This will also act to determine whether the ram is ram or IR register, 
     // with ram indicated by true and IR register indicated by false
     bool ramEnable;
+    bool bankingMode;
     uint8_t *ram;
     uint8_t *curRamBank;
     uint8_t *curRomBank;
-    int numRomBanks;
-    int curRamNum;
+    // This is for mode 1 (in MBC1 for now)
+    uint8_t *curRomBank0;
+    uint16_t numRomBanks;
+    uint8_t numRamBanks;
+    uint16_t curRomBankNum;
+    uint8_t curRamBankNum;
 } rom_t;
 
 typedef uint8_t (*memMapRead_t)(uint16_t);

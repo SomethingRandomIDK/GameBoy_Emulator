@@ -595,20 +595,27 @@ static void cartTypeSelector() {
         case 0x03:
             rom.cType = MBC1;
             // Set the pointer for curRomBank to the first Rom Bank
+            rom.curRomBank0 = rom.cartridge;
             rom.curRomBank = rom.cartridge + 0x4000;
+            rom.numRomBanks = 1 << rom.header.romSize;
+            rom.curRomBankNum = 1;
             break;
         case 0x05:
         case 0x06:
             rom.cType = MBC2;
+            rom.curRomBank0 = rom.cartridge;
             rom.curRomBank = rom.cartridge + 0x4000;
             rom.numRomBanks = 1 << rom.header.romSize;
+            rom.curRomBankNum = 1;
             break;
         case 0x0b:
         case 0x0c:
         case 0x0d:
             rom.cType = MMM01;
+            rom.curRomBank0 = rom.cartridge;
             rom.curRomBank = rom.cartridge + 0x4000;
             rom.numRomBanks = 1 << rom.header.romSize;
+            rom.curRomBankNum = 1;
             break;
         case 0x0f:
         case 0x10:
@@ -616,8 +623,10 @@ static void cartTypeSelector() {
         case 0x12:
         case 0x13:
             rom.cType = MBC3;
+            rom.curRomBank0 = rom.cartridge;
             rom.curRomBank = rom.cartridge + 0x4000;
             rom.numRomBanks = 1 << rom.header.romSize;
+            rom.curRomBankNum = 1;
             break;
         case 0x19:
         case 0x1a:
@@ -626,28 +635,38 @@ static void cartTypeSelector() {
         case 0x1d:
         case 0x1e:
             rom.cType = MBC5;
+            rom.curRomBank0 = rom.cartridge;
             rom.curRomBank = rom.cartridge + 0x4000;
             rom.numRomBanks = 1 << rom.header.romSize;
+            rom.curRomBankNum = 1;
             break;
         case 0x20:
             rom.cType = MBC6;
+            rom.curRomBank0 = rom.cartridge;
             rom.curRomBank = rom.cartridge + 0x4000;
             rom.numRomBanks = 1 << rom.header.romSize;
+            rom.curRomBankNum = 1;
             break;
         case 0x22:
             rom.cType = MBC7;
+            rom.curRomBank0 = rom.cartridge;
             rom.curRomBank = rom.cartridge + 0x4000;
             rom.numRomBanks = 1 << rom.header.romSize;
+            rom.curRomBankNum = 1;
             break;
         case 0xfe:
             rom.cType = HUC3;
+            rom.curRomBank0 = rom.cartridge;
             rom.curRomBank = rom.cartridge + 0x4000;
             rom.numRomBanks = 1 << rom.header.romSize;
+            rom.curRomBankNum = 1;
             break;
         case 0xff:
             rom.cType = HUC1;
+            rom.curRomBank0 = rom.cartridge;
             rom.curRomBank = rom.cartridge + 0x4000;
             rom.numRomBanks = 1 << rom.header.romSize;
+            rom.curRomBankNum = 1;
             break;
         default:
             printf("INVALID ROM TYPE\n");
@@ -679,21 +698,29 @@ static void cartTypeSelector() {
                 case 0x02:
                     rom.ram = (uint8_t *)calloc(0x2000, 1);
                     rom.curRamBank = rom.ram;
+                    rom.curRamBankNum = 0;
+                    rom.numRamBanks = 1;
                     break;
                 case 0x03:
                     rom.ram = (uint8_t *)calloc(0x4 * 0x2000, 1);
                     rom.curRamBank = rom.ram;
+                    rom.curRamBankNum = 0;
+                    rom.numRamBanks = 4;
                     break;
                 case 0x04:
                     rom.ram = (uint8_t *)calloc(0x10 * 0x2000, 1);
                     rom.curRamBank = rom.ram;
+                    rom.curRamBankNum = 0;
+                    rom.numRamBanks = 16;
                     break;
                 case 0x05:
                     rom.ram = (uint8_t *)calloc(0x8 * 0x2000, 1);
                     rom.curRamBank = rom.ram;
+                    rom.curRamBankNum = 0;
+                    rom.numRamBanks = 8;
                     break;
                 default:
-                    printf("INVALID CART SIZE\n");
+                    printf("INVALID RAM SIZE\n");
                     exit(1);
             }
             break;
@@ -720,13 +747,21 @@ static void mapperRomWrite(uint16_t addr, uint8_t val) {
 
 // Read and Write function for the MBC1 cartridge
 static uint8_t mapperMBC1Read(uint16_t addr) {
-    if (addr < 0x4000)
-        return rom.cartridge[addr];
+    if (addr < 0x4000){
+        if (rom.bankingMode)
+            return rom.curRomBank0[addr];
+        else
+            return rom.cartridge[addr];
+    }
     else if (addr < 0x8000)
         return rom.curRomBank[addr - 0x4000];
     else if (addr > 0x9fff && addr < 0xc000) {
-        if (rom.ramAvail && rom.ramEnable)
-            return rom.curRamBank[addr - 0xa000];
+        if (rom.ramAvail && rom.ramEnable) {
+            if (rom.bankingMode)
+                return rom.curRamBank[addr - 0xa000];
+            else
+                return rom.ram[addr - 0xa000];
+        }
         else
             return 0xff;
     }
@@ -736,15 +771,36 @@ static uint8_t mapperMBC1Read(uint16_t addr) {
 static void mapperMBC1Write(uint16_t addr, uint8_t val) {
     if (addr < 0x2000) {
         rom.ramEnable = (val & 0xf) == 0xa;
-        return;
     } else if (addr < 0x4000) {
         // There are a few unofficial docs that use values where this won't be
         // supported, but it's unofficial so I don't want to make support for it
         // rn
-        int shiftAmt = 8 - rom.header.romSize;
-        uint8_t selectedBank = (val & (0xff >> (shiftAmt)));
-        if (selectedBank == 0) {
-            selectedBank = 1;
+
+        // TODO: add implementation for banking modes
+        int shiftAmt = 8 - rom.header.romSize + 1;
+        rom.curRomBankNum = (val & (0xff >> (shiftAmt)));
+        if (shiftAmt < 4) {
+            rom.curRomBankNum &= 0x1f;
+            rom.curRomBankNum |= ((rom.curRamBankNum & 0x3) << 5);
+            rom.curRomBank0 = rom.cartridge + ((rom.curRomBankNum & 0x60) * 0x4000);
+        }
+        if ((rom.curRomBankNum & 0x1f) == 0) {
+            rom.curRomBankNum += 1;
+        }
+        rom.curRomBank = rom.cartridge + (rom.curRomBankNum * 0x4000);
+    } else if (addr < 0x6000) {
+        rom.curRamBankNum = (val & 0x3);
+        if (rom.ramAvail){
+            rom.curRamBank = rom.ram + (rom.curRamBankNum * 0x2000);
+        }
+    } else if (addr < 0x8000) {
+        rom.bankingMode = val & 0x1;
+    } else if (addr > 0x9fff && addr < 0xc000) {
+        if (rom.ramAvail && rom.ramEnable) {
+            if (rom.bankingMode)
+                rom.curRamBank[addr - 0xa000] = val;
+            else
+                rom.ram[addr - 0xa000] = val;
         }
     }
 }
