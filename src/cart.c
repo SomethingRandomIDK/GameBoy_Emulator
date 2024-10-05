@@ -734,14 +734,14 @@ static void cartTypeSelector() {
 static uint8_t mapperRomRead(uint16_t addr) {
     if (addr < 0x8000) {
         return rom.cartridge[addr];
-    } else if (rom.ramAvail) {
+    } else if (addr > 0x9fff && addr < 0xc000 && rom.ramAvail) {
         return rom.ram[addr - 0xa000];
     }
     return 0xff;
 }
 
 static void mapperRomWrite(uint16_t addr, uint8_t val) {
-    if (rom.ramAvail)
+    if (addr > 0x9fff && addr < 0xc000 && rom.ramAvail)
         rom.ram[addr - 0xa000] = val;
 }
 
