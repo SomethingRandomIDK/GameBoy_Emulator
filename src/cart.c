@@ -810,11 +810,27 @@ static uint8_t mapperMBC2Read(uint16_t addr) {
         return rom.cartridge[addr];
     } else if (addr < 0x8000) {
         return rom.curRomBank[addr - 0x4000];
-    } else if (addr > 0x9fff && addr < 0xc000 && rom.ramAvail) {
+    } else if (addr > 0x9fff && addr < 0xc000 && rom.ramAvail && rom.ramEnable) {
         addr &= 0x1ff;
-        return rom.curRamBank[addr] & 0xf;
+        return rom.ram[addr] & 0xf;
     }
     return 0xff;
+}
+
+static void mapperMBC2Write(uint16_t addr, uint8_t val) {
+    if (addr < 0x4000) {
+        if (addr & 0x100) {
+            if ((val & 0xf) == 0) {
+                val++;
+            }
+            rom.curRomBank = rom.cartridge + ((val & 0xf) * 0x4000);
+        } else {
+            rom.ramEnable = val == 0x0a;
+        }
+    } else if (addr > 0x9fff && addr < 0xc000 && rom.ramAvail && rom.ramEnable) {
+        addr &= 0x1ff;
+        rom.ram[addr] = val;
+    }
 }
 
 void cartInit(char *file) {
