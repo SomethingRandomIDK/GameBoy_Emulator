@@ -805,6 +805,18 @@ static void mapperMBC1Write(uint16_t addr, uint8_t val) {
     }
 }
 
+static uint8_t mapperMBC2Read(uint16_t addr) {
+    if (addr < 0x4000) {
+        return rom.cartridge[addr];
+    } else if (addr < 0x8000) {
+        return rom.curRomBank[addr - 0x4000];
+    } else if (addr > 0x9fff && addr < 0xc000 && rom.ramAvail) {
+        addr &= 0x1ff;
+        return rom.curRamBank[addr] & 0xf;
+    }
+    return 0xff;
+}
+
 void cartInit(char *file) {
     rom.filenameSize = strlen(file);
     rom.filename = malloc(rom.filenameSize + 1);
