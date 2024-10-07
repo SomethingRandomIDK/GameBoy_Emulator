@@ -677,60 +677,39 @@ static void cartTypeSelector() {
             exit(1);
     }
 
-    switch(rom.header.type) {
-        case 0x02:
-        case 0x03:
-        case 0x08:
-        case 0x09:
-        case 0x0c:
-        case 0x0d:
-        case 0x10:
-        case 0x12:
-        case 0x13:
-        case 0x1a:
-        case 0x1b:
-        case 0x1d:
-        case 0x1e:
-        case 0x22:
-        case 0xff:
-            rom.ramAvail = true;
-            rom.ramEnable = false;
-            switch(rom.header.ramSize) {
-                case 0x00:
-                    rom.ramAvail = false;
-                    break;
-                case 0x02:
-                    rom.ram = (uint8_t *)calloc(0x2000, 1);
-                    rom.curRamBank = rom.ram;
-                    rom.curRamBankNum = 0;
-                    rom.numRamBanks = 1;
-                    break;
-                case 0x03:
-                    rom.ram = (uint8_t *)calloc(0x4 * 0x2000, 1);
-                    rom.curRamBank = rom.ram;
-                    rom.curRamBankNum = 0;
-                    rom.numRamBanks = 4;
-                    break;
-                case 0x04:
-                    rom.ram = (uint8_t *)calloc(0x10 * 0x2000, 1);
-                    rom.curRamBank = rom.ram;
-                    rom.curRamBankNum = 0;
-                    rom.numRamBanks = 16;
-                    break;
-                case 0x05:
-                    rom.ram = (uint8_t *)calloc(0x8 * 0x2000, 1);
-                    rom.curRamBank = rom.ram;
-                    rom.curRamBankNum = 0;
-                    rom.numRamBanks = 8;
-                    break;
-                default:
-                    printf("INVALID RAM SIZE\n");
-                    exit(1);
-            }
-            break;
-        default:
+    rom.ramAvail = true;
+    rom.ramEnable = false;
+    switch(rom.header.ramSize) {
+        case 0x00:
             rom.ramAvail = false;
             break;
+        case 0x02:
+            rom.ram = (uint8_t *)calloc(0x2000, 1);
+            rom.curRamBank = rom.ram;
+            rom.curRamBankNum = 0;
+            rom.numRamBanks = 1;
+            break;
+        case 0x03:
+            rom.ram = (uint8_t *)calloc(0x4 * 0x2000, 1);
+            rom.curRamBank = rom.ram;
+            rom.curRamBankNum = 0;
+            rom.numRamBanks = 4;
+            break;
+        case 0x04:
+            rom.ram = (uint8_t *)calloc(0x10 * 0x2000, 1);
+            rom.curRamBank = rom.ram;
+            rom.curRamBankNum = 0;
+            rom.numRamBanks = 16;
+            break;
+        case 0x05:
+            rom.ram = (uint8_t *)calloc(0x8 * 0x2000, 1);
+            rom.curRamBank = rom.ram;
+            rom.curRamBankNum = 0;
+            rom.numRamBanks = 8;
+            break;
+        default:
+            printf("INVALID RAM SIZE\n");
+            exit(1);
     }
 }
 
