@@ -599,6 +599,8 @@ static void cartTypeSelector() {
             rom.curRomBank = rom.cartridge + 0x4000;
             rom.numRomBanks = 1 << rom.header.romSize;
             rom.curRomBankNum = 1;
+            // MBC1 specific
+            rom.bankingMode = 0;
             break;
         case 0x05:
         case 0x06:
