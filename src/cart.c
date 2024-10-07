@@ -852,6 +852,29 @@ static uint8_t mapperMBC3Read(uint16_t addr) {
     return 0xff;
 }
 
+static void mapperMBC3Write(uint16_t addr, uint8_t val) {
+    if (addr < 0x2000) {
+        rom.ramEnable = val == 0x0a;
+    } else if (addr < 0x4000) {
+        rom.curRomBankNum = val & 0x7f;
+        if (!rom.curRomBankNum)
+            rom.curRomBankNum++;
+        rom.curRomBank = rom.cartridge + (rom.curRomBankNum * 0x4000);
+    } else if (addr < 0x6000) {
+        rom.curRamBankNum = val;
+        if (rom.curRamBankNum < 0x4)
+            rom.curRamBank = rom.ram + (rom.curRamBankNum * 0x2000);
+    } else if (addr < 0x8000) {
+        // TODO figure out how RTC registers and latches work
+    } else if (addr > 0x9fff && addr < 0xc000 && rom.ramEnable) {
+        if (rom.curRamBankNum < 0x4 && rom.ramAvail)
+            rom.curRamBank[addr - 0xa000] = val;
+        else {
+            // TODO figure out how the RTC registers work
+        }
+    }
+}
+
 void cartInit(char *file) {
     rom.filenameSize = strlen(file);
     rom.filename = malloc(rom.filenameSize + 1);
@@ -860,8 +883,8 @@ void cartInit(char *file) {
 
     FILE *f = fopen(rom.filename, "r");
     if (f == NULL) {
-	printf("File Failed to Open\n");
-	exit(1);
+        printf("File Failed to Open\n");
+        exit(1);
     }
 
     fseek(f, 0, SEEK_END);

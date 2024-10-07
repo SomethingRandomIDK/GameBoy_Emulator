@@ -50,6 +50,7 @@ typedef struct {
     // with ram indicated by true and IR register indicated by false
     bool ramEnable;
     bool bankingMode;
+    bool rtcAvail;
     uint8_t *ram;
     uint8_t *curRamBank;
     uint8_t *curRomBank;
