@@ -584,6 +584,7 @@ static void displayInfo() {
 }
 
 static void cartTypeSelector() {
+    rom.rtcAvail = false;
     switch(rom.header.type) {
         case 0x00:
         case 0x08:
@@ -621,6 +622,7 @@ static void cartTypeSelector() {
             break;
         case 0x0f:
         case 0x10:
+            rom.rtcAvail = true;
         case 0x11:
         case 0x12:
         case 0x13:
@@ -833,6 +835,21 @@ static void mapperMBC2Write(uint16_t addr, uint8_t val) {
         addr &= 0x1ff;
         rom.ram[addr] = val;
     }
+}
+
+static uint8_t mapperMBC3Read(uint16_t addr) {
+    if (addr < 0x4000) {
+        return rom.cartridge[addr];
+    } else if (addr < 0x8000) {
+        return rom.curRomBank[addr - 0x4000];
+    } else if (addr > 0x9fff && addr < 0xc000 && rom.ramEnable) {
+        if (rom.curRamBankNum < 0x4 && rom.ramAvail) {
+            return rom.curRamBank[addr - 0xa000];
+        } else if (rom.curRamBankNum > 0x7 && rom.curRamBankNum < 0xd && rom.rtcAvail) {
+            // TODO figure out how the RTC registers work
+        }
+    }
+    return 0xff;
 }
 
 void cartInit(char *file) {
