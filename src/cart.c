@@ -788,6 +788,7 @@ static void mapperMBC1Write(uint16_t addr, uint8_t val) {
     }
 }
 
+// Read and Write function for the MBC2 cartridge
 static uint8_t mapperMBC2Read(uint16_t addr) {
     if (addr < 0x4000) {
         return rom.cartridge[addr];
@@ -816,6 +817,7 @@ static void mapperMBC2Write(uint16_t addr, uint8_t val) {
     }
 }
 
+// Read and Write function for the MBC3 cartridge
 static uint8_t mapperMBC3Read(uint16_t addr) {
     if (addr < 0x4000) {
         return rom.cartridge[addr];
