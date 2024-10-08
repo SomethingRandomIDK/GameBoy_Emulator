@@ -84,5 +84,7 @@ void romWrite(uint16_t addr, uint8_t val);
 
 void cartInit(char *file);
 
+void updateRtcRegs();
+
 #endif
 

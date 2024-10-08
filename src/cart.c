@@ -828,6 +828,33 @@ static void mapperMBC2Write(uint16_t addr, uint8_t val) {
     }
 }
 
+void updateRtcRegs() {
+    // Check if the RTC is halted
+    if (!(rom.curRtcRegs.flags & 0x40)) {
+        rom.curRtcRegs.sec++;
+        if (rom.curRtcRegs.sec > 0x3b) {
+            rom.curRtcRegs.sec = 0;
+            rom.curRtcRegs.min++;
+            if (rom.curRtcRegs.min > 0x3b) {
+                rom.curRtcRegs.min = 0;
+                rom.curRtcRegs.hr++;
+                if (rom.curRtcRegs.hr > 0x17) {
+                    rom.curRtcRegs.hr = 0;
+                    rom.curRtcRegs.day++;
+                    if (rom.curRtcRegs.day == 0) {
+                        // Update carry flag
+                        if (rom.curRtcRegs.flags & 0x1) {
+                            rom.curRtcRegs.flags |= 0x80;
+                        }
+                        // Update upper day counter
+                        rom.curRtcRegs.flags ^= 0x1;
+                    }
+                }
+            }
+        }
+    }
+}
+
 // Read and Write function for the MBC3 cartridge
 static uint8_t mapperMBC3Read(uint16_t addr) {
     if (addr < 0x4000) {
