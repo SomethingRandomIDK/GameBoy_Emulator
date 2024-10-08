@@ -623,6 +623,17 @@ static void cartTypeSelector() {
         case 0x0f:
         case 0x10:
             rom.rtcAvail = true;
+            rom.curRtcRegs.sec = 0;
+            rom.curRtcRegs.min = 0;
+            rom.curRtcRegs.hr = 0;
+            rom.curRtcRegs.day = 0;
+            rom.curRtcRegs.flags = 0;
+            rom.latchedRegs.sec = 0;
+            rom.latchedRegs.min = 0;
+            rom.latchedRegs.hr = 0;
+            rom.latchedRegs.day = 0;
+            rom.latchedRegs.flags = 0;
+            rom.prevLatch = 0;
         case 0x11:
         case 0x12:
         case 0x13:
@@ -826,8 +837,24 @@ static uint8_t mapperMBC3Read(uint16_t addr) {
     } else if (addr > 0x9fff && addr < 0xc000 && rom.ramEnable) {
         if (rom.curRamBankNum < 0x4 && rom.ramAvail) {
             return rom.curRamBank[addr - 0xa000];
-        } else if (rom.curRamBankNum > 0x7 && rom.curRamBankNum < 0xd && rom.rtcAvail) {
-            // TODO figure out how the RTC registers work
+        } else if (rom.rtcAvail) {
+            switch(rom.curRamBankNum){
+                case 0x8:
+                    return rom.latchedRegs.sec;
+                    break;
+                case 0x9:
+                    return rom.latchedRegs.min;
+                    break;
+                case 0xa:
+                    return rom.latchedRegs.hr;
+                    break;
+                case 0xb:
+                    return rom.latchedRegs.day;
+                    break;
+                case 0xc:
+                    return rom.latchedRegs.flags;
+                    break;
+            }
         }
     }
     return 0xff;
@@ -845,13 +872,31 @@ static void mapperMBC3Write(uint16_t addr, uint8_t val) {
         rom.curRamBankNum = val;
         if (rom.curRamBankNum < 0x4)
             rom.curRamBank = rom.ram + (rom.curRamBankNum * 0x2000);
-    } else if (addr < 0x8000) {
-        // TODO figure out how RTC registers and latches work
+    } else if (addr < 0x8000 && rom.ramEnable && rom.rtcAvail) {
+        if (rom.prevLatch == 0 && val == 1)
+            rom.latchedRegs = rom.curRtcRegs;
+        rom.prevLatch = val;
     } else if (addr > 0x9fff && addr < 0xc000 && rom.ramEnable) {
         if (rom.curRamBankNum < 0x4 && rom.ramAvail)
             rom.curRamBank[addr - 0xa000] = val;
-        else {
-            // TODO figure out how the RTC registers work
+        else if (rom.rtcAvail) {
+            switch(rom.curRamBankNum) {
+                case 0x8:
+                    rom.curRtcRegs.sec = val;
+                    break;
+                case 0x9:
+                    rom.curRtcRegs.min = val;
+                    break;
+                case 0xa:
+                    rom.curRtcRegs.hr = val;
+                    break;
+                case 0xb:
+                    rom.curRtcRegs.day = val;
+                    break;
+                case 0xc:
+                    rom.curRtcRegs.flags = val;
+                    break;
+            }
         }
     }
 }

@@ -37,6 +37,15 @@ enum cartType {
     HUC3
 };
 
+struct rtcRegs{
+    uint8_t sec;
+    uint8_t min;
+    uint8_t hr;
+    // The day is the zero bit in the flags and then the 8 bits from the day reg
+    uint8_t day;
+    uint8_t flags;
+};
+
 typedef struct {
     struct romHeader header;
     char *filename;
@@ -50,7 +59,12 @@ typedef struct {
     // with ram indicated by true and IR register indicated by false
     bool ramEnable;
     bool bankingMode;
+    // MBC3 Specific items
     bool rtcAvail;
+    struct rtcRegs curRtcRegs;
+    struct rtcRegs latchedRegs;
+    uint8_t prevLatch;
+
     uint8_t *ram;
     uint8_t *curRamBank;
     uint8_t *curRomBank;
