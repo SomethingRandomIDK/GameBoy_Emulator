@@ -749,15 +749,11 @@ static uint8_t mapperMBC1Read(uint16_t addr) {
     }
     else if (addr < 0x8000)
         return rom.curRomBank[addr - 0x4000];
-    else if (addr > 0x9fff && addr < 0xc000) {
-        if (rom.ramAvail && rom.ramEnable) {
-            if (rom.bankingMode)
-                return rom.curRamBank[addr - 0xa000];
-            else
-                return rom.ram[addr - 0xa000];
-        }
+    else if (addr > 0x9fff && addr < 0xc000 && rom.ramAvail && rom.ramEnable) {
+        if (rom.bankingMode)
+            return rom.curRamBank[addr - 0xa000];
         else
-            return 0xff;
+            return rom.ram[addr - 0xa000];
     }
     return 0xff;
 }
@@ -789,13 +785,11 @@ static void mapperMBC1Write(uint16_t addr, uint8_t val) {
         }
     } else if (addr < 0x8000) {
         rom.bankingMode = val & 0x1;
-    } else if (addr > 0x9fff && addr < 0xc000) {
-        if (rom.ramAvail && rom.ramEnable) {
-            if (rom.bankingMode)
-                rom.curRamBank[addr - 0xa000] = val;
-            else
-                rom.ram[addr - 0xa000] = val;
-        }
+    } else if (addr > 0x9fff && addr < 0xc000 && rom.ramAvail && rom.ramEnable) {
+        if (rom.bankingMode)
+            rom.curRamBank[addr - 0xa000] = val;
+        else
+            rom.ram[addr - 0xa000] = val;
     }
 }
 
