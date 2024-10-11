@@ -923,6 +923,7 @@ static void mapperMBC3Write(uint16_t addr, uint8_t val) {
 }
 
 // There is no MBC4 mapper
+// Interesting fun fact, this might be because 4 is an unlucky number
 
 // Read and Write function for the MBC5 cartridge
 static uint8_t mapperMBC5Read(uint16_t addr) {
@@ -937,7 +938,22 @@ static uint8_t mapperMBC5Read(uint16_t addr) {
 }
 
 static void mapperMBC5Write(uint16_t addr, uint8_t val) {
-    return;
+    if (addr < 0x2000) {
+        rom.ramEnable = val == 0x0a;
+    } else if (addr < 0x3000) {
+        rom.curRomBankNum &= 0x100;
+        rom.curRomBankNum |= val;
+        rom.curRomBank = rom.cartridge + (rom.curRomBankNum * 0x4000);
+    } else if (addr < 0x4000) {
+        rom.curRomBankNum &= 0xff;
+        rom.curRomBankNum |= ((val & 0x1) << 8);
+        rom.curRomBank = rom.cartridge + (rom.curRomBankNum * 0x4000);
+    } else if (addr < 0x6000) {
+        rom.curRamBankNum = val & 0xf;
+        rom.curRamBank = rom.ram + (rom.curRamBankNum * 0x2000);
+    } else if (addr > 0x9fff && addr < 0xc000 && rom.ramAvail && rom.ramEnable) {
+        rom.curRamBank[addr - 0xa000] = val;
+    }
 }
 
 void cartInit(char *file) {
