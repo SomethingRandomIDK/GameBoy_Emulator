@@ -3,7 +3,7 @@
 
 #include "./include/cart.h"
 
-rom_t rom;
+static rom_t rom;
 
 static const char *newLicenseeText() {
     switch(rom.header.newLicenseeCode) {
@@ -961,6 +961,50 @@ static void mapperMBC5Write(uint16_t addr, uint8_t val) {
 // MBC6 WILL NOT BE SUPPORTED
 // MBC7 WILL NOT BE SUPPORTED
 // MMM01 MIGHT BE SUPPORTED IN THE FUTURE
+
+memMapRead_t mapperReadFuncs[] = {
+    [ROM] = &mapperRomRead,
+    [MBC1] = &mapperMBC1Read,
+    [MBC2] = &mapperMBC2Read,
+    [MBC3] = &mapperMBC3Read,
+    [MBC5] = &mapperMBC5Read,
+    [MBC6] = NULL,
+    [MBC7] = NULL,
+    [MMM01] = NULL,
+    [HUC1] = NULL,
+    [HUC3] = NULL
+};
+
+memMapWrite_t mapperWriteFuncs[] = {
+    [ROM] = &mapperRomWrite,
+    [MBC1] = &mapperMBC1Write,
+    [MBC2] = &mapperMBC2Write,
+    [MBC3] = &mapperMBC3Write,
+    [MBC5] = &mapperMBC5Write,
+    [MBC6] = NULL,
+    [MBC7] = NULL,
+    [MMM01] = NULL,
+    [HUC1] = NULL,
+    [HUC3] = NULL
+};
+
+uint8_t romRead(uint16_t addr) {
+    if (!mapperReadFuncs[rom.cType]) {
+        printf("Cartridge type not supported \n");
+        exit(-1);
+    }
+
+    return mapperReadFuncs[rom.cType](addr);
+}
+
+void romWrite(uint16_t addr, uint8_t val) {
+    if (!mapperWriteFuncs[rom.cType]) {
+        printf("Cartridge type not supported \n");
+        exit(-1);
+    }
+
+    mapperWriteFuncs[rom.cType](addr, val);
+}
 
 void cartInit(char *file) {
     rom.filenameSize = strlen(file);
