@@ -956,6 +956,12 @@ static void mapperMBC5Write(uint16_t addr, uint8_t val) {
     }
 }
 
+// MBC6 is only used by one game, which downloads games off the internet
+// and lets you play them
+// MBC6 WILL NOT BE SUPPORTED
+// MBC7 WILL NOT BE SUPPORTED
+// MMM01 MIGHT BE SUPPORTED IN THE FUTURE
+
 void cartInit(char *file) {
     rom.filenameSize = strlen(file);
     rom.filename = malloc(rom.filenameSize + 1);
