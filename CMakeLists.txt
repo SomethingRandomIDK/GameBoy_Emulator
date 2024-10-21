@@ -9,6 +9,8 @@ add_executable(gbemu
     src/cpu.c
     src/cart.c
     src/bus.c
+    src/interpreter.c
+    src/logging/log.c
 )
 
 target_link_libraries(gbemu
