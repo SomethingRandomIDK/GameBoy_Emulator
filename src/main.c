@@ -29,11 +29,13 @@ int main(int argv, char **argc) {
     assert(flagC());
 
     if (argv == 2)
-	cartInit(argc[1]);
+        cartInit(argc[1]);
     else {
-	printf("This program requires one cli input\n");
-	exit(1);
+        printf("This program requires one cli input\n");
+        exit(1);
     }
+
+    startCPU();
 
     return 0;
 }

@@ -1022,7 +1022,7 @@ void cartInit(char *file) {
     rom.cartSize = ftell(f);
     rewind(f);
     rom.cartridge = malloc(rom.cartSize);
-    fread(rom.cartridge, rom.cartSize, 1, f);
+    fread(rom.cartridge, 1, rom.cartSize, f);
     fclose(f);
 
     rom.header.entry = (uint8_t *)(rom.cartridge + 0x100);
@@ -1046,7 +1046,7 @@ void cartInit(char *file) {
     cartTypeSelector();
 
     // Need to move these to the exit function When made
-    free(rom.cartridge);
-    free(rom.filename);
+    // free(rom.cartridge);
+    // free(rom.filename);
 }
 

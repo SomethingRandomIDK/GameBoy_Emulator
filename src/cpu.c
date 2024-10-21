@@ -2,6 +2,8 @@
 
 #include "./include/cpu.h"
 #include "./include/bus.h"
+#include "./include/interpreter.h"
+#include "./logging/log.h"
 
 gb_t gbcpu;
 
@@ -116,6 +118,14 @@ void initCPU() {
     gbcpu.regs.l = 0x22;
     gbcpu.regs.f = 0x00;
     gbcpu.regs.sp = 0;
-    gbcpu.regs.pc = 0;
+    gbcpu.regs.pc = 0x100;
+}
+
+void startCPU() {
+    initLogger(NULL, TRACE);
+
+    while(1) {
+        runInst(&gbcpu);
+    }
 }
 

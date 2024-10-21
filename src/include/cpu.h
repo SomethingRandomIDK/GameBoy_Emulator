@@ -44,7 +44,9 @@ void wramWrite(uint16_t addr, uint8_t val);
 uint8_t hramRead(uint16_t addr);
 void hramWrite(uint16_t addr, uint8_t val);
 
-void initCPU();
+void initCPU(void);
+
+void startCPU(void);
 
 #endif
 
