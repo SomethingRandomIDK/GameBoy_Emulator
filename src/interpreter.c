@@ -7,10 +7,23 @@
 
 typedef void (*inst)(gb_t *);
 
+// NOP
+
 static void nop(gb_t *cpu) {
     char msg[64];
     sprintf(msg, "Inst: NOP  InstCode: 0x00 PC: %x", cpu->regs.pc); 
     cpu->regs.pc ++;
+    logMessage(msg, TRACE);
+}
+
+// 8-BIT LD
+
+static void ld_nn_a(gb_t *cpu) {
+    char msg[64];
+    sprintf(msg, "Inst: LD nn A InstCode: 0xea PC: %x", cpu->regs.pc);
+    uint16_t addr = busRead16(++cpu->regs.pc);
+    cpu->regs.pc += 2;
+    busWrite8(addr, cpu->regs.a);
     logMessage(msg, TRACE);
 }
 
@@ -63,16 +76,17 @@ static inst instructions[0x100] = {
     [0xaf] = &xor_a,
     [0xc2] = &jp_nz,
     [0xc3] = &jp,
+    [0xea] = &ld_nn_a,
     [0xf3] = &di
 };
 
 void runInst(gb_t *cpu) {
-    uint8_t curInst = busRead8(cpu->regs.pc);
-    if (instructions[curInst]) {
-        instructions[curInst](cpu);
+    uint8_t opcode = busRead8(cpu->regs.pc);
+    if (instructions[opcode]) {
+        instructions[opcode](cpu);
     } else {
         char msg[64];
-        sprintf(msg, "Instruction not recognized INST: %x PC: %x", curInst, cpu->regs.pc);
+        sprintf(msg, "Instruction not recognized INST: %x PC: %x", opcode, cpu->regs.pc);
         logMessage(msg, ERROR);
         exit(-1);
     }
