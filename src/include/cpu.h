@@ -21,6 +21,7 @@ typedef struct {
     registers_t regs;
     uint8_t wram[0x2000];
     uint8_t hram[0x7f];
+    bool interrupts;
 } gb_t;
 
 uint16_t regAF();
