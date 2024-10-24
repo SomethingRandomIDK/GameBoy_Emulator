@@ -53,7 +53,7 @@ static void jp_nn(gb_t *cpu) {
 }
 
 static void jp_nz_nn(gb_t *cpu) {
-    if ((cpu->regs.f & 0x80) == 0) {
+    if (!flagZ()) {
         uint16_t addr = busRead16(++cpu->regs.pc);
         cpu->regs.pc = addr;
     } else {

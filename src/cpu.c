@@ -7,25 +7,14 @@
 
 gb_t gbcpu;
 
-static void sPush(uint16_t val){
-    busWrite8(--gbcpu.regs.sp, (val >> 8) & 0xff);
-    busWrite8(--gbcpu.regs.sp, val & 0xff);
-}
-
-static uint16_t sPop(){
-    uint16_t ret = busRead16(gbcpu.regs.sp);
-    gbcpu.regs.sp += 2;
-    return ret;
-}
-
 // This will do everything that the bootrom is supposed to do on start up
 static void bootRom() {
     gbcpu.regs.sp = 0xfffe;
     gbcpu.regs.a = 0x00;
     setHL(0x9fff);
     while (regHL() > 0x7fff) {
-	busWrite8(regHL(), gbcpu.regs.a);
-	setHL(regHL() - 1);
+        busWrite8(regHL(), gbcpu.regs.a);
+        setHL(regHL() - 1);
     }
     printf("boot rom not fully implemented yet\n");
 }
@@ -117,7 +106,7 @@ void initCPU() {
     gbcpu.regs.h = 0x11;
     gbcpu.regs.l = 0x22;
     gbcpu.regs.f = 0x00;
-    gbcpu.regs.sp = 0;
+    gbcpu.regs.sp = 0xfffe;
     gbcpu.regs.pc = 0x100;
 }
 
