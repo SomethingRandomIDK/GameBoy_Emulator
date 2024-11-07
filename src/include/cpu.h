@@ -39,6 +39,11 @@ bool flagN();
 bool flagH();
 bool flagC();
 
+void setZ(bool newZ);
+void setN(bool newN);
+void setH(bool newH);
+void setC(bool newC);
+
 uint8_t wramRead(uint16_t addr);
 void wramWrite(uint16_t addr, uint8_t val);
 

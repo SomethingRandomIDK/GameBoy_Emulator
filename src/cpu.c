@@ -79,6 +79,34 @@ bool flagC() {
     return (gbcpu.regs.f >> 4) & 1;
 }
 
+void setZ(bool newZ) {
+    if (newZ)
+        gbcpu.regs.f |= 0x80;
+    else
+        gbcpu.regs.f &= 0x7f;
+}
+
+void setN(bool newN) {
+    if (newN)
+        gbcpu.regs.f |= 0x40;
+    else
+        gbcpu.regs.f &= 0xbf;
+}
+
+void setH(bool newH) {
+    if (newH)
+        gbcpu.regs.f |= 0x20;
+    else
+        gbcpu.regs.f &= 0xdf;
+}
+
+void setC(bool newC) {
+    if (newC)
+        gbcpu.regs.f |= 0x10;
+    else
+        gbcpu.regs.f &= 0xef;
+}
+
 uint8_t wramRead(uint16_t addr) {
     // From where it is used the addr variable should never exceed 0xe000
     return gbcpu.wram[addr - 0xc000];
