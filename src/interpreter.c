@@ -21,6 +21,10 @@ static void ld_reg_n(uint8_t *val, gb_t *cpu) {
     cpu->regs.pc++;
 }
 
+static void ld_a_n(gb_t *cpu) {
+    ld_reg_n(&cpu->regs.a, cpu);
+}
+
 static void ld_b_n(gb_t *cpu) {
     ld_reg_n(&cpu->regs.b, cpu);
 }
@@ -106,6 +110,7 @@ static inst instructions[0x100] = {
     [0x26] = &ld_h_n,
     [0x2e] = &ld_l_n,
     [0x31] = &ld_sp_nn,
+    [0x3e] = &ld_a_n,
     [0xaf] = &xor_a,
     [0xc2] = &jp_nz_nn,
     [0xc3] = &jp_nn,
