@@ -16,6 +16,35 @@ static void nop(gb_t *cpu) {
 
 // 8-BIT LD
 
+static void ld_reg_n(uint8_t *val, gb_t *cpu) {
+    *val = busRead8(++cpu->regs.pc);
+    cpu->regs.pc++;
+}
+
+static void ld_b_n(gb_t *cpu) {
+    ld_reg_n(&cpu->regs.b, cpu);
+}
+
+static void ld_c_n(gb_t *cpu) {
+    ld_reg_n(&cpu->regs.c, cpu);
+}
+
+static void ld_d_n(gb_t *cpu) {
+    ld_reg_n(&cpu->regs.d, cpu);
+}
+
+static void ld_e_n(gb_t *cpu) {
+    ld_reg_n(&cpu->regs.e, cpu);
+}
+
+static void ld_h_n(gb_t *cpu) {
+    ld_reg_n(&cpu->regs.h, cpu);
+}
+
+static void ld_l_n(gb_t *cpu) {
+    ld_reg_n(&cpu->regs.l, cpu);
+}
+
 static void ld_nn_a(gb_t *cpu) {
     uint16_t addr = busRead16(++cpu->regs.pc);
     cpu->regs.pc += 2;
@@ -69,7 +98,13 @@ static void jr_n(gb_t *cpu) {
 
 static inst instructions[0x100] = {
     [0x00] = &nop,
+    [0x06] = &ld_b_n,
+    [0x0e] = &ld_c_n,
+    [0x16] = &ld_d_n,
     [0x18] = &jr_n,
+    [0x1e] = &ld_e_n,
+    [0x26] = &ld_h_n,
+    [0x2e] = &ld_l_n,
     [0x31] = &ld_sp_nn,
     [0xaf] = &xor_a,
     [0xc2] = &jp_nz_nn,
