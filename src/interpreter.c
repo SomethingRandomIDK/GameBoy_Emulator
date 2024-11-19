@@ -54,260 +54,319 @@ static void ld_l_n(gb_t *cpu) {
 // Register to Register
 
 static void ld_b_b(gb_t *cpu) {
-    return;
+    cpu->regs.pc++;
 }
 
 static void ld_b_c(gb_t *cpu) {
     cpu->regs.b = cpu->regs.c;
+    cpu->regs.pc++;
 }
 
 static void ld_b_d(gb_t *cpu) {
     cpu->regs.b = cpu->regs.d;
+    cpu->regs.pc++;
 }
 
 static void ld_b_e(gb_t *cpu) {
     cpu->regs.b = cpu->regs.e;
+    cpu->regs.pc++;
 }
 
 static void ld_b_h(gb_t *cpu) {
     cpu->regs.b = cpu->regs.h;
+    cpu->regs.pc++;
 }
 
 static void ld_b_l(gb_t *cpu) {
     cpu->regs.b = cpu->regs.l;
+    cpu->regs.pc++;
 }
 
 static void ld_b_hl(gb_t *cpu) {
     cpu->regs.b = busRead8(regHL());
+    cpu->regs.pc++;
 }
 
 static void ld_b_a(gb_t *cpu) {
     cpu->regs.b = cpu->regs.a;
+    cpu->regs.pc++;
 }
 
 static void ld_c_b(gb_t *cpu) {
     cpu->regs.c = cpu->regs.b;
+    cpu->regs.pc++;
 }
 
 static void ld_c_c(gb_t *cpu) {
-    return;
+    cpu->regs.pc++;
 }
 
 static void ld_c_d(gb_t *cpu) {
     cpu->regs.c = cpu->regs.d;
+    cpu->regs.pc++;
 }
 
 static void ld_c_e(gb_t *cpu) {
     cpu->regs.c = cpu->regs.e;
+    cpu->regs.pc++;
 }
 
 static void ld_c_h(gb_t *cpu) {
     cpu->regs.c = cpu->regs.h;
+    cpu->regs.pc++;
 }
 
 static void ld_c_l(gb_t *cpu) {
     cpu->regs.c = cpu->regs.l;
+    cpu->regs.pc++;
 }
 
 static void ld_c_hl(gb_t *cpu) {
     cpu->regs.c = busRead8(regHL());
+    cpu->regs.pc++;
 }
 
 static void ld_c_a(gb_t *cpu) {
     cpu->regs.c = cpu->regs.a;
+    cpu->regs.pc++;
 }
 
 static void ld_d_b(gb_t *cpu) {
     cpu->regs.d = cpu->regs.b;
+    cpu->regs.pc++;
 }
 
 static void ld_d_c(gb_t *cpu) {
     cpu->regs.d = cpu->regs.c;
+    cpu->regs.pc++;
 }
 
 static void ld_d_d(gb_t *cpu) {
-    return;
+    cpu->regs.pc++;
 }
 
 static void ld_d_e(gb_t *cpu) {
     cpu->regs.d = cpu->regs.e;
+    cpu->regs.pc++;
 }
 
 static void ld_d_h(gb_t *cpu) {
     cpu->regs.d = cpu->regs.h;
+    cpu->regs.pc++;
 }
 
 static void ld_d_l(gb_t *cpu) {
     cpu->regs.d = cpu->regs.l;
+    cpu->regs.pc++;
 }
 
 static void ld_d_hl(gb_t *cpu) {
     cpu->regs.d = busRead8(regHL());
+    cpu->regs.pc++;
 }
 
 static void ld_d_a(gb_t *cpu) {
     cpu->regs.d = cpu->regs.a;
+    cpu->regs.pc++;
 }
 
 static void ld_e_b(gb_t *cpu) {
     cpu->regs.e = cpu->regs.b;
+    cpu->regs.pc++;
 }
 
 static void ld_e_c(gb_t *cpu) {
     cpu->regs.e = cpu->regs.c;
+    cpu->regs.pc++;
 }
 
 static void ld_e_d(gb_t *cpu) {
     cpu->regs.e = cpu->regs.d;
+    cpu->regs.pc++;
 }
 
 static void ld_e_e(gb_t *cpu) {
-    return;
+    cpu->regs.pc++;
 }
 
 static void ld_e_h(gb_t *cpu) {
     cpu->regs.e = cpu->regs.h;
+    cpu->regs.pc++;
 }
 
 static void ld_e_l(gb_t *cpu) {
     cpu->regs.e = cpu->regs.l;
+    cpu->regs.pc++;
 }
 
 static void ld_e_hl(gb_t *cpu) {
     cpu->regs.e = busRead8(regHL());
+    cpu->regs.pc++;
 }
 
 static void ld_e_a(gb_t *cpu) {
     cpu->regs.e = cpu->regs.a;
+    cpu->regs.pc++;
 }
 
 static void ld_h_b(gb_t *cpu) {
     cpu->regs.h = cpu->regs.b;
+    cpu->regs.pc++;
 }
 
 static void ld_h_c(gb_t *cpu) {
     cpu->regs.h = cpu->regs.c;
+    cpu->regs.pc++;
 }
 
 static void ld_h_d(gb_t *cpu) {
     cpu->regs.h = cpu->regs.d;
+    cpu->regs.pc++;
 }
 
 static void ld_h_e(gb_t *cpu) {
     cpu->regs.h = cpu->regs.e;
+    cpu->regs.pc++;
 }
 
 static void ld_h_h(gb_t *cpu) {
-    return;
+    cpu->regs.pc++;
 }
 
 static void ld_h_l(gb_t *cpu) {
     cpu->regs.h = cpu->regs.l;
+    cpu->regs.pc++;
 }
 
 static void ld_h_hl(gb_t *cpu) {
     cpu->regs.h = busRead8(regHL());
+    cpu->regs.pc++;
 }
 
 static void ld_h_a(gb_t *cpu) {
     cpu->regs.h = cpu->regs.a;
+    cpu->regs.pc++;
 }
 
 static void ld_l_b(gb_t *cpu) {
     cpu->regs.l = cpu->regs.b;
+    cpu->regs.pc++;
 }
 
 static void ld_l_c(gb_t *cpu) {
     cpu->regs.l = cpu->regs.c;
+    cpu->regs.pc++;
 }
 
 static void ld_l_d(gb_t *cpu) {
     cpu->regs.l = cpu->regs.d;
+    cpu->regs.pc++;
 }
 
 static void ld_l_e(gb_t *cpu) {
     cpu->regs.l = cpu->regs.e;
+    cpu->regs.pc++;
 }
 
 static void ld_l_h(gb_t *cpu) {
     cpu->regs.l = cpu->regs.h;
+    cpu->regs.pc++;
 }
 
 static void ld_l_l(gb_t *cpu) {
-    return;
+    cpu->regs.pc++;
 }
 
 static void ld_l_hl(gb_t *cpu) {
     cpu->regs.l = busRead8(regHL());
+    cpu->regs.pc++;
 }
 
 static void ld_l_a(gb_t *cpu) {
     cpu->regs.l = cpu->regs.a;
+    cpu->regs.pc++;
 }
 
 static void ld_hl_b(gb_t *cpu) {
     busWrite8(regHL(), cpu->regs.b);
+    cpu->regs.pc++;
 }
 
 static void ld_hl_c(gb_t *cpu) {
     busWrite8(regHL(), cpu->regs.c);
+    cpu->regs.pc++;
 }
 
 static void ld_hl_d(gb_t *cpu) {
     busWrite8(regHL(), cpu->regs.d);
+    cpu->regs.pc++;
 }
 
 static void ld_hl_e(gb_t *cpu) {
     busWrite8(regHL(), cpu->regs.e);
+    cpu->regs.pc++;
 }
 
 static void ld_hl_h(gb_t *cpu) {
     busWrite8(regHL(), cpu->regs.h);
+    cpu->regs.pc++;
 }
 
 static void ld_hl_l(gb_t *cpu) {
     busWrite8(regHL(), cpu->regs.l);
+    cpu->regs.pc++;
 }
 
 static void halt(gb_t *cpu) {
-    cpu->regs.l = busRead8(regHL());
+    //TODO actualling implement this
+    cpu->regs.pc++;
 }
 
 static void ld_hl_a(gb_t *cpu) {
     busWrite8(regHL(), cpu->regs.a);
+    cpu->regs.pc++;
 }
 
 static void ld_a_b(gb_t *cpu) {
     cpu->regs.a = cpu->regs.b;
+    cpu->regs.pc++;
 }
 
 static void ld_a_c(gb_t *cpu) {
     cpu->regs.a = cpu->regs.c;
+    cpu->regs.pc++;
 }
 
 static void ld_a_d(gb_t *cpu) {
     cpu->regs.a = cpu->regs.d;
+    cpu->regs.pc++;
 }
 
 static void ld_a_e(gb_t *cpu) {
     cpu->regs.a = cpu->regs.e;
+    cpu->regs.pc++;
 }
 
 static void ld_a_h(gb_t *cpu) {
     cpu->regs.a = cpu->regs.h;
+    cpu->regs.pc++;
 }
 
 static void ld_a_l(gb_t *cpu) {
     cpu->regs.a = cpu->regs.l;
+    cpu->regs.pc++;
 }
 
 static void ld_a_hl(gb_t *cpu) {
     cpu->regs.a = busRead8(regHL());
+    cpu->regs.pc++;
 }
 
 static void ld_a_a(gb_t *cpu) {
-    return;
+    cpu->regs.pc++;
 }
+
+// Load A into value
 
 static void ld_nn_a(gb_t *cpu) {
     uint16_t addr = busRead16(++cpu->regs.pc);
