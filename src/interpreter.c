@@ -49,6 +49,262 @@ static void ld_l_n(gb_t *cpu) {
     ld_reg_n(&cpu->regs.l, cpu);
 }
 
+static void ld_b_b(gb_t *cpu) {
+    return;
+}
+
+static void ld_b_c(gb_t *cpu) {
+    cpu->regs.b = cpu->regs.c;
+}
+
+static void ld_b_d(gb_t *cpu) {
+    cpu->regs.b = cpu->regs.d;
+}
+
+static void ld_b_e(gb_t *cpu) {
+    cpu->regs.b = cpu->regs.e;
+}
+
+static void ld_b_h(gb_t *cpu) {
+    cpu->regs.b = cpu->regs.h;
+}
+
+static void ld_b_l(gb_t *cpu) {
+    cpu->regs.b = cpu->regs.l;
+}
+
+static void ld_b_hl(gb_t *cpu) {
+    cpu->regs.b = busRead8(regHL());
+}
+
+static void ld_b_a(gb_t *cpu) {
+    cpu->regs.b = cpu->regs.a;
+}
+
+static void ld_c_b(gb_t *cpu) {
+    cpu->regs.c = cpu->regs.b;
+}
+
+static void ld_c_c(gb_t *cpu) {
+    return;
+}
+
+static void ld_c_d(gb_t *cpu) {
+    cpu->regs.c = cpu->regs.d;
+}
+
+static void ld_c_e(gb_t *cpu) {
+    cpu->regs.c = cpu->regs.e;
+}
+
+static void ld_c_h(gb_t *cpu) {
+    cpu->regs.c = cpu->regs.h;
+}
+
+static void ld_c_l(gb_t *cpu) {
+    cpu->regs.c = cpu->regs.l;
+}
+
+static void ld_c_hl(gb_t *cpu) {
+    cpu->regs.c = busRead8(regHL());
+}
+
+static void ld_c_a(gb_t *cpu) {
+    cpu->regs.c = cpu->regs.a;
+}
+
+static void ld_d_b(gb_t *cpu) {
+    cpu->regs.d = cpu->regs.b;
+}
+
+static void ld_d_c(gb_t *cpu) {
+    cpu->regs.d = cpu->regs.c;
+}
+
+static void ld_d_d(gb_t *cpu) {
+    return;
+}
+
+static void ld_d_e(gb_t *cpu) {
+    cpu->regs.d = cpu->regs.e;
+}
+
+static void ld_d_h(gb_t *cpu) {
+    cpu->regs.d = cpu->regs.h;
+}
+
+static void ld_d_l(gb_t *cpu) {
+    cpu->regs.d = cpu->regs.l;
+}
+
+static void ld_d_hl(gb_t *cpu) {
+    cpu->regs.d = busRead8(regHL());
+}
+
+static void ld_d_a(gb_t *cpu) {
+    cpu->regs.d = cpu->regs.a;
+}
+
+static void ld_e_b(gb_t *cpu) {
+    cpu->regs.e = cpu->regs.b;
+}
+
+static void ld_e_c(gb_t *cpu) {
+    cpu->regs.e = cpu->regs.c;
+}
+
+static void ld_e_d(gb_t *cpu) {
+    cpu->regs.e = cpu->regs.d;
+}
+
+static void ld_e_e(gb_t *cpu) {
+    return;
+}
+
+static void ld_e_h(gb_t *cpu) {
+    cpu->regs.e = cpu->regs.h;
+}
+
+static void ld_e_l(gb_t *cpu) {
+    cpu->regs.e = cpu->regs.l;
+}
+
+static void ld_e_hl(gb_t *cpu) {
+    cpu->regs.e = busRead8(regHL());
+}
+
+static void ld_e_a(gb_t *cpu) {
+    cpu->regs.e = cpu->regs.a;
+}
+
+static void ld_h_b(gb_t *cpu) {
+    cpu->regs.h = cpu->regs.b;
+}
+
+static void ld_h_c(gb_t *cpu) {
+    cpu->regs.h = cpu->regs.c;
+}
+
+static void ld_h_d(gb_t *cpu) {
+    cpu->regs.h = cpu->regs.d;
+}
+
+static void ld_h_e(gb_t *cpu) {
+    cpu->regs.h = cpu->regs.e;
+}
+
+static void ld_h_h(gb_t *cpu) {
+    return;
+}
+
+static void ld_h_l(gb_t *cpu) {
+    cpu->regs.h = cpu->regs.l;
+}
+
+static void ld_h_hl(gb_t *cpu) {
+    cpu->regs.h = busRead8(regHL());
+}
+
+static void ld_h_a(gb_t *cpu) {
+    cpu->regs.h = cpu->regs.a;
+}
+
+static void ld_l_b(gb_t *cpu) {
+    cpu->regs.l = cpu->regs.b;
+}
+
+static void ld_l_c(gb_t *cpu) {
+    cpu->regs.l = cpu->regs.c;
+}
+
+static void ld_l_d(gb_t *cpu) {
+    cpu->regs.l = cpu->regs.d;
+}
+
+static void ld_l_e(gb_t *cpu) {
+    cpu->regs.l = cpu->regs.e;
+}
+
+static void ld_l_h(gb_t *cpu) {
+    cpu->regs.l = cpu->regs.h;
+}
+
+static void ld_l_l(gb_t *cpu) {
+    return;
+}
+
+static void ld_l_hl(gb_t *cpu) {
+    cpu->regs.l = busRead8(regHL());
+}
+
+static void ld_l_a(gb_t *cpu) {
+    cpu->regs.l = cpu->regs.a;
+}
+
+static void ld_hl_b(gb_t *cpu) {
+    busWrite8(regHL(), cpu->regs.b);
+}
+
+static void ld_hl_c(gb_t *cpu) {
+    busWrite8(regHL(), cpu->regs.c);
+}
+
+static void ld_hl_d(gb_t *cpu) {
+    busWrite8(regHL(), cpu->regs.d);
+}
+
+static void ld_hl_e(gb_t *cpu) {
+    busWrite8(regHL(), cpu->regs.e);
+}
+
+static void ld_hl_h(gb_t *cpu) {
+    busWrite8(regHL(), cpu->regs.h);
+}
+
+static void ld_hl_l(gb_t *cpu) {
+    busWrite8(regHL(), cpu->regs.l);
+}
+
+static void halt(gb_t *cpu) {
+    cpu->regs.l = busRead8(regHL());
+}
+
+static void ld_hl_a(gb_t *cpu) {
+    busWrite8(regHL(), cpu->regs.a);
+}
+
+static void ld_a_b(gb_t *cpu) {
+    cpu->regs.a = cpu->regs.b;
+}
+
+static void ld_a_c(gb_t *cpu) {
+    cpu->regs.a = cpu->regs.c;
+}
+
+static void ld_a_d(gb_t *cpu) {
+    cpu->regs.a = cpu->regs.d;
+}
+
+static void ld_a_e(gb_t *cpu) {
+    cpu->regs.a = cpu->regs.e;
+}
+
+static void ld_a_h(gb_t *cpu) {
+    cpu->regs.a = cpu->regs.h;
+}
+
+static void ld_a_l(gb_t *cpu) {
+    cpu->regs.a = cpu->regs.l;
+}
+
+static void ld_a_hl(gb_t *cpu) {
+    cpu->regs.a = busRead8(regHL());
+}
+
+static void ld_a_a(gb_t *cpu) {
+    return;
+}
+
 static void ld_nn_a(gb_t *cpu) {
     uint16_t addr = busRead16(++cpu->regs.pc);
     cpu->regs.pc += 2;
@@ -111,6 +367,70 @@ static inst instructions[0x100] = {
     [0x2e] = &ld_l_n,
     [0x31] = &ld_sp_nn,
     [0x3e] = &ld_a_n,
+    [0x40] = &ld_b_b,
+    [0x41] = &ld_b_c,
+    [0x42] = &ld_b_d,
+    [0x43] = &ld_b_e,
+    [0x44] = &ld_b_h,
+    [0x45] = &ld_b_l,
+    [0x46] = &ld_b_hl,
+    [0x47] = &ld_b_a,
+    [0x48] = &ld_c_b,
+    [0x49] = &ld_c_c,
+    [0x4a] = &ld_c_d,
+    [0x4b] = &ld_c_e,
+    [0x4c] = &ld_c_h,
+    [0x4d] = &ld_c_l,
+    [0x4e] = &ld_c_hl,
+    [0x4f] = &ld_c_a,
+    [0x50] = &ld_d_b,
+    [0x51] = &ld_d_c,
+    [0x52] = &ld_d_d,
+    [0x53] = &ld_d_e,
+    [0x54] = &ld_d_h,
+    [0x55] = &ld_d_l,
+    [0x56] = &ld_d_hl,
+    [0x57] = &ld_d_a,
+    [0x58] = &ld_e_b,
+    [0x59] = &ld_e_c,
+    [0x5a] = &ld_e_d,
+    [0x5b] = &ld_e_e,
+    [0x5c] = &ld_e_h,
+    [0x5d] = &ld_e_l,
+    [0x5e] = &ld_e_hl,
+    [0x5f] = &ld_e_a,
+    [0x60] = &ld_h_b,
+    [0x61] = &ld_h_c,
+    [0x62] = &ld_h_d,
+    [0x63] = &ld_h_e,
+    [0x64] = &ld_h_h,
+    [0x65] = &ld_h_l,
+    [0x66] = &ld_h_hl,
+    [0x67] = &ld_h_a,
+    [0x68] = &ld_l_b,
+    [0x69] = &ld_l_c,
+    [0x6a] = &ld_l_d,
+    [0x6b] = &ld_l_e,
+    [0x6c] = &ld_l_h,
+    [0x6d] = &ld_l_l,
+    [0x6e] = &ld_l_hl,
+    [0x6f] = &ld_l_a,
+    [0x70] = &ld_hl_b,
+    [0x71] = &ld_hl_c,
+    [0x72] = &ld_hl_d,
+    [0x73] = &ld_hl_e,
+    [0x74] = &ld_hl_h,
+    [0x75] = &ld_hl_l,
+    // [0x76] = &halt,
+    [0x77] = &ld_hl_a,
+    [0x78] = &ld_a_b,
+    [0x79] = &ld_a_c,
+    [0x7a] = &ld_a_d,
+    [0x7b] = &ld_a_e,
+    [0x7c] = &ld_a_h,
+    [0x7d] = &ld_a_l,
+    [0x7e] = &ld_a_hl,
+    [0x7f] = &ld_a_a,
     [0xaf] = &xor_a,
     [0xc2] = &jp_nz_nn,
     [0xc3] = &jp_nn,
