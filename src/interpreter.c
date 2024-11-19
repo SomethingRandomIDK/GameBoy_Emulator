@@ -16,6 +16,8 @@ static void nop(gb_t *cpu) {
 
 // 8-BIT LD
 
+// Immediate 8 bits to register
+
 static void ld_reg_n(uint8_t *val, gb_t *cpu) {
     *val = busRead8(++cpu->regs.pc);
     cpu->regs.pc++;
@@ -48,6 +50,8 @@ static void ld_h_n(gb_t *cpu) {
 static void ld_l_n(gb_t *cpu) {
     ld_reg_n(&cpu->regs.l, cpu);
 }
+
+// Register to Register
 
 static void ld_b_b(gb_t *cpu) {
     return;
@@ -359,16 +363,25 @@ static void jr_n(gb_t *cpu) {
 }
 
 static inst instructions[0x100] = {
+    // 0x00 - 0x0f
     [0x00] = &nop,
     [0x06] = &ld_b_n,
     [0x0e] = &ld_c_n,
+
+    // 0x10 - 0x1f
     [0x16] = &ld_d_n,
     [0x18] = &jr_n,
     [0x1e] = &ld_e_n,
+
+    // 0x20 - 0x2f
     [0x26] = &ld_h_n,
     [0x2e] = &ld_l_n,
+
+    // 0x30 - 0x3f
     [0x31] = &ld_sp_nn,
     [0x3e] = &ld_a_n,
+
+    // 0x40 - 0x4f
     [0x40] = &ld_b_b,
     [0x41] = &ld_b_c,
     [0x42] = &ld_b_d,
@@ -385,6 +398,8 @@ static inst instructions[0x100] = {
     [0x4d] = &ld_c_l,
     [0x4e] = &ld_c_hl,
     [0x4f] = &ld_c_a,
+
+    // 0x50 - 0x5f
     [0x50] = &ld_d_b,
     [0x51] = &ld_d_c,
     [0x52] = &ld_d_d,
@@ -401,6 +416,8 @@ static inst instructions[0x100] = {
     [0x5d] = &ld_e_l,
     [0x5e] = &ld_e_hl,
     [0x5f] = &ld_e_a,
+
+    // 0x60 - 0x6f
     [0x60] = &ld_h_b,
     [0x61] = &ld_h_c,
     [0x62] = &ld_h_d,
@@ -417,6 +434,8 @@ static inst instructions[0x100] = {
     [0x6d] = &ld_l_l,
     [0x6e] = &ld_l_hl,
     [0x6f] = &ld_l_a,
+
+    // 0x70 - 0x7f
     [0x70] = &ld_hl_b,
     [0x71] = &ld_hl_c,
     [0x72] = &ld_hl_d,
@@ -433,10 +452,26 @@ static inst instructions[0x100] = {
     [0x7d] = &ld_a_l,
     [0x7e] = &ld_a_hl,
     [0x7f] = &ld_a_a,
+
+    // 0x80 - 0x8f
+
+    // 0x90 - 0x9f
+
+    // 0xa0 - 0xaf
     [0xaf] = &xor_a,
+
+    // 0xb0 - 0xbf
+
+    // 0xc0 - 0xcf
     [0xc2] = &jp_nz_nn,
     [0xc3] = &jp_nn,
+
+    // 0xd0 - 0xdf
+
+    // 0xe0 - 0xef
     [0xea] = &ld_nn_a,
+
+    // 0xf0 - 0xff
     [0xf3] = &di
 };
 
