@@ -401,14 +401,14 @@ static void ld_a_hli(gb_t *cpu) {
     cpu->regs.pc++;
 }
 
-// This saves C & 0xff00 into A instead of saving C into A
+// This saves C + 0xff00 into A instead of saving C into A
 static void ld_a_addr_c(gb_t *cpu) {
     uint16_t addr = 0xff00 | cpu->regs.c;
     cpu->regs.a = busRead8(addr);
     cpu->regs.pc++;
 }
 
-// This saves n & 0xff00 into A instead of saving n into A
+// This saves n + 0xff00 into A instead of saving n into A
 static void ldh_a_n(gb_t *cpu) {
     uint16_t addr = 0xff00 | busRead8(++cpu->regs.pc);
     cpu->regs.a = busRead8(addr);
@@ -417,10 +417,45 @@ static void ldh_a_n(gb_t *cpu) {
 
 // Load A into value
 
+static void ld_bc_a(gb_t *cpu) {
+    busWrite8(regBC(), cpu->regs.a);
+    cpu->regs.pc++;
+}
+
+static void ld_de_a(gb_t *cpu) {
+    busWrite8(regDE(), cpu->regs.a);
+    cpu->regs.pc++;
+}
+
 static void ld_nn_a(gb_t *cpu) {
     uint16_t addr = busRead16(++cpu->regs.pc);
     cpu->regs.pc += 2;
     busWrite8(addr, cpu->regs.a);
+}
+
+static void ld_hld_a(gb_t *cpu) {
+    busWrite8(regHL(), cpu->regs.a);
+    setHL(regHL() - 1);
+    cpu->regs.pc++;
+}
+
+static void ld_hli_a(gb_t *cpu) {
+    busWrite8(regHL(), cpu->regs.a);
+    setHL(regHL() + 1);
+    cpu->regs.pc++;
+}
+
+// This saves A into C + 0xff00 instead of saving A into C
+static void ld_addr_c_a(gb_t *cpu) {
+    uint16_t addr = 0xff00 | cpu->regs.c;
+    busWrite8(addr, cpu->regs.a);
+    cpu->regs.pc++;
+}
+
+static void ldh_n_a(gb_t *cpu) {
+    uint16_t addr = 0xff00 | busRead8(++cpu->regs.pc);
+    busWrite8(addr, cpu->regs.a);
+    cpu->regs.pc++;
 }
 
 // 16-BIT LD
@@ -473,23 +508,27 @@ static void jr_n(gb_t *cpu) {
 static inst instructions[0x100] = {
     // 0x00 - 0x0f
     [0x00] = &nop,
+    [0x02] = &ld_bc_a,
     [0x06] = &ld_b_n,
     [0x0a] = &ld_a_bc,
     [0x0e] = &ld_c_n,
 
     // 0x10 - 0x1f
+    [0x12] = &ld_de_a,
     [0x16] = &ld_d_n,
     [0x18] = &jr_n,
     [0x1a] = &ld_a_de,
     [0x1e] = &ld_e_n,
 
     // 0x20 - 0x2f
+    [0x22] = &ld_hli_a,
     [0x26] = &ld_h_n,
     [0x2a] = &ld_a_hli,
     [0x2e] = &ld_l_n,
 
     // 0x30 - 0x3f
     [0x31] = &ld_sp_nn,
+    [0x32] = &ld_hld_a,
     [0x36] = &ld_hl_n,
     [0x3a] = &ld_a_hld,
     [0x3e] = &ld_a_n,
@@ -582,6 +621,8 @@ static inst instructions[0x100] = {
     // 0xd0 - 0xdf
 
     // 0xe0 - 0xef
+    [0xe0] = &ldh_n_a,
+    [0xe2] = &ld_addr_c_a,
     [0xea] = &ld_nn_a,
 
     // 0xf0 - 0xff
