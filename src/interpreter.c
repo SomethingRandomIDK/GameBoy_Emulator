@@ -51,6 +51,11 @@ static void ld_l_n(gb_t *cpu) {
     ld_reg_n(&cpu->regs.l, cpu);
 }
 
+static void ld_hl_n(gb_t *cpu) {
+    busWrite8(regHL(), busRead8(++cpu->regs.pc));
+    cpu->regs.pc++;
+}
+
 // Register to Register
 
 static void ld_b_b(gb_t *cpu) {
@@ -366,6 +371,50 @@ static void ld_a_a(gb_t *cpu) {
     cpu->regs.pc++;
 }
 
+// Load value into A
+
+static void ld_a_bc(gb_t *cpu) {
+    cpu->regs.a = busRead8(regBC());
+    cpu->regs.pc++;
+}
+
+static void ld_a_de(gb_t *cpu) {
+    cpu->regs.a = busRead8(regDE());
+    cpu->regs.pc++;
+}
+
+static void ld_a_nn(gb_t *cpu) {
+    uint16_t addr = busRead16(++cpu->regs.pc);
+    cpu->regs.pc +=2;
+    cpu->regs.a = busRead8(addr);
+}
+
+static void ld_a_hld(gb_t *cpu) {
+    cpu->regs.a = busRead8(regHL());
+    setHL(regHL() - 1);
+    cpu->regs.pc++;
+}
+
+static void ld_a_hli(gb_t *cpu) {
+    cpu->regs.a = busRead8(regHL());
+    setHL(regHL() + 1);
+    cpu->regs.pc++;
+}
+
+// This saves C & 0xff00 into A instead of saving C into A
+static void ld_a_addr_c(gb_t *cpu) {
+    uint16_t addr = 0xff00 | cpu->regs.c;
+    cpu->regs.a = busRead8(addr);
+    cpu->regs.pc++;
+}
+
+// This saves n & 0xff00 into A instead of saving n into A
+static void ldh_a_n(gb_t *cpu) {
+    uint16_t addr = 0xff00 | busRead8(++cpu->regs.pc);
+    cpu->regs.a = busRead8(addr);
+    cpu->regs.pc++;
+}
+
 // Load A into value
 
 static void ld_nn_a(gb_t *cpu) {
@@ -425,19 +474,24 @@ static inst instructions[0x100] = {
     // 0x00 - 0x0f
     [0x00] = &nop,
     [0x06] = &ld_b_n,
+    [0x0a] = &ld_a_bc,
     [0x0e] = &ld_c_n,
 
     // 0x10 - 0x1f
     [0x16] = &ld_d_n,
     [0x18] = &jr_n,
+    [0x1a] = &ld_a_de,
     [0x1e] = &ld_e_n,
 
     // 0x20 - 0x2f
     [0x26] = &ld_h_n,
+    [0x2a] = &ld_a_hli,
     [0x2e] = &ld_l_n,
 
     // 0x30 - 0x3f
     [0x31] = &ld_sp_nn,
+    [0x36] = &ld_hl_n,
+    [0x3a] = &ld_a_hld,
     [0x3e] = &ld_a_n,
 
     // 0x40 - 0x4f
@@ -531,7 +585,10 @@ static inst instructions[0x100] = {
     [0xea] = &ld_nn_a,
 
     // 0xf0 - 0xff
-    [0xf3] = &di
+    [0xf0] = &ldh_a_n,
+    [0xf2] = &ld_a_addr_c,
+    [0xf3] = &di,
+    [0xfa] = &ld_a_nn
 };
 
 static char *instNames[0x100] = {
