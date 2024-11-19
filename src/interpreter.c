@@ -322,8 +322,10 @@ static void ld_sp_nn(gb_t* cpu) {
 
 static void xor_a(gb_t *cpu) {
     cpu->regs.a ^= cpu->regs.a;
-    cpu->regs.f |= 0x80;
-    cpu->regs.f &= 0x8f;
+    setZ(true);
+    setC(false);
+    setH(false);
+    setN(false);
     cpu->regs.pc++;
 }
 
