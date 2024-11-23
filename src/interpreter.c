@@ -460,9 +460,96 @@ static void ldh_n_a(gb_t *cpu) {
 
 // 16-BIT LD
 
-static void ld_sp_nn(gb_t* cpu) {
+static void ld_bc_nn(gb_t *cpu) {
+    setBC(busRead16(++cpu->regs.pc));
+    cpu->regs.pc += 2;
+}
+
+static void ld_de_nn(gb_t *cpu) {
+    setDE(busRead16(++cpu->regs.pc));
+    cpu->regs.pc += 2;
+}
+
+static void ld_hl_nn(gb_t *cpu) {
+    setHL(busRead16(++cpu->regs.pc));
+    cpu->regs.pc += 2;
+}
+
+static void ld_sp_nn(gb_t *cpu) {
     cpu->regs.sp = busRead16(++cpu->regs.pc);
     cpu->regs.pc += 2;
+}
+
+static void ld_sp_hl(gb_t *cpu) {
+    cpu->regs.sp = regHL();
+    cpu->regs.pc++;
+}
+
+static void ld_hl_sp_n(gb_t *cpu) {
+    int8_t arg = (int8_t)busRead8(++cpu->regs.pc);
+    setHL(cpu->regs.sp + arg);
+    cpu->regs.pc++;
+
+    uint16_t temp = regHL() ^ cpu->regs.sp ^ arg;
+    setZ(false);
+    setN(false);
+    setC(!!(temp & 0x100));
+    setH(!!(temp & 0x10));
+}
+
+static void ld_nn_sp(gb_t *cpu) {
+    uint16_t addr = busRead16(++cpu->regs.pc);
+    busWrite16(addr, cpu->regs.sp);
+    cpu->regs.pc += 2;
+}
+
+// All stack push instructions
+
+static void push(uint16_t val, gb_t *cpu) {
+    cpu->regs.sp -= 2;
+    busWrite16(cpu->regs.sp, val);
+    cpu->regs.pc ++;
+}
+
+static void push_af(gb_t *cpu){
+    push(regAF(), cpu);
+}
+
+static void push_bc(gb_t *cpu){
+    push(regBC(), cpu);
+}
+
+static void push_de(gb_t *cpu){
+    push(regDE(), cpu);
+}
+
+static void push_hl(gb_t *cpu){
+    push(regHL(), cpu);
+}
+
+// All stack pop operations
+
+static uint16_t pop(gb_t *cpu){
+    uint16_t val = busRead16(cpu->regs.sp);
+    cpu->regs.sp += 2;
+    cpu->regs.pc ++;
+    return val;
+}
+
+static void pop_bc(gb_t *cpu){
+    setBC(pop(cpu));
+}
+
+static void pop_de(gb_t *cpu){
+    setDE(pop(cpu));
+}
+
+static void pop_hl(gb_t *cpu){
+    setHL(pop(cpu));
+}
+
+static void pop_af(gb_t *cpu){
+    setAF((pop(cpu) & 0xfff0));
 }
 
 // XOR
@@ -508,12 +595,15 @@ static void jr_n(gb_t *cpu) {
 static inst instructions[0x100] = {
     // 0x00 - 0x0f
     [0x00] = &nop,
+    [0x01] = &ld_bc_nn,
     [0x02] = &ld_bc_a,
     [0x06] = &ld_b_n,
+    [0x08] = &ld_nn_sp,
     [0x0a] = &ld_a_bc,
     [0x0e] = &ld_c_n,
 
     // 0x10 - 0x1f
+    [0x11] = &ld_de_nn,
     [0x12] = &ld_de_a,
     [0x16] = &ld_d_n,
     [0x18] = &jr_n,
@@ -521,6 +611,7 @@ static inst instructions[0x100] = {
     [0x1e] = &ld_e_n,
 
     // 0x20 - 0x2f
+    [0x21] = &ld_hl_nn,
     [0x22] = &ld_hli_a,
     [0x26] = &ld_h_n,
     [0x2a] = &ld_a_hli,
@@ -615,20 +706,30 @@ static inst instructions[0x100] = {
     // 0xb0 - 0xbf
 
     // 0xc0 - 0xcf
+    [0xc1] = &pop_bc,
     [0xc2] = &jp_nz_nn,
     [0xc3] = &jp_nn,
+    [0xc5] = &push_bc,
 
     // 0xd0 - 0xdf
+    [0xd1] = &pop_de,
+    [0xd5] = &push_de,
 
     // 0xe0 - 0xef
     [0xe0] = &ldh_n_a,
+    [0xe1] = &pop_hl,
     [0xe2] = &ld_addr_c_a,
+    [0xe5] = &push_hl,
     [0xea] = &ld_nn_a,
 
     // 0xf0 - 0xff
     [0xf0] = &ldh_a_n,
+    [0xf1] = &pop_af,
     [0xf2] = &ld_a_addr_c,
     [0xf3] = &di,
+    [0xf5] = &push_af,
+    [0xf8] = &ld_hl_sp_n,
+    [0xf9] = &ld_sp_hl,
     [0xfa] = &ld_a_nn
 };
 
