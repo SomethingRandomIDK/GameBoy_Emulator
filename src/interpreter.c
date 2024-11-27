@@ -493,6 +493,7 @@ static void ld_hl_sp_n(gb_t *cpu) {
     uint16_t temp = regHL() ^ cpu->regs.sp ^ arg;
     setZ(false);
     setN(false);
+    // XORing everything is supposed to show where there is a carry
     setC(!!(temp & 0x100));
     setH(!!(temp & 0x10));
 }
@@ -550,6 +551,77 @@ static void pop_hl(gb_t *cpu){
 
 static void pop_af(gb_t *cpu){
     setAF((pop(cpu) & 0xfff0));
+}
+
+// 8 Bit ALU
+
+// ADD
+ 
+static void add8(uint8_t val, gb_t *cpu) {
+    uint8_t temp = cpu->regs.a;
+    cpu->regs.a += val;
+    temp ^= (cpu->regs.a ^ val);
+
+    setN(false);
+    setZ(cpu->regs.a == 0);
+    setC(cpu->regs.a < val);
+    // XORing everything is supposed to show where there is a carry
+    // XORing two binary numbers gives the what the digit should be after
+    // adding, not taking into account any carries
+
+    // This should work in theory, might have to change it later
+    // If this errors then replace with this line:
+    // setH(((temp & 0xf) + (val & 0xf)) > 0xf);
+    // (Can remove temp variable and perform the operations before the addition,
+    // if this doesn't work)
+    setH(!!(temp & 0x10));
+}
+
+static void add_a_b(gb_t *cpu) {
+    add8(cpu->regs.b, cpu);
+    cpu->regs.pc++;
+}
+
+static void add_a_c(gb_t *cpu) {
+    add8(cpu->regs.c, cpu);
+    cpu->regs.pc++;
+}
+
+static void add_a_d(gb_t *cpu) {
+    add8(cpu->regs.d, cpu);
+    cpu->regs.pc++;
+}
+
+static void add_a_e(gb_t *cpu) {
+    add8(cpu->regs.e, cpu);
+    cpu->regs.pc++;
+}
+
+static void add_a_h(gb_t *cpu) {
+    add8(cpu->regs.h, cpu);
+    cpu->regs.pc++;
+}
+
+static void add_a_l(gb_t *cpu) {
+    add8(cpu->regs.l, cpu);
+    cpu->regs.pc++;
+}
+
+static void add_a_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    add8(val, cpu);
+    cpu->regs.pc++;
+}
+
+static void add_a_a(gb_t *cpu) {
+    add8(cpu->regs.a, cpu);
+    cpu->regs.pc++;
+}
+
+static void add_a_n(gb_t *cpu) {
+    uint8_t val = busRead8(++cpu->regs.pc);
+    add8(val, cpu);
+    cpu->regs.pc++;
 }
 
 // XOR
@@ -697,6 +769,14 @@ static inst instructions[0x100] = {
     [0x7f] = &ld_a_a,
 
     // 0x80 - 0x8f
+    [0x80] = &add_a_b,
+    [0x81] = &add_a_c,
+    [0x82] = &add_a_d,
+    [0x83] = &add_a_e,
+    [0x84] = &add_a_h,
+    [0x85] = &add_a_l,
+    [0x86] = &add_a_hl,
+    [0x87] = &add_a_a,
 
     // 0x90 - 0x9f
 
@@ -710,6 +790,7 @@ static inst instructions[0x100] = {
     [0xc2] = &jp_nz_nn,
     [0xc3] = &jp_nn,
     [0xc5] = &push_bc,
+    [0xc6] = &add_a_n,
 
     // 0xd0 - 0xdf
     [0xd1] = &pop_de,
