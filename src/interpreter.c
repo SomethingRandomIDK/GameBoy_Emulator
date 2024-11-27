@@ -684,6 +684,70 @@ static void adc_a_n(gb_t *cpu) {
     cpu->regs.pc++;
 }
 
+// SUB
+
+static void sub(uint8_t val, gb_t *cpu) {
+    uint8_t temp = cpu->regs.a;
+    cpu->regs.a -= val;
+    setC(temp < val);
+
+    // For digit wise binary subtraction the result is the same as the result
+    // of and XOR calculation, so then XORing that with the answer should show 
+    // the bits where all the borrows occured
+    temp ^= cpu->regs.a ^ val;
+
+    setN(true);
+    setZ(cpu->regs.a == 0);
+    setH(!!(temp & 0x10));
+}
+
+static void sub_b(gb_t *cpu) {
+    sub(cpu->regs.b, cpu);
+    cpu->regs.pc++;
+}
+
+static void sub_c(gb_t *cpu) {
+    sub(cpu->regs.c, cpu);
+    cpu->regs.pc++;
+}
+
+static void sub_d(gb_t *cpu) {
+    sub(cpu->regs.d, cpu);
+    cpu->regs.pc++;
+}
+
+static void sub_e(gb_t *cpu) {
+    sub(cpu->regs.e, cpu);
+    cpu->regs.pc++;
+}
+
+static void sub_h(gb_t *cpu) {
+    sub(cpu->regs.h, cpu);
+    cpu->regs.pc++;
+}
+
+static void sub_l(gb_t *cpu) {
+    sub(cpu->regs.l, cpu);
+    cpu->regs.pc++;
+}
+
+static void sub_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    sub(val, cpu);
+    cpu->regs.pc++;
+}
+
+static void sub_a(gb_t *cpu) {
+    sub(cpu->regs.a, cpu);
+    cpu->regs.pc++;
+}
+
+static void sub_n(gb_t *cpu) {
+    uint8_t val = busRead8(++cpu->regs.pc);
+    sub(val, cpu);
+    cpu->regs.pc++;
+}
+
 // XOR
 
 static void xor_a(gb_t *cpu) {
@@ -847,6 +911,14 @@ static inst instructions[0x100] = {
     [0x8f] = &adc_a_a,
 
     // 0x90 - 0x9f
+    [0x90] = &sub_b,
+    [0x91] = &sub_c,
+    [0x92] = &sub_d,
+    [0x93] = &sub_e,
+    [0x94] = &sub_h,
+    [0x95] = &sub_l,
+    [0x96] = &sub_hl,
+    [0x97] = &sub_a,
 
     // 0xa0 - 0xaf
     [0xaf] = &xor_a,
@@ -864,6 +936,7 @@ static inst instructions[0x100] = {
     // 0xd0 - 0xdf
     [0xd1] = &pop_de,
     [0xd5] = &push_de,
+    [0xd6] = &sub_n,
 
     // 0xe0 - 0xef
     [0xe0] = &ldh_n_a,
