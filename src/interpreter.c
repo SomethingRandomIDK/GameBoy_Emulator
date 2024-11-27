@@ -624,6 +624,66 @@ static void add_a_n(gb_t *cpu) {
     cpu->regs.pc++;
 }
 
+// ADC
+
+static void adc(uint8_t val, gb_t *cpu) {
+    uint8_t temp = cpu->regs.a;
+    cpu->regs.a += val + flagC();
+    temp ^= (cpu->regs.a ^ val ^ flagC());
+
+    setN(false);
+    setZ(cpu->regs.a == 0);
+    setC((cpu->regs.a < val) || (flagC() && cpu->regs.a == val));
+    setH(!!(temp & 0x10));
+}
+
+static void adc_a_b(gb_t *cpu) {
+    adc(cpu->regs.b, cpu);
+    cpu->regs.pc++;
+}
+
+static void adc_a_c(gb_t *cpu) {
+    adc(cpu->regs.c, cpu);
+    cpu->regs.pc++;
+}
+
+static void adc_a_d(gb_t *cpu) {
+    adc(cpu->regs.d, cpu);
+    cpu->regs.pc++;
+}
+
+static void adc_a_e(gb_t *cpu) {
+    adc(cpu->regs.e, cpu);
+    cpu->regs.pc++;
+}
+
+static void adc_a_h(gb_t *cpu) {
+    adc(cpu->regs.h, cpu);
+    cpu->regs.pc++;
+}
+
+static void adc_a_l(gb_t *cpu) {
+    adc(cpu->regs.l, cpu);
+    cpu->regs.pc++;
+}
+
+static void adc_a_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    adc(val, cpu);
+    cpu->regs.pc++;
+}
+
+static void adc_a_a(gb_t *cpu) {
+    adc(cpu->regs.a, cpu);
+    cpu->regs.pc++;
+}
+
+static void adc_a_n(gb_t *cpu) {
+    uint8_t val = busRead8(++cpu->regs.pc);
+    adc(val, cpu);
+    cpu->regs.pc++;
+}
+
 // XOR
 
 static void xor_a(gb_t *cpu) {
@@ -777,6 +837,14 @@ static inst instructions[0x100] = {
     [0x85] = &add_a_l,
     [0x86] = &add_a_hl,
     [0x87] = &add_a_a,
+    [0x88] = &adc_a_b,
+    [0x89] = &adc_a_c,
+    [0x8a] = &adc_a_d,
+    [0x8b] = &adc_a_e,
+    [0x8c] = &adc_a_h,
+    [0x8d] = &adc_a_l,
+    [0x8e] = &adc_a_hl,
+    [0x8f] = &adc_a_a,
 
     // 0x90 - 0x9f
 
@@ -791,6 +859,7 @@ static inst instructions[0x100] = {
     [0xc3] = &jp_nn,
     [0xc5] = &push_bc,
     [0xc6] = &add_a_n,
+    [0xce] = &adc_a_n,
 
     // 0xd0 - 0xdf
     [0xd1] = &pop_de,
