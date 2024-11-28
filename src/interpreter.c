@@ -629,7 +629,7 @@ static void add_a_n(gb_t *cpu) {
 static void adc(uint8_t val, gb_t *cpu) {
     uint8_t temp = cpu->regs.a;
     cpu->regs.a += val + flagC();
-    temp ^= (cpu->regs.a ^ val ^ flagC());
+    temp ^= cpu->regs.a ^ val;
 
     setN(false);
     setZ(cpu->regs.a == 0);
@@ -745,6 +745,72 @@ static void sub_a(gb_t *cpu) {
 static void sub_n(gb_t *cpu) {
     uint8_t val = busRead8(++cpu->regs.pc);
     sub(val, cpu);
+    cpu->regs.pc++;
+}
+
+// SBC
+
+static void sbc(uint8_t val, gb_t *cpu) {
+    uint8_t temp = cpu->regs.a;
+    cpu->regs.a -= (val + flagC());
+
+    setC(temp < (val + flagC()));
+
+    temp ^= (cpu->regs.a ^ val);
+
+    setN(true);
+    setZ(cpu->regs.a == 0);
+    // So same logic as last time with the Sub, but I'm less sure about this one
+    // I feel like it should work, and the logic checks out, but I'm still 
+    // unsure
+    // Tested it in a notebook, so this should hold up
+    setH(!!(temp & 0x10));
+}
+
+static void sbc_a_b(gb_t *cpu) {
+    sbc(cpu->regs.b, cpu);
+    cpu->regs.pc++;
+}
+
+static void sbc_a_c(gb_t *cpu) {
+    sbc(cpu->regs.c, cpu);
+    cpu->regs.pc++;
+}
+
+static void sbc_a_d(gb_t *cpu) {
+    sbc(cpu->regs.d, cpu);
+    cpu->regs.pc++;
+}
+
+static void sbc_a_e(gb_t *cpu) {
+    sbc(cpu->regs.e, cpu);
+    cpu->regs.pc++;
+}
+
+static void sbc_a_h(gb_t *cpu) {
+    sbc(cpu->regs.h, cpu);
+    cpu->regs.pc++;
+}
+
+static void sbc_a_l(gb_t *cpu) {
+    sbc(cpu->regs.l, cpu);
+    cpu->regs.pc++;
+}
+
+static void sbc_a_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    sbc(val, cpu);
+    cpu->regs.pc++;
+}
+
+static void sbc_a_a(gb_t *cpu) {
+    sbc(cpu->regs.a, cpu);
+    cpu->regs.pc++;
+}
+
+static void sbc_a_n(gb_t *cpu) {
+    uint8_t val = busRead8(++cpu->regs.pc);
+    sbc(val, cpu);
     cpu->regs.pc++;
 }
 
@@ -919,6 +985,14 @@ static inst instructions[0x100] = {
     [0x95] = &sub_l,
     [0x96] = &sub_hl,
     [0x97] = &sub_a,
+    [0x98] = &sbc_a_b,
+    [0x99] = &sbc_a_c,
+    [0x9a] = &sbc_a_d,
+    [0x9b] = &sbc_a_e,
+    [0x9c] = &sbc_a_h,
+    [0x9d] = &sbc_a_l,
+    [0x9e] = &sbc_a_hl,
+    [0x9f] = &sbc_a_a,
 
     // 0xa0 - 0xaf
     [0xaf] = &xor_a,
@@ -937,6 +1011,7 @@ static inst instructions[0x100] = {
     [0xd1] = &pop_de,
     [0xd5] = &push_de,
     [0xd6] = &sub_n,
+    [0xde] = &sbc_a_n,
 
     // 0xe0 - 0xef
     [0xe0] = &ldh_n_a,
