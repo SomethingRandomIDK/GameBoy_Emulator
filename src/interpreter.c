@@ -874,12 +874,58 @@ static void and_n(gb_t *cpu) {
 
 // XOR
 
-static void xor_a(gb_t *cpu) {
-    cpu->regs.a ^= cpu->regs.a;
-    setZ(true);
-    setC(false);
-    setH(false);
+static void xor(uint8_t val, gb_t *cpu) {
+    cpu->regs.a ^= val;
+    setZ(cpu->regs.a == 0);
     setN(false);
+    setH(false);
+    setC(false);
+}
+
+static void xor_b(gb_t *cpu) {
+    xor(cpu->regs.b, cpu);
+    cpu->regs.pc++;
+}
+
+static void xor_c(gb_t *cpu) {
+    xor(cpu->regs.c, cpu);
+    cpu->regs.pc++;
+}
+
+static void xor_d(gb_t *cpu) {
+    xor(cpu->regs.d, cpu);
+    cpu->regs.pc++;
+}
+
+static void xor_e(gb_t *cpu) {
+    xor(cpu->regs.e, cpu);
+    cpu->regs.pc++;
+}
+
+static void xor_h(gb_t *cpu) {
+    xor(cpu->regs.h, cpu);
+    cpu->regs.pc++;
+}
+
+static void xor_l(gb_t *cpu) {
+    xor(cpu->regs.l, cpu);
+    cpu->regs.pc++;
+}
+
+static void xor_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    xor(val, cpu);
+    cpu->regs.pc++;
+}
+
+static void xor_a(gb_t *cpu) {
+    xor(cpu->regs.a, cpu);
+    cpu->regs.pc++;
+}
+
+static void xor_n(gb_t *cpu) {
+    uint8_t val = busRead8(++cpu->regs.pc);
+    xor(val, cpu);
     cpu->regs.pc++;
 }
 
@@ -1061,6 +1107,13 @@ static inst instructions[0x100] = {
     [0xa5] = &and_l,
     [0xa6] = &and_hl,
     [0xa7] = &and_a,
+    [0xa8] = &xor_b,
+    [0xa9] = &xor_c,
+    [0xaa] = &xor_d,
+    [0xab] = &xor_e,
+    [0xac] = &xor_h,
+    [0xad] = &xor_l,
+    [0xae] = &xor_hl,
     [0xaf] = &xor_a,
 
     // 0xb0 - 0xbf
@@ -1086,6 +1139,7 @@ static inst instructions[0x100] = {
     [0xe5] = &push_hl,
     [0xe6] = &and_n,
     [0xea] = &ld_nn_a,
+    [0xee] = &xor_n,
 
     // 0xf0 - 0xff
     [0xf0] = &ldh_a_n,
