@@ -4,6 +4,12 @@ project(gbemu C)
 
 include(GNUInstallDirs)
 
+find_package(SDL2 REQUIRED)
+
+if(WIN32)
+    add_definitions(-DSDL_MAIN_HANDLED)
+endif()
+
 add_executable(gbemu
     src/main.c
     src/cpu.c
@@ -14,7 +20,7 @@ add_executable(gbemu
 )
 
 target_link_libraries(gbemu
-    -lSDL2
+    SDL2::SDL2
 )
 
 install(TARGETS gbemu
