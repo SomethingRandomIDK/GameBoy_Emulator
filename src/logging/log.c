@@ -1,13 +1,11 @@
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "logging/log.h"
+#include "log.h"
 
 static FILE *logOut = NULL;
 static LoggingLevel minLevel = TRACE;
-static pthread_mutex_t lock;
 
 int initLogger(const char *filename, LoggingLevel minimumLevel) {
     if (logOut) {
@@ -25,10 +23,6 @@ int initLogger(const char *filename, LoggingLevel minimumLevel) {
 
     minLevel = minimumLevel;
 
-    if(pthread_mutex_init(&lock, NULL) < 0) {
-        printf("Mutex initialization failed.\n");
-        return -1;
-    }
     return 0;
 }
 
@@ -48,10 +42,6 @@ int logMessage(const char *msg, LoggingLevel level) {
         return -1;
     }
 
-    if (pthread_mutex_lock(&lock) < 0) {
-        printf("Mutex lock failed\n");
-        return -1;
-    }
     size_t buffLen = strlen(levelMsgs[level]) + strlen(msg) + 2;
     char *buff = (char *)malloc(sizeof(char) * buffLen);
     if (!buff) {
@@ -70,10 +60,6 @@ int logMessage(const char *msg, LoggingLevel level) {
 
     free(buff);
 
-    if (pthread_mutex_unlock(&lock) < 0) {
-        printf("Mutex unlock failed.\n");
-        return -1;
-    }
     return 0;
 }
 
@@ -90,10 +76,6 @@ int closeLogger(void) {
 
     logOut = NULL;
 
-    if (pthread_mutex_destroy(&lock) < 0) {
-        printf("Mutex destroy failed.\n");
-        return -1;
-    }
     return 0;
 }
 
