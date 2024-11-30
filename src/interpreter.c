@@ -929,6 +929,64 @@ static void xor_n(gb_t *cpu) {
     cpu->regs.pc++;
 }
 
+// OR
+
+static void or(uint8_t val, gb_t *cpu) {
+    cpu->regs.a |= val;
+
+    setZ(cpu->regs.a == 0);
+    setN(false);
+    setH(false);
+    setC(false);
+}
+
+static void or_b(gb_t *cpu) {
+    or(cpu->regs.b, cpu);
+    cpu->regs.pc++;
+}
+
+static void or_c(gb_t *cpu) {
+    or(cpu->regs.c, cpu);
+    cpu->regs.pc++;
+}
+
+static void or_d(gb_t *cpu) {
+    or(cpu->regs.d, cpu);
+    cpu->regs.pc++;
+}
+
+static void or_e(gb_t *cpu) {
+    or(cpu->regs.e, cpu);
+    cpu->regs.pc++;
+}
+
+static void or_h(gb_t *cpu) {
+    or(cpu->regs.h, cpu);
+    cpu->regs.pc++;
+}
+
+static void or_l(gb_t *cpu) {
+    or(cpu->regs.l, cpu);
+    cpu->regs.pc++;
+}
+
+static void or_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    or(val, cpu);
+    cpu->regs.pc++;
+}
+
+static void or_a(gb_t *cpu) {
+    or(cpu->regs.a, cpu);
+    cpu->regs.pc++;
+}
+
+static void or_n(gb_t *cpu) {
+    uint8_t val = busRead8(++cpu->regs.pc);
+    or(val, cpu);
+    cpu->regs.pc++;
+}
+
 // INTERUPTS
 
 static void di(gb_t *cpu) {
@@ -1117,6 +1175,14 @@ static inst instructions[0x100] = {
     [0xaf] = &xor_a,
 
     // 0xb0 - 0xbf
+    [0xb0] = &or_b,
+    [0xb1] = &or_c,
+    [0xb2] = &or_d,
+    [0xb3] = &or_e,
+    [0xb4] = &or_h,
+    [0xb5] = &or_l,
+    [0xb6] = &or_hl,
+    [0xb7] = &or_a,
 
     // 0xc0 - 0xcf
     [0xc1] = &pop_bc,
@@ -1147,6 +1213,7 @@ static inst instructions[0x100] = {
     [0xf2] = &ld_a_addr_c,
     [0xf3] = &di,
     [0xf5] = &push_af,
+    [0xf6] = &or_n,
     [0xf8] = &ld_hl_sp_n,
     [0xf9] = &ld_sp_hl,
     [0xfa] = &ld_a_nn
