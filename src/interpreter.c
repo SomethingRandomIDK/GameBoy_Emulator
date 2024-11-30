@@ -1133,6 +1133,8 @@ static void dec_a(gb_t *cpu) {
 
 // 16 Bit ALU
 
+// ADD HL
+
 static void add_hl(uint16_t val, gb_t *cpu) {
     uint16_t temp = regHL();
     setHL(temp + val);
@@ -1160,6 +1162,22 @@ static void add_hl_hl(gb_t *cpu) {
 
 static void add_hl_sp(gb_t *cpu) {
     add_hl(cpu->regs.sp, cpu);
+}
+
+//ADD SP n
+
+static void add_sp_n(gb_t *cpu) {
+    int8_t  val = (int8_t)busRead8(++cpu->regs.pc);
+    uint16_t temp = cpu->regs.sp;
+    cpu->regs.sp += val;
+    cpu->regs.pc++;
+
+    temp ^= cpu->regs.sp ^ val;
+
+    setZ(false);
+    setN(false);
+    setH(!!(temp & 0x10));
+    setC(!!(temp & 0x100));
 }
 
 // INTERUPTS
@@ -1407,6 +1425,7 @@ static inst instructions[0x100] = {
     [0xe2] = &ld_addr_c_a,
     [0xe5] = &push_hl,
     [0xe6] = &and_n,
+    [0xe8] = &add_sp_n,
     [0xea] = &ld_nn_a,
     [0xee] = &xor_n,
 
