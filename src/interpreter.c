@@ -1131,6 +1131,37 @@ static void dec_a(gb_t *cpu) {
     dec(&cpu->regs.a, cpu);
 }
 
+// 16 Bit ALU
+
+static void add_hl(uint16_t val, gb_t *cpu) {
+    uint16_t temp = regHL();
+    setHL(temp + val);
+    temp ^= regHL() ^ val;
+
+    // The zero flag is not affected for this command
+    setN(false);
+    setH(!!(temp &0x1000));
+    setC(regHL() < val);
+
+    cpu->regs.pc++;
+}
+
+static void add_hl_bc(gb_t *cpu) {
+    add_hl(regBC(), cpu);
+}
+
+static void add_hl_de(gb_t *cpu) {
+    add_hl(regDE(), cpu);
+}
+
+static void add_hl_hl(gb_t *cpu) {
+    add_hl(regHL(), cpu);
+}
+
+static void add_hl_sp(gb_t *cpu) {
+    add_hl(cpu->regs.sp, cpu);
+}
+
 // INTERUPTS
 
 static void di(gb_t *cpu) {
@@ -1169,6 +1200,7 @@ static inst instructions[0x100] = {
     [0x05] = &dec_b,
     [0x06] = &ld_b_n,
     [0x08] = &ld_nn_sp,
+    [0x09] = &add_hl_bc,
     [0x0a] = &ld_a_bc,
     [0x0c] = &inc_c,
     [0x0d] = &dec_c,
@@ -1181,6 +1213,7 @@ static inst instructions[0x100] = {
     [0x15] = &dec_d,
     [0x16] = &ld_d_n,
     [0x18] = &jr_n,
+    [0x19] = &add_hl_de,
     [0x1a] = &ld_a_de,
     [0x1c] = &inc_e,
     [0x1d] = &dec_e,
@@ -1192,6 +1225,7 @@ static inst instructions[0x100] = {
     [0x24] = &inc_h,
     [0x25] = &dec_h,
     [0x26] = &ld_h_n,
+    [0x29] = &add_hl_hl,
     [0x2a] = &ld_a_hli,
     [0x2c] = &inc_l,
     [0x2d] = &dec_l,
@@ -1203,6 +1237,7 @@ static inst instructions[0x100] = {
     [0x34] = &inc_hl,
     [0x35] = &dec_hl,
     [0x36] = &ld_hl_n,
+    [0x39] = &add_hl_sp,
     [0x3a] = &ld_a_hld,
     [0x3c] = &inc_a,
     [0x3d] = &dec_a,
