@@ -1077,7 +1077,8 @@ static void inc_l(gb_t *cpu) {
     inc(&cpu->regs.l, cpu);
 }
 
-static void inc_hl(gb_t *cpu) {
+// Naming conflict so this one is different
+static void inc_addr_hl(gb_t *cpu) {
     uint8_t val = busRead8(regHL());
     inc(&val, cpu);
     setHL(val);
@@ -1121,7 +1122,8 @@ static void dec_l(gb_t *cpu) {
     dec(&cpu->regs.l, cpu);
 }
 
-static void dec_hl(gb_t *cpu) {
+// Changed to avoid naming conflict
+static void dec_addr_hl(gb_t *cpu) {
     uint8_t val = busRead8(regHL());
     dec(&val, cpu);
     setHL(val);
@@ -1180,6 +1182,50 @@ static void add_sp_n(gb_t *cpu) {
     setC(!!(temp & 0x100));
 }
 
+// 16 bit INC
+
+static void inc_bc(gb_t *cpu) {
+    setBC(regBC() + 1);
+    cpu->regs.pc++;
+}
+
+static void inc_de(gb_t *cpu) {
+    setDE(regDE() + 1);
+    cpu->regs.pc++;
+}
+
+static void inc_hl(gb_t *cpu) {
+    setHL(regHL() + 1);
+    cpu->regs.pc++;
+}
+
+static void inc_sp(gb_t *cpu) {
+    cpu->regs.sp++;
+    cpu->regs.pc++;
+}
+
+// 16 Bit DEC
+
+static void dec_bc(gb_t *cpu) {
+    setBC(regBC() - 1);
+    cpu->regs.pc++;
+}
+
+static void dec_de(gb_t *cpu) {
+    setDE(regDE() - 1);
+    cpu->regs.pc++;
+}
+
+static void dec_hl(gb_t *cpu) {
+    setHL(regHL() - 1);
+    cpu->regs.pc++;
+}
+
+static void dec_sp(gb_t *cpu) {
+    cpu->regs.sp--;
+    cpu->regs.pc++;
+}
+
 // INTERUPTS
 
 static void di(gb_t *cpu) {
@@ -1214,12 +1260,14 @@ static inst instructions[0x100] = {
     [0x00] = &nop,
     [0x01] = &ld_bc_nn,
     [0x02] = &ld_bc_a,
+    [0x03] = &inc_bc,
     [0x04] = &inc_b,
     [0x05] = &dec_b,
     [0x06] = &ld_b_n,
     [0x08] = &ld_nn_sp,
     [0x09] = &add_hl_bc,
     [0x0a] = &ld_a_bc,
+    [0x0b] = &dec_bc,
     [0x0c] = &inc_c,
     [0x0d] = &dec_c,
     [0x0e] = &ld_c_n,
@@ -1227,12 +1275,14 @@ static inst instructions[0x100] = {
     // 0x10 - 0x1f
     [0x11] = &ld_de_nn,
     [0x12] = &ld_de_a,
+    [0x13] = &inc_de,
     [0x14] = &inc_d,
     [0x15] = &dec_d,
     [0x16] = &ld_d_n,
     [0x18] = &jr_n,
     [0x19] = &add_hl_de,
     [0x1a] = &ld_a_de,
+    [0x1b] = &dec_de,
     [0x1c] = &inc_e,
     [0x1d] = &dec_e,
     [0x1e] = &ld_e_n,
@@ -1240,11 +1290,13 @@ static inst instructions[0x100] = {
     // 0x20 - 0x2f
     [0x21] = &ld_hl_nn,
     [0x22] = &ld_hli_a,
+    [0x23] = &inc_hl,
     [0x24] = &inc_h,
     [0x25] = &dec_h,
     [0x26] = &ld_h_n,
     [0x29] = &add_hl_hl,
     [0x2a] = &ld_a_hli,
+    [0x2b] = &dec_hl,
     [0x2c] = &inc_l,
     [0x2d] = &dec_l,
     [0x2e] = &ld_l_n,
@@ -1252,11 +1304,13 @@ static inst instructions[0x100] = {
     // 0x30 - 0x3f
     [0x31] = &ld_sp_nn,
     [0x32] = &ld_hld_a,
-    [0x34] = &inc_hl,
-    [0x35] = &dec_hl,
+    [0x33] = &inc_sp,
+    [0x34] = &inc_addr_hl,
+    [0x35] = &dec_addr_hl,
     [0x36] = &ld_hl_n,
     [0x39] = &add_hl_sp,
     [0x3a] = &ld_a_hld,
+    [0x3b] = &dec_sp,
     [0x3c] = &inc_a,
     [0x3d] = &dec_a,
     [0x3e] = &ld_a_n,
