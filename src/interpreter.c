@@ -987,6 +987,62 @@ static void or_n(gb_t *cpu) {
     cpu->regs.pc++;
 }
 
+//CP
+
+static void cp(uint8_t val, gb_t *cpu){
+    setZ(cpu->regs.a == val);
+    setN(true);
+    setH((cpu->regs.a & 0xf) < (val & 0xf));
+    setC(cpu->regs.a < val);
+}
+
+static void cp_b(gb_t *cpu) {
+    cp(cpu->regs.b, cpu);
+    cpu->regs.pc++;
+}
+
+static void cp_c(gb_t *cpu) {
+    cp(cpu->regs.c, cpu);
+    cpu->regs.pc++;
+}
+
+static void cp_d(gb_t *cpu) {
+    cp(cpu->regs.d, cpu);
+    cpu->regs.pc++;
+}
+
+static void cp_e(gb_t *cpu) {
+    cp(cpu->regs.e, cpu);
+    cpu->regs.pc++;
+}
+
+static void cp_h(gb_t *cpu) {
+    cp(cpu->regs.h, cpu);
+    cpu->regs.pc++;
+}
+
+static void cp_l(gb_t *cpu) {
+    cp(cpu->regs.l, cpu);
+    cpu->regs.pc++;
+}
+
+static void cp_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    cp(val, cpu);
+    cpu->regs.pc++;
+}
+
+static void cp_a(gb_t *cpu) {
+    cp(cpu->regs.a, cpu);
+    cpu->regs.pc++;
+}
+
+static void cp_n(gb_t *cpu) {
+    uint8_t val = busRead8(++cpu->regs.pc);
+    cp(val, cpu);
+    cpu->regs.pc++;
+}
+
 // INTERUPTS
 
 static void di(gb_t *cpu) {
@@ -1183,6 +1239,14 @@ static inst instructions[0x100] = {
     [0xb5] = &or_l,
     [0xb6] = &or_hl,
     [0xb7] = &or_a,
+    [0xb8] = &cp_b,
+    [0xb9] = &cp_c,
+    [0xba] = &cp_d,
+    [0xbb] = &cp_e,
+    [0xbc] = &cp_h,
+    [0xbd] = &cp_l,
+    [0xbe] = &cp_hl,
+    [0xbf] = &cp_a,
 
     // 0xc0 - 0xcf
     [0xc1] = &pop_bc,
@@ -1216,7 +1280,8 @@ static inst instructions[0x100] = {
     [0xf6] = &or_n,
     [0xf8] = &ld_hl_sp_n,
     [0xf9] = &ld_sp_hl,
-    [0xfa] = &ld_a_nn
+    [0xfa] = &ld_a_nn,
+    [0xfe] = &cp_n
 };
 
 static char *instNames[0x100] = {
