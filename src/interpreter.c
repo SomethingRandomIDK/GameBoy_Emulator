@@ -1050,48 +1050,85 @@ static void inc(uint8_t *val, gb_t *cpu) {
     setZ(*val == 0);
     setN(false);
     setH((*val & 0xf) == 0);
+    cpu->regs.pc++;
 }
 
 static void inc_b(gb_t *cpu) {
     inc(&cpu->regs.b, cpu);
-    cpu->regs.pc++;
 }
 
 static void inc_c(gb_t *cpu) {
     inc(&cpu->regs.c, cpu);
-    cpu->regs.pc++;
 }
 
 static void inc_d(gb_t *cpu) {
     inc(&cpu->regs.d, cpu);
-    cpu->regs.pc++;
 }
 
 static void inc_e(gb_t *cpu) {
     inc(&cpu->regs.e, cpu);
-    cpu->regs.pc++;
 }
 
 static void inc_h(gb_t *cpu) {
     inc(&cpu->regs.h, cpu);
-    cpu->regs.pc++;
 }
 
 static void inc_l(gb_t *cpu) {
     inc(&cpu->regs.l, cpu);
-    cpu->regs.pc++;
 }
 
 static void inc_hl(gb_t *cpu) {
     uint8_t val = busRead8(regHL());
     inc(&val, cpu);
     setHL(val);
-    cpu->regs.pc++;
 }
 
 static void inc_a(gb_t *cpu) {
     inc(&cpu->regs.a, cpu);
+}
+
+// DEC
+
+static void dec(uint8_t *val, gb_t *cpu) {
+    (*val)--;
+    setZ(*val == 0);
+    setN(true);
+    setH((*val & 0xf) == 0xf);
     cpu->regs.pc++;
+}
+
+static void dec_b(gb_t *cpu) {
+    dec(&cpu->regs.b, cpu);
+}
+
+static void dec_c(gb_t *cpu) {
+    dec(&cpu->regs.c, cpu);
+}
+
+static void dec_d(gb_t *cpu) {
+    dec(&cpu->regs.d, cpu);
+}
+
+static void dec_e(gb_t *cpu) {
+    dec(&cpu->regs.e, cpu);
+}
+
+static void dec_h(gb_t *cpu) {
+    dec(&cpu->regs.h, cpu);
+}
+
+static void dec_l(gb_t *cpu) {
+    dec(&cpu->regs.l, cpu);
+}
+
+static void dec_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    dec(&val, cpu);
+    setHL(val);
+}
+
+static void dec_a(gb_t *cpu) {
+    dec(&cpu->regs.a, cpu);
 }
 
 // INTERUPTS
@@ -1129,38 +1166,46 @@ static inst instructions[0x100] = {
     [0x01] = &ld_bc_nn,
     [0x02] = &ld_bc_a,
     [0x04] = &inc_b,
+    [0x05] = &dec_b,
     [0x06] = &ld_b_n,
     [0x08] = &ld_nn_sp,
     [0x0a] = &ld_a_bc,
     [0x0c] = &inc_c,
+    [0x0d] = &dec_c,
     [0x0e] = &ld_c_n,
 
     // 0x10 - 0x1f
     [0x11] = &ld_de_nn,
     [0x12] = &ld_de_a,
     [0x14] = &inc_d,
+    [0x15] = &dec_d,
     [0x16] = &ld_d_n,
     [0x18] = &jr_n,
     [0x1a] = &ld_a_de,
     [0x1c] = &inc_e,
+    [0x1d] = &dec_e,
     [0x1e] = &ld_e_n,
 
     // 0x20 - 0x2f
     [0x21] = &ld_hl_nn,
     [0x22] = &ld_hli_a,
     [0x24] = &inc_h,
+    [0x25] = &dec_h,
     [0x26] = &ld_h_n,
     [0x2a] = &ld_a_hli,
     [0x2c] = &inc_l,
+    [0x2d] = &dec_l,
     [0x2e] = &ld_l_n,
 
     // 0x30 - 0x3f
     [0x31] = &ld_sp_nn,
     [0x32] = &ld_hld_a,
     [0x34] = &inc_hl,
+    [0x35] = &dec_hl,
     [0x36] = &ld_hl_n,
     [0x3a] = &ld_a_hld,
     [0x3c] = &inc_a,
+    [0x3d] = &dec_a,
     [0x3e] = &ld_a_n,
 
     // 0x40 - 0x4f
