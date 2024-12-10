@@ -1275,10 +1275,46 @@ static void jp_hl(gb_t *cpu) {
     cpu->regs.pc = regHL();
 }
 
+// Relative Jumps
+
 static void jr_n(gb_t *cpu) {
     int8_t jmpDiff = (int8_t)busRead8(++cpu->regs.pc);
     cpu->regs.pc++;
     cpu->regs.pc += jmpDiff;
+}
+
+// Relative Conditional Jumps
+
+static void jr_nz_n(gb_t *cpu) {
+    if (!flagZ()) {
+        jr_n(cpu);
+    } else {
+        cpu->regs.pc++;
+    }
+}
+
+static void jr_z_n(gb_t *cpu) {
+    if (flagZ()) {
+        jr_n(cpu);
+    } else {
+        cpu->regs.pc++;
+    }
+}
+
+static void jr_nc_n(gb_t *cpu) {
+    if (!flagC()) {
+        jr_n(cpu);
+    } else {
+        cpu->regs.pc++;
+    }
+}
+
+static void jr_c_n(gb_t *cpu) {
+    if (flagC()) {
+        jr_n(cpu);
+    } else {
+        cpu->regs.pc++;
+    }
 }
 
 // INTERUPTS
@@ -1321,12 +1357,14 @@ static inst instructions[0x100] = {
     [0x1e] = &ld_e_n,
 
     // 0x20 - 0x2f
+    [0x20] = &jr_nz_n,
     [0x21] = &ld_hl_nn,
     [0x22] = &ld_hli_a,
     [0x23] = &inc_hl,
     [0x24] = &inc_h,
     [0x25] = &dec_h,
     [0x26] = &ld_h_n,
+    [0x28] = &jr_z_n,
     [0x29] = &add_hl_hl,
     [0x2a] = &ld_a_hli,
     [0x2b] = &dec_hl,
@@ -1335,12 +1373,14 @@ static inst instructions[0x100] = {
     [0x2e] = &ld_l_n,
 
     // 0x30 - 0x3f
+    [0x30] = &jr_nc_n,
     [0x31] = &ld_sp_nn,
     [0x32] = &ld_hld_a,
     [0x33] = &inc_sp,
     [0x34] = &inc_addr_hl,
     [0x35] = &dec_addr_hl,
     [0x36] = &ld_hl_n,
+    [0x38] = &jr_c_n,
     [0x39] = &add_hl_sp,
     [0x3a] = &ld_a_hld,
     [0x3b] = &dec_sp,
