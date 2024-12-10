@@ -1317,6 +1317,48 @@ static void jr_c_n(gb_t *cpu) {
     }
 }
 
+// CALLS
+
+static void call_nn(gb_t *cpu) {
+    uint16_t addr = busRead16(++cpu->regs.pc);
+    push(cpu->regs.pc + 2, cpu);
+    cpu->regs.pc = addr;
+}
+
+// Conditional Calls
+
+static void call_nz_nn(gb_t *cpu) {
+    if (!flagZ()) {
+        call_nn(cpu);
+    } else {
+        cpu->regs.pc += 3;
+    }
+}
+
+static void call_z_nn(gb_t *cpu) {
+    if (flagZ()) {
+        call_nn(cpu);
+    } else {
+        cpu->regs.pc += 3;
+    }
+}
+
+static void call_nc_nn(gb_t *cpu) {
+    if (!flagC()) {
+        call_nn(cpu);
+    } else {
+        cpu->regs.pc += 3;
+    }
+}
+
+static void call_c_nn(gb_t *cpu) {
+    if (flagC()) {
+        call_nn(cpu);
+    } else {
+        cpu->regs.pc += 3;
+    }
+}
+
 // INTERUPTS
 
 static void di(gb_t *cpu) {
@@ -1536,17 +1578,22 @@ static inst instructions[0x100] = {
     [0xc1] = &pop_bc,
     [0xc2] = &jp_nz_nn,
     [0xc3] = &jp_nn,
+    [0xc4] = &call_nz_nn,
     [0xc5] = &push_bc,
     [0xc6] = &add_a_n,
     [0xca] = &jp_z_nn,
+    [0xcc] = &call_z_nn,
+    [0xcd] = &call_nn,
     [0xce] = &adc_a_n,
 
     // 0xd0 - 0xdf
     [0xd1] = &pop_de,
     [0xd2] = &jp_nc_nn,
+    [0xd4] = &call_nc_nn,
     [0xd5] = &push_de,
     [0xd6] = &sub_n,
     [0xda] = &jp_c_nn,
+    [0xdc] = &call_c_nn,
     [0xde] = &sbc_a_n,
 
     // 0xe0 - 0xef
