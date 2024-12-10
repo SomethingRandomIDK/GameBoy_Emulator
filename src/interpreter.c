@@ -1226,33 +1226,66 @@ static void dec_sp(gb_t *cpu) {
     cpu->regs.pc++;
 }
 
-// INTERUPTS
-
-static void di(gb_t *cpu) {
-    cpu->interrupts = false;
-    cpu->regs.pc++;
-}
-
 // JUMPS
+
+// Jump to immediate 16 bits
 
 static void jp_nn(gb_t *cpu) {
     uint16_t addr = busRead16(++cpu->regs.pc);
     cpu->regs.pc = addr;
 }
 
+// Conditional Jumps
+
 static void jp_nz_nn(gb_t *cpu) {
     if (!flagZ()) {
-        uint16_t addr = busRead16(++cpu->regs.pc);
-        cpu->regs.pc = addr;
+        jp_nn(cpu);
     } else {
         cpu->regs.pc += 3;
     }
+}
+
+static void jp_z_nn(gb_t *cpu) {
+    if (flagZ()) {
+        jp_nn(cpu);
+    } else {
+        cpu->regs.pc += 3;
+    }
+}
+
+static void jp_nc_nn(gb_t *cpu) {
+    if (!flagC()) {
+        jp_nn(cpu);
+    } else {
+        cpu->regs.pc += 3;
+    }
+}
+
+static void jp_c_nn(gb_t *cpu) {
+    if (flagC()) {
+        jp_nn(cpu);
+    } else {
+        cpu->regs.pc += 3;
+    }
+}
+
+// Jump to address contained in HL
+
+static void jp_hl(gb_t *cpu) {
+    cpu->regs.pc = regHL();
 }
 
 static void jr_n(gb_t *cpu) {
     int8_t jmpDiff = (int8_t)busRead8(++cpu->regs.pc);
     cpu->regs.pc++;
     cpu->regs.pc += jmpDiff;
+}
+
+// INTERUPTS
+
+static void di(gb_t *cpu) {
+    cpu->interrupts = false;
+    cpu->regs.pc++;
 }
 
 static inst instructions[0x100] = {
@@ -1465,12 +1498,15 @@ static inst instructions[0x100] = {
     [0xc3] = &jp_nn,
     [0xc5] = &push_bc,
     [0xc6] = &add_a_n,
+    [0xca] = &jp_z_nn,
     [0xce] = &adc_a_n,
 
     // 0xd0 - 0xdf
     [0xd1] = &pop_de,
+    [0xd2] = &jp_nc_nn,
     [0xd5] = &push_de,
     [0xd6] = &sub_n,
+    [0xda] = &jp_c_nn,
     [0xde] = &sbc_a_n,
 
     // 0xe0 - 0xef
@@ -1480,6 +1516,7 @@ static inst instructions[0x100] = {
     [0xe5] = &push_hl,
     [0xe6] = &and_n,
     [0xe8] = &add_sp_n,
+    [0xe9] = &jp_hl,
     [0xea] = &ld_nn_a,
     [0xee] = &xor_n,
 
