@@ -1359,6 +1359,54 @@ static void call_c_nn(gb_t *cpu) {
     }
 }
 
+// RESTARTS
+
+static void rst(uint8_t val, gb_t *cpu) {
+    // TODO Check if by pushing current addr on the stack if it means the address of the restart instruction
+    // Or if if pushes the addr for the next instr on the stack
+    // The language is slightly vague
+}
+
+// RETURNS
+
+static void ret(gb_t *cpu) {
+    cpu->regs.pc = pop(cpu);
+}
+
+static void ret_nz(gb_t *cpu) {
+    if (!flagZ())
+        ret(cpu);
+    else
+        cpu->regs.pc++;
+}
+
+static void ret_z(gb_t *cpu) {
+    if (flagZ())
+        ret(cpu);
+    else
+        cpu->regs.pc++;
+}
+
+static void ret_nc(gb_t *cpu) {
+    if (!flagC())
+        ret(cpu);
+    else
+        cpu->regs.pc++;
+}
+
+static void ret_c(gb_t *cpu) {
+    if (flagC())
+        ret(cpu);
+    else
+        cpu->regs.pc++;
+}
+
+static void reti(gb_t *cpu) {
+    ret(cpu);
+    // TODO Need to implement interrupts and implement them here, Will probably try to work 
+    // on interupts next
+}
+
 // INTERUPTS
 
 static void di(gb_t *cpu) {
@@ -1575,23 +1623,28 @@ static inst instructions[0x100] = {
     [0xbf] = &cp_a,
 
     // 0xc0 - 0xcf
+    [0xc0] = &ret_nz,
     [0xc1] = &pop_bc,
     [0xc2] = &jp_nz_nn,
     [0xc3] = &jp_nn,
     [0xc4] = &call_nz_nn,
     [0xc5] = &push_bc,
     [0xc6] = &add_a_n,
+    [0xc8] = &ret_z,
+    [0xc9] = &ret,
     [0xca] = &jp_z_nn,
     [0xcc] = &call_z_nn,
     [0xcd] = &call_nn,
     [0xce] = &adc_a_n,
 
     // 0xd0 - 0xdf
+    [0xd0] = &ret_nc,
     [0xd1] = &pop_de,
     [0xd2] = &jp_nc_nn,
     [0xd4] = &call_nc_nn,
     [0xd5] = &push_de,
     [0xd6] = &sub_n,
+    [0xd8] = &ret_c,
     [0xda] = &jp_c_nn,
     [0xdc] = &call_c_nn,
     [0xde] = &sbc_a_n,
