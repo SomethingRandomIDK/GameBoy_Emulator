@@ -1362,9 +1362,40 @@ static void call_c_nn(gb_t *cpu) {
 // RESTARTS
 
 static void rst(uint8_t val, gb_t *cpu) {
-    // TODO Check if by pushing current addr on the stack if it means the address of the restart instruction
-    // Or if if pushes the addr for the next instr on the stack
-    // The language is slightly vague
+    push(++cpu->regs.pc, cpu);
+    cpu->regs.pc = val;
+}
+
+static void rst_00(gb_t *cpu) {
+    rst(0x00, cpu);
+}
+
+static void rst_10(gb_t *cpu) {
+    rst(0x10, cpu);
+}
+
+static void rst_20(gb_t *cpu) {
+    rst(0x20, cpu);
+}
+
+static void rst_30(gb_t *cpu) {
+    rst(0x30, cpu);
+}
+
+static void rst_08(gb_t *cpu) {
+    rst(0x08, cpu);
+}
+
+static void rst_18(gb_t *cpu) {
+    rst(0x18, cpu);
+}
+
+static void rst_28(gb_t *cpu) {
+    rst(0x28, cpu);
+}
+
+static void rst_38(gb_t *cpu) {
+    rst(0x38, cpu);
 }
 
 // RETURNS
@@ -1630,12 +1661,14 @@ static inst instructions[0x100] = {
     [0xc4] = &call_nz_nn,
     [0xc5] = &push_bc,
     [0xc6] = &add_a_n,
+    [0xc7] = &rst_00,
     [0xc8] = &ret_z,
     [0xc9] = &ret,
     [0xca] = &jp_z_nn,
     [0xcc] = &call_z_nn,
     [0xcd] = &call_nn,
     [0xce] = &adc_a_n,
+    [0xcf] = &rst_08,
 
     // 0xd0 - 0xdf
     [0xd0] = &ret_nc,
@@ -1644,10 +1677,12 @@ static inst instructions[0x100] = {
     [0xd4] = &call_nc_nn,
     [0xd5] = &push_de,
     [0xd6] = &sub_n,
+    [0xd7] = &rst_10,
     [0xd8] = &ret_c,
     [0xda] = &jp_c_nn,
     [0xdc] = &call_c_nn,
     [0xde] = &sbc_a_n,
+    [0xdf] = &rst_18,
 
     // 0xe0 - 0xef
     [0xe0] = &ldh_n_a,
@@ -1655,10 +1690,12 @@ static inst instructions[0x100] = {
     [0xe2] = &ld_addr_c_a,
     [0xe5] = &push_hl,
     [0xe6] = &and_n,
+    [0xe7] = &rst_20,
     [0xe8] = &add_sp_n,
     [0xe9] = &jp_hl,
     [0xea] = &ld_nn_a,
     [0xee] = &xor_n,
+    [0xef] = &rst_28,
 
     // 0xf0 - 0xff
     [0xf0] = &ldh_a_n,
@@ -1667,10 +1704,12 @@ static inst instructions[0x100] = {
     [0xf3] = &di,
     [0xf5] = &push_af,
     [0xf6] = &or_n,
+    [0xf7] = &rst_30,
     [0xf8] = &ld_hl_sp_n,
     [0xf9] = &ld_sp_hl,
     [0xfa] = &ld_a_nn,
-    [0xfe] = &cp_n
+    [0xfe] = &cp_n,
+    [0xff] = &rst_38
 };
 
 static char *instNames[0x100] = {
