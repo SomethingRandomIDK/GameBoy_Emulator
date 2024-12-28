@@ -1289,7 +1289,7 @@ static void jr_nz_n(gb_t *cpu) {
     if (!flagZ()) {
         jr_n(cpu);
     } else {
-        cpu->regs.pc++;
+        cpu->regs.pc += 2;
     }
 }
 
@@ -1297,7 +1297,7 @@ static void jr_z_n(gb_t *cpu) {
     if (flagZ()) {
         jr_n(cpu);
     } else {
-        cpu->regs.pc++;
+        cpu->regs.pc += 2;
     }
 }
 
@@ -1305,7 +1305,7 @@ static void jr_nc_n(gb_t *cpu) {
     if (!flagC()) {
         jr_n(cpu);
     } else {
-        cpu->regs.pc++;
+        cpu->regs.pc += 2;
     }
 }
 
@@ -1313,7 +1313,7 @@ static void jr_c_n(gb_t *cpu) {
     if (flagC()) {
         jr_n(cpu);
     } else {
-        cpu->regs.pc++;
+        cpu->regs.pc += 2;
     }
 }
 
