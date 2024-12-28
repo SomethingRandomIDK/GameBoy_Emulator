@@ -1434,14 +1434,19 @@ static void ret_c(gb_t *cpu) {
 
 static void reti(gb_t *cpu) {
     ret(cpu);
-    // TODO Need to implement interrupts and implement them here, Will probably try to work 
-    // on interupts next
+    cpu->interEnableBuffer = true;
 }
 
 // INTERUPTS
 
 static void di(gb_t *cpu) {
     cpu->interrupts = false;
+    cpu->interEnableBuffer = false;
+    cpu->regs.pc++;
+}
+
+static void ei(gb_t *cpu) {
+    cpu->interEnableBuffer = true;
     cpu->regs.pc++;
 }
 
@@ -1679,6 +1684,7 @@ static inst instructions[0x100] = {
     [0xd6] = &sub_n,
     [0xd7] = &rst_10,
     [0xd8] = &ret_c,
+    [0xd9] = &reti,
     [0xda] = &jp_c_nn,
     [0xdc] = &call_c_nn,
     [0xde] = &sbc_a_n,
@@ -1708,6 +1714,7 @@ static inst instructions[0x100] = {
     [0xf8] = &ld_hl_sp_n,
     [0xf9] = &ld_sp_hl,
     [0xfa] = &ld_a_nn,
+    [0xfb] = &ei,
     [0xfe] = &cp_n,
     [0xff] = &rst_38
 };
@@ -2013,6 +2020,11 @@ void runInst(gb_t *cpu) {
             logMessage(msg, TRACE);
         } else
             logMessage("Instruction Information Not Found", WARNING);
+
+        if (cpu->interEnableBuffer) {
+            cpu->interrupts = true;
+            cpu->interEnableBuffer = false;
+        }
 
         instructions[opcode](cpu);
     } else {

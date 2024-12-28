@@ -22,6 +22,7 @@ typedef struct {
     uint8_t wram[0x2000];
     uint8_t hram[0x7f];
     bool interrupts;
+    bool interEnableBuffer;
 } gb_t;
 
 uint16_t regAF();
