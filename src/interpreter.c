@@ -2012,6 +2012,13 @@ static char *instNames[0x100] = {
 void runInst(gb_t *cpu) {
     uint8_t opcode = busRead8(cpu->regs.pc);
     if (instructions[opcode]) {
+        if (cpu->interEnableBuffer) {
+            cpu->interrupts = true;
+            cpu->interEnableBuffer = false;
+        }
+
+        instructions[opcode](cpu);
+
         if (instNames[opcode]) {
             char msg[128];
             sprintf(msg, "INST: %s OPCODE: %02x PC: %04x SP: %04x A: %02x BC: %04x DE: %04x HL: %04x F: %02x",
@@ -2020,13 +2027,6 @@ void runInst(gb_t *cpu) {
             logMessage(msg, TRACE);
         } else
             logMessage("Instruction Information Not Found", WARNING);
-
-        if (cpu->interEnableBuffer) {
-            cpu->interrupts = true;
-            cpu->interEnableBuffer = false;
-        }
-
-        instructions[opcode](cpu);
     } else {
         char msg[64];
         sprintf(msg, "Instruction not recognized INST: %x PC: %x", opcode, cpu->regs.pc);
