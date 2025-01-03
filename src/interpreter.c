@@ -1514,6 +1514,50 @@ static void stop(gb_t *cpu) {
     cpu->regs.pc += 2;
 }
 
+// ROTATES AND SHIFTS
+
+// Rotate A left, old 7 bit to carry flag
+static void rlca(gb_t *cpu) {
+    setC(!!(cpu->regs.a & 0x80));
+    cpu->regs.a = (cpu->regs.a << 1) | flagC();
+    setH(false);
+    setN(false);
+    setZ(false);
+    cpu->regs.pc++;
+}
+
+// Rotate A left through carry flag
+static void rla(gb_t *cpu) {
+    bool tempC = flagC();
+    setC(!!(cpu->regs.a & 0x80));
+    cpu->regs.a = (cpu->regs.a << 1) | tempC;
+    setH(false);
+    setN(false);
+    setZ(false);
+    cpu->regs.pc++;
+}
+
+// Rotate A right, old 0 bit to carry flag
+static void rrca(gb_t *cpu) {
+    setC(!!(cpu->regs.a & 0x1));
+    cpu->regs.a = (cpu->regs.a >> 1) | (flagC() << 7);
+    setH(false);
+    setN(false);
+    setZ(false);
+    cpu->regs.pc++;
+}
+
+// Rotate A right through carry flag
+static void rra(gb_t *cpu) {
+    bool tempC = flagC();
+    setC(!!(cpu->regs.a & 0x1));
+    cpu->regs.a = (cpu->regs.a >> 1) | (tempC << 7);
+    setH(false);
+    setN(false);
+    setZ(false);
+    cpu->regs.pc++;
+}
+
 static inst instructions[0x100] = {
     // 0x00 - 0x0f
     [0x00] = &nop,
@@ -1523,6 +1567,7 @@ static inst instructions[0x100] = {
     [0x04] = &inc_b,
     [0x05] = &dec_b,
     [0x06] = &ld_b_n,
+    [0x07] = &rlca,
     [0x08] = &ld_nn_sp,
     [0x09] = &add_hl_bc,
     [0x0a] = &ld_a_bc,
@@ -1530,6 +1575,7 @@ static inst instructions[0x100] = {
     [0x0c] = &inc_c,
     [0x0d] = &dec_c,
     [0x0e] = &ld_c_n,
+    [0x0f] = &rrca,
 
     // 0x10 - 0x1f
     [0x10] = &stop,
@@ -1539,6 +1585,7 @@ static inst instructions[0x100] = {
     [0x14] = &inc_d,
     [0x15] = &dec_d,
     [0x16] = &ld_d_n,
+    [0x17] = &rla,
     [0x18] = &jr_n,
     [0x19] = &add_hl_de,
     [0x1a] = &ld_a_de,
@@ -1546,6 +1593,7 @@ static inst instructions[0x100] = {
     [0x1c] = &inc_e,
     [0x1d] = &dec_e,
     [0x1e] = &ld_e_n,
+    [0x1f] = &rra,
 
     // 0x20 - 0x2f
     [0x20] = &jr_nz_n,
