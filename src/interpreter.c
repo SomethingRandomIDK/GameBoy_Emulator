@@ -1133,6 +1133,63 @@ static void dec_a(gb_t *cpu) {
     dec(&cpu->regs.a, cpu);
 }
 
+// Miscellaneous ALU intructions
+
+// Decimal Adjust A
+
+static void daa(gb_t *cpu) {
+    if (!flagN()) {
+        if (flagC() || cpu->regs.a > 0x99) {
+            cpu->regs.a += 0x60;
+            setC(true);
+        }
+        if (flagH() || (cpu->regs.a & 0xf) > 0x9) {
+            cpu->regs.a += 0x6;
+            setH(false);
+        }
+    } else {
+        if (flagH()) {
+            cpu->regs.a += 0xfa;
+            setH(false);
+        } else if (flagC()) {
+            cpu->regs.a += 0xa0;
+        } else if (flagH() && flagC()) {
+            cpu->regs.a += 0x9a;
+            setH(false);
+        }
+    }
+
+    setZ(cpu->regs.a == 0);
+    cpu->regs.pc++;
+}
+
+// Complement A register
+
+static void cpl(gb_t *cpu) {
+    cpu->regs.a ^= 0xff;
+    setN(true);
+    setH(true);
+    cpu->regs.pc++;
+}
+
+// Complement The Carry Flag
+
+static void ccf(gb_t *cpu) {
+    setC(!flagC());
+    setN(false);
+    setH(false);
+    cpu->regs.pc++;
+}
+
+// Set the Carry Flag
+
+static void scf(gb_t *cpu) {
+    setN(false);
+    setH(false);
+    setC(true);
+    cpu->regs.pc++;
+}
+
 // 16 Bit ALU
 
 // ADD HL
@@ -1490,6 +1547,7 @@ static inst instructions[0x100] = {
     [0x24] = &inc_h,
     [0x25] = &dec_h,
     [0x26] = &ld_h_n,
+    [0x27] = &daa,
     [0x28] = &jr_z_n,
     [0x29] = &add_hl_hl,
     [0x2a] = &ld_a_hli,
@@ -1497,6 +1555,7 @@ static inst instructions[0x100] = {
     [0x2c] = &inc_l,
     [0x2d] = &dec_l,
     [0x2e] = &ld_l_n,
+    [0x2f] = &cpl,
 
     // 0x30 - 0x3f
     [0x30] = &jr_nc_n,
@@ -1506,6 +1565,7 @@ static inst instructions[0x100] = {
     [0x34] = &inc_addr_hl,
     [0x35] = &dec_addr_hl,
     [0x36] = &ld_hl_n,
+    [0x37] = &scf,
     [0x38] = &jr_c_n,
     [0x39] = &add_hl_sp,
     [0x3a] = &ld_a_hld,
@@ -1513,6 +1573,7 @@ static inst instructions[0x100] = {
     [0x3c] = &inc_a,
     [0x3d] = &dec_a,
     [0x3e] = &ld_a_n,
+    [0x3f] = &ccf,
 
     // 0x40 - 0x4f
     [0x40] = &ld_b_b,
