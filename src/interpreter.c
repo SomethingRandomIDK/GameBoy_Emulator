@@ -322,11 +322,6 @@ static void ld_hl_l(gb_t *cpu) {
     cpu->regs.pc++;
 }
 
-static void halt(gb_t *cpu) {
-    //TODO actualling implement this
-    cpu->regs.pc++;
-}
-
 static void ld_hl_a(gb_t *cpu) {
     busWrite8(regHL(), cpu->regs.a);
     cpu->regs.pc++;
@@ -1507,6 +1502,18 @@ static void ei(gb_t *cpu) {
     cpu->regs.pc++;
 }
 
+// MISCELLANEOUS
+
+static void halt(gb_t *cpu) {
+    cpu->halted = true;
+    cpu->regs.pc++;
+}
+
+static void stop(gb_t *cpu) {
+    cpu->stopped = true;
+    cpu->regs.pc += 2;
+}
+
 static inst instructions[0x100] = {
     // 0x00 - 0x0f
     [0x00] = &nop,
@@ -1525,6 +1532,7 @@ static inst instructions[0x100] = {
     [0x0e] = &ld_c_n,
 
     // 0x10 - 0x1f
+    [0x10] = &stop,
     [0x11] = &ld_de_nn,
     [0x12] = &ld_de_a,
     [0x13] = &inc_de,
@@ -1636,7 +1644,7 @@ static inst instructions[0x100] = {
     [0x73] = &ld_hl_e,
     [0x74] = &ld_hl_h,
     [0x75] = &ld_hl_l,
-    // [0x76] = &halt,
+    [0x76] = &halt,
     [0x77] = &ld_hl_a,
     [0x78] = &ld_a_b,
     [0x79] = &ld_a_c,
