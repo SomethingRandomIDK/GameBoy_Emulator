@@ -1928,6 +1928,280 @@ static void srl_a(gb_t *cpu) {
     srl(&cpu->regs.a, cpu);
 }
 
+// BITS OPCODES
+
+// Check if the bit is on or not
+static void bit(uint8_t val, uint8_t bit, gb_t *cpu) {
+    setZ(!(val & (1 << bit)));
+    setH(true);
+    setN(false);
+    cpu->regs.pc++;
+}
+
+static void bit_0_b(gb_t *cpu) {
+    bit(cpu->regs.b, 0, cpu);
+}
+
+static void bit_0_c(gb_t *cpu) {
+    bit(cpu->regs.c, 0, cpu);
+}
+
+static void bit_0_d(gb_t *cpu) {
+    bit(cpu->regs.d, 0, cpu);
+}
+
+static void bit_0_e(gb_t *cpu) {
+    bit(cpu->regs.e, 0, cpu);
+}
+
+static void bit_0_h(gb_t *cpu) {
+    bit(cpu->regs.h, 0, cpu);
+}
+
+static void bit_0_l(gb_t *cpu) {
+    bit(cpu->regs.l, 0, cpu);
+}
+
+static void bit_0_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    bit(val, 0, cpu);
+}
+
+static void bit_0_a(gb_t *cpu) {
+    bit(cpu->regs.a, 0, cpu);
+}
+
+static void bit_1_b(gb_t *cpu) {
+    bit(cpu->regs.b, 1, cpu);
+}
+
+static void bit_1_c(gb_t *cpu) {
+    bit(cpu->regs.c, 1, cpu);
+}
+
+static void bit_1_d(gb_t *cpu) {
+    bit(cpu->regs.d, 1, cpu);
+}
+
+static void bit_1_e(gb_t *cpu) {
+    bit(cpu->regs.e, 1, cpu);
+}
+
+static void bit_1_h(gb_t *cpu) {
+    bit(cpu->regs.h, 1, cpu);
+}
+
+static void bit_1_l(gb_t *cpu) {
+    bit(cpu->regs.l, 1, cpu);
+}
+
+static void bit_1_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    bit(val, 1, cpu);
+}
+
+static void bit_1_a(gb_t *cpu) {
+    bit(cpu->regs.a, 1, cpu);
+}
+
+static void bit_2_b(gb_t *cpu) {
+    bit(cpu->regs.b, 2, cpu);
+}
+
+static void bit_2_c(gb_t *cpu) {
+    bit(cpu->regs.c, 2, cpu);
+}
+
+static void bit_2_d(gb_t *cpu) {
+    bit(cpu->regs.d, 2, cpu);
+}
+
+static void bit_2_e(gb_t *cpu) {
+    bit(cpu->regs.e, 2, cpu);
+}
+
+static void bit_2_h(gb_t *cpu) {
+    bit(cpu->regs.h, 2, cpu);
+}
+
+static void bit_2_l(gb_t *cpu) {
+    bit(cpu->regs.l, 2, cpu);
+}
+
+static void bit_2_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    bit(val, 2, cpu);
+}
+
+static void bit_2_a(gb_t *cpu) {
+    bit(cpu->regs.a, 2, cpu);
+}
+
+static void bit_3_b(gb_t *cpu) {
+    bit(cpu->regs.b, 3, cpu);
+}
+
+static void bit_3_c(gb_t *cpu) {
+    bit(cpu->regs.c, 3, cpu);
+}
+
+static void bit_3_d(gb_t *cpu) {
+    bit(cpu->regs.d, 3, cpu);
+}
+
+static void bit_3_e(gb_t *cpu) {
+    bit(cpu->regs.e, 3, cpu);
+}
+
+static void bit_3_h(gb_t *cpu) {
+    bit(cpu->regs.h, 3, cpu);
+}
+
+static void bit_3_l(gb_t *cpu) {
+    bit(cpu->regs.l, 3, cpu);
+}
+
+static void bit_3_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    bit(val, 3, cpu);
+}
+
+static void bit_3_a(gb_t *cpu) {
+    bit(cpu->regs.a, 3, cpu);
+}
+
+static void bit_4_b(gb_t *cpu) {
+    bit(cpu->regs.b, 4, cpu);
+}
+
+static void bit_4_c(gb_t *cpu) {
+    bit(cpu->regs.c, 4, cpu);
+}
+
+static void bit_4_d(gb_t *cpu) {
+    bit(cpu->regs.d, 4, cpu);
+}
+
+static void bit_4_e(gb_t *cpu) {
+    bit(cpu->regs.e, 4, cpu);
+}
+
+static void bit_4_h(gb_t *cpu) {
+    bit(cpu->regs.h, 4, cpu);
+}
+
+static void bit_4_l(gb_t *cpu) {
+    bit(cpu->regs.l, 4, cpu);
+}
+
+static void bit_4_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    bit(val, 4, cpu);
+}
+
+static void bit_4_a(gb_t *cpu) {
+    bit(cpu->regs.a, 4, cpu);
+}
+
+static void bit_5_b(gb_t *cpu) {
+    bit(cpu->regs.b, 5, cpu);
+}
+
+static void bit_5_c(gb_t *cpu) {
+    bit(cpu->regs.c, 5, cpu);
+}
+
+static void bit_5_d(gb_t *cpu) {
+    bit(cpu->regs.d, 5, cpu);
+}
+
+static void bit_5_e(gb_t *cpu) {
+    bit(cpu->regs.e, 5, cpu);
+}
+
+static void bit_5_h(gb_t *cpu) {
+    bit(cpu->regs.h, 5, cpu);
+}
+
+static void bit_5_l(gb_t *cpu) {
+    bit(cpu->regs.l, 5, cpu);
+}
+
+static void bit_5_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    bit(val, 5, cpu);
+}
+
+static void bit_5_a(gb_t *cpu) {
+    bit(cpu->regs.a, 5, cpu);
+}
+
+static void bit_6_b(gb_t *cpu) {
+    bit(cpu->regs.b, 6, cpu);
+}
+
+static void bit_6_c(gb_t *cpu) {
+    bit(cpu->regs.c, 6, cpu);
+}
+
+static void bit_6_d(gb_t *cpu) {
+    bit(cpu->regs.d, 6, cpu);
+}
+
+static void bit_6_e(gb_t *cpu) {
+    bit(cpu->regs.e, 6, cpu);
+}
+
+static void bit_6_h(gb_t *cpu) {
+    bit(cpu->regs.h, 6, cpu);
+}
+
+static void bit_6_l(gb_t *cpu) {
+    bit(cpu->regs.l, 6, cpu);
+}
+
+static void bit_6_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    bit(val, 6, cpu);
+}
+
+static void bit_6_a(gb_t *cpu) {
+    bit(cpu->regs.a, 6, cpu);
+}
+
+static void bit_7_b(gb_t *cpu) {
+    bit(cpu->regs.b, 7, cpu);
+}
+
+static void bit_7_c(gb_t *cpu) {
+    bit(cpu->regs.c, 7, cpu);
+}
+
+static void bit_7_d(gb_t *cpu) {
+    bit(cpu->regs.d, 7, cpu);
+}
+
+static void bit_7_e(gb_t *cpu) {
+    bit(cpu->regs.e, 7, cpu);
+}
+
+static void bit_7_h(gb_t *cpu) {
+    bit(cpu->regs.h, 7, cpu);
+}
+
+static void bit_7_l(gb_t *cpu) {
+    bit(cpu->regs.l, 7, cpu);
+}
+
+static void bit_7_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    bit(val, 7, cpu);
+}
+
+static void bit_7_a(gb_t *cpu) {
+    bit(cpu->regs.a, 7, cpu);
+}
+
 static inst cb_instr[0x100] = {
     //0x00 - 0x0f
     [0x00] = &rlc_b,
@@ -2000,6 +2274,78 @@ static inst cb_instr[0x100] = {
     [0x3d] = &srl_l,
     [0x3e] = &srl_hl,
     [0x3f] = &srl_a,
+
+    //0x40 - 0x4f
+    [0x40] = &bit_0_b,
+    [0x41] = &bit_0_c,
+    [0x42] = &bit_0_d,
+    [0x43] = &bit_0_e,
+    [0x44] = &bit_0_h,
+    [0x45] = &bit_0_l,
+    [0x46] = &bit_0_hl,
+    [0x47] = &bit_0_a,
+    [0x48] = &bit_1_b,
+    [0x49] = &bit_1_c,
+    [0x4a] = &bit_1_d,
+    [0x4b] = &bit_1_e,
+    [0x4c] = &bit_1_h,
+    [0x4d] = &bit_1_l,
+    [0x4e] = &bit_1_hl,
+    [0x4f] = &bit_1_a,
+
+    //0x50 - 0x5f
+    [0x50] = &bit_2_b,
+    [0x51] = &bit_2_c,
+    [0x52] = &bit_2_d,
+    [0x53] = &bit_2_e,
+    [0x54] = &bit_2_h,
+    [0x55] = &bit_2_l,
+    [0x56] = &bit_2_hl,
+    [0x57] = &bit_2_a,
+    [0x58] = &bit_3_b,
+    [0x59] = &bit_3_c,
+    [0x5a] = &bit_3_d,
+    [0x5b] = &bit_3_e,
+    [0x5c] = &bit_3_h,
+    [0x5d] = &bit_3_l,
+    [0x5e] = &bit_3_hl,
+    [0x5f] = &bit_3_a,
+
+    //0x60 - 0x6f
+    [0x60] = &bit_4_b,
+    [0x61] = &bit_4_c,
+    [0x62] = &bit_4_d,
+    [0x63] = &bit_4_e,
+    [0x64] = &bit_4_h,
+    [0x65] = &bit_4_l,
+    [0x66] = &bit_4_hl,
+    [0x67] = &bit_4_a,
+    [0x68] = &bit_5_b,
+    [0x69] = &bit_5_c,
+    [0x6a] = &bit_5_d,
+    [0x6b] = &bit_5_e,
+    [0x6c] = &bit_5_h,
+    [0x6d] = &bit_5_l,
+    [0x6e] = &bit_5_hl,
+    [0x6f] = &bit_5_a,
+
+    //0x70 - 0x7f
+    [0x70] = &bit_6_b,
+    [0x71] = &bit_6_c,
+    [0x72] = &bit_6_d,
+    [0x73] = &bit_6_e,
+    [0x74] = &bit_6_h,
+    [0x75] = &bit_6_l,
+    [0x76] = &bit_6_hl,
+    [0x77] = &bit_6_a,
+    [0x78] = &bit_7_b,
+    [0x79] = &bit_7_c,
+    [0x7a] = &bit_7_d,
+    [0x7b] = &bit_7_e,
+    [0x7c] = &bit_7_h,
+    [0x7d] = &bit_7_l,
+    [0x7e] = &bit_7_hl,
+    [0x7f] = &bit_7_a,
 };
 
 static void cb(gb_t *cpu) {
