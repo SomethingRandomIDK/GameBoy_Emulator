@@ -1882,6 +1882,52 @@ static void swap_a (gb_t *cpu) {
     swap(&cpu->regs.a, cpu);
 }
 
+// Shift right with 0 bit going into the carry flag, and the new 7 bit being set
+// to 0
+
+static void srl (uint8_t *val, gb_t *cpu) {
+    setC(!!(*val & 0x01));
+    *val >>= 1;
+    setH(false);
+    setN(false);
+    setZ(*val == 0);
+    cpu->regs.pc++;
+}
+
+static void srl_b(gb_t *cpu) {
+    srl(&cpu->regs.b, cpu);
+}
+
+static void srl_c(gb_t *cpu) {
+    srl(&cpu->regs.c, cpu);
+}
+
+static void srl_d(gb_t *cpu) {
+    srl(&cpu->regs.d, cpu);
+}
+
+static void srl_e(gb_t *cpu) {
+    srl(&cpu->regs.e, cpu);
+}
+
+static void srl_h(gb_t *cpu) {
+    srl(&cpu->regs.h, cpu);
+}
+
+static void srl_l(gb_t *cpu) {
+    srl(&cpu->regs.l, cpu);
+}
+
+static void srl_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    srl(&val, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void srl_a(gb_t *cpu) {
+    srl(&cpu->regs.a, cpu);
+}
+
 static inst cb_instr[0x100] = {
     //0x00 - 0x0f
     [0x00] = &rlc_b,
@@ -1946,6 +1992,14 @@ static inst cb_instr[0x100] = {
     [0x35] = &swap_l,
     [0x36] = &swap_hl,
     [0x37] = &swap_a,
+    [0x38] = &srl_b,
+    [0x39] = &srl_c,
+    [0x3a] = &srl_d,
+    [0x3b] = &srl_e,
+    [0x3c] = &srl_h,
+    [0x3d] = &srl_l,
+    [0x3e] = &srl_hl,
+    [0x3f] = &srl_a,
 };
 
 static void cb(gb_t *cpu) {
