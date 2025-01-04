@@ -1076,7 +1076,7 @@ static void inc_l(gb_t *cpu) {
 static void inc_addr_hl(gb_t *cpu) {
     uint8_t val = busRead8(regHL());
     inc(&val, cpu);
-    setHL(val);
+    busWrite8(regHL(), val);
 }
 
 static void inc_a(gb_t *cpu) {
@@ -1121,7 +1121,7 @@ static void dec_l(gb_t *cpu) {
 static void dec_addr_hl(gb_t *cpu) {
     uint8_t val = busRead8(regHL());
     dec(&val, cpu);
-    setHL(val);
+    busWrite8(regHL(), val);
 }
 
 static void dec_a(gb_t *cpu) {
@@ -1599,7 +1599,7 @@ static void rlc_l (gb_t *cpu) {
 static void rlc_hl (gb_t *cpu) {
     uint8_t val = busRead8(regHL());
     rlc(&val, cpu);
-    setHL(val);
+    busWrite8(regHL(), val);
 }
 
 static void rlc_a (gb_t *cpu) {
@@ -1644,7 +1644,7 @@ static void rrc_l (gb_t *cpu) {
 static void rrc_hl (gb_t *cpu) {
     uint8_t val = busRead8(regHL());
     rrc(&val, cpu);
-    setHL(val);
+    busWrite8(regHL(), val);
 }
 
 static void rrc_a (gb_t *cpu) {
@@ -1691,7 +1691,7 @@ static void rl_l (gb_t *cpu) {
 static void rl_hl (gb_t *cpu) {
     uint8_t val = busRead8(regHL());
     rl(&val, cpu);
-    setHL(val);
+    busWrite8(regHL(), val);
 }
 
 static void rl_a (gb_t *cpu) {
@@ -1738,11 +1738,57 @@ static void rr_l (gb_t *cpu) {
 static void rr_hl (gb_t *cpu) {
     uint8_t val = busRead8(regHL());
     rr(&val, cpu);
-    setHL(val);
+    busWrite8(regHL(), val);
 }
 
 static void rr_a (gb_t *cpu) {
     rr(&cpu->regs.a, cpu);
+}
+
+// Shift left with 7 bit going into the carry flag, and the new 0 bit being set
+// to 0
+
+static void sla (uint8_t *val, gb_t *cpu) {
+    setC(!!(*val & 0x80));
+    *val <<= 1;
+    setH(false);
+    setN(false);
+    setZ(*val == 0);
+    cpu->regs.pc++;
+}
+
+static void sla_b (gb_t *cpu) {
+    sla(&cpu->regs.b, cpu);
+}
+
+static void sla_c (gb_t *cpu) {
+    sla(&cpu->regs.c, cpu);
+}
+
+static void sla_d (gb_t *cpu) {
+    sla(&cpu->regs.d, cpu);
+}
+
+static void sla_e (gb_t *cpu) {
+    sla(&cpu->regs.e, cpu);
+}
+
+static void sla_h (gb_t *cpu) {
+    sla(&cpu->regs.h, cpu);
+}
+
+static void sla_l (gb_t *cpu) {
+    sla(&cpu->regs.l, cpu);
+}
+
+static void sla_hl (gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    sla(&val, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void sla_a (gb_t *cpu) {
+    sla(&cpu->regs.a, cpu);
 }
 
 static inst cb_instr[0x100] = {
@@ -1764,7 +1810,7 @@ static inst cb_instr[0x100] = {
     [0x0e] = &rrc_hl,
     [0x0f] = &rrc_a,
 
-    //0x00 - 0x0f
+    //0x10 - 0x1f
     [0x10] = &rl_b,
     [0x11] = &rl_c,
     [0x12] = &rl_d,
@@ -1781,6 +1827,16 @@ static inst cb_instr[0x100] = {
     [0x1d] = &rr_l,
     [0x1e] = &rr_hl,
     [0x1f] = &rr_a,
+
+    //0x20 - 0x2f
+    [0x20] = &sla_b,
+    [0x21] = &sla_c,
+    [0x22] = &sla_d,
+    [0x23] = &sla_e,
+    [0x24] = &sla_h,
+    [0x25] = &sla_l,
+    [0x26] = &sla_hl,
+    [0x27] = &sla_a,
 };
 
 static void cb(gb_t *cpu) {
