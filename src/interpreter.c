@@ -1837,6 +1837,51 @@ static void sra_a (gb_t *cpu) {
     sra(&cpu->regs.a, cpu);
 }
 
+// Swap the lower and upper nibbles of a number
+
+static void swap (uint8_t *val, gb_t *cpu) {
+    *val = ((*val & 0xf0) >> 4) | ((*val & 0xf) << 4);
+    setZ(*val == 0);
+    setC(false);
+    setN(false);
+    setH(false);
+    cpu->regs.pc++;
+}
+
+static void swap_b (gb_t *cpu) {
+    swap(&cpu->regs.b, cpu);
+}
+
+static void swap_c (gb_t *cpu) {
+    swap(&cpu->regs.c, cpu);
+}
+
+static void swap_d (gb_t *cpu) {
+    swap(&cpu->regs.d, cpu);
+}
+
+static void swap_e (gb_t *cpu) {
+    swap(&cpu->regs.e, cpu);
+}
+
+static void swap_h (gb_t *cpu) {
+    swap(&cpu->regs.h, cpu);
+}
+
+static void swap_l (gb_t *cpu) {
+    swap(&cpu->regs.l, cpu);
+}
+
+static void swap_hl (gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    swap(&val, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void swap_a (gb_t *cpu) {
+    swap(&cpu->regs.a, cpu);
+}
+
 static inst cb_instr[0x100] = {
     //0x00 - 0x0f
     [0x00] = &rlc_b,
@@ -1891,6 +1936,16 @@ static inst cb_instr[0x100] = {
     [0x2d] = &sra_l,
     [0x2e] = &sra_hl,
     [0x2f] = &sra_a,
+
+    //0x30 - 0x3f
+    [0x30] = &swap_b,
+    [0x31] = &swap_c,
+    [0x32] = &swap_d,
+    [0x33] = &swap_e,
+    [0x34] = &swap_h,
+    [0x35] = &swap_l,
+    [0x36] = &swap_hl,
+    [0x37] = &swap_a,
 };
 
 static void cb(gb_t *cpu) {
