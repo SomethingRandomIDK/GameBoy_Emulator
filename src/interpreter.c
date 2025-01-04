@@ -1651,7 +1651,55 @@ static void rrc_a (gb_t *cpu) {
     rrc(&cpu->regs.a, cpu);
 }
 
+// Shift left by 1, through the carry flag, old bit 7 goes into the carry flag
+// old carry flag becomes new bit 0
+
+static void rl (uint8_t *val, gb_t *cpu) {
+    bool tempC = flagC();
+    setC(!!(*val & 0x80));
+    *val = (*val << 1) | tempC;
+    setH(false);
+    setN(false);
+    setZ(*val == 0);
+    cpu->regs.pc++;
+}
+
+static void rl_b (gb_t *cpu) {
+    rl(&cpu->regs.b, cpu);
+}
+
+static void rl_c (gb_t *cpu) {
+    rl(&cpu->regs.c, cpu);
+}
+
+static void rl_d (gb_t *cpu) {
+    rl(&cpu->regs.d, cpu);
+}
+
+static void rl_e (gb_t *cpu) {
+    rl(&cpu->regs.e, cpu);
+}
+
+static void rl_h (gb_t *cpu) {
+    rl(&cpu->regs.h, cpu);
+}
+
+static void rl_l (gb_t *cpu) {
+    rl(&cpu->regs.l, cpu);
+}
+
+static void rl_hl (gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    rl(&val, cpu);
+    setHL(val);
+}
+
+static void rl_a (gb_t *cpu) {
+    rl(&cpu->regs.a, cpu);
+}
+
 static inst cb_instr[0x100] = {
+    //0x00 - 0x0f
     [0x00] = &rlc_b,
     [0x01] = &rlc_c,
     [0x02] = &rlc_d,
@@ -1668,6 +1716,16 @@ static inst cb_instr[0x100] = {
     [0x0d] = &rrc_l,
     [0x0e] = &rrc_hl,
     [0x0f] = &rrc_a,
+
+    //0x00 - 0x0f
+    [0x10] = &rl_b,
+    [0x11] = &rl_c,
+    [0x12] = &rl_d,
+    [0x13] = &rl_e,
+    [0x14] = &rl_h,
+    [0x15] = &rl_l,
+    [0x16] = &rl_hl,
+    [0x17] = &rl_a,
 };
 
 static void cb(gb_t *cpu) {
