@@ -1558,6 +1558,69 @@ static void rra(gb_t *cpu) {
     cpu->regs.pc++;
 }
 
+// CB INSTRUCTIONS
+
+// ROTATES AND SHIFTS
+
+static void rlc (uint8_t *val, gb_t *cpu) {
+    setC(!!(*val & 0x80));
+    *val = (*val << 1) | flagC();
+    setH(false);
+    setN(false);
+    setZ(*val == 0);
+    cpu->regs.pc++;
+}
+
+static void rlc_b (gb_t *cpu) {
+    rlc(&cpu->regs.b, cpu);
+}
+
+static void rlc_c (gb_t *cpu) {
+    rlc(&cpu->regs.c, cpu);
+}
+
+static void rlc_d (gb_t *cpu) {
+    rlc(&cpu->regs.d, cpu);
+}
+
+static void rlc_e (gb_t *cpu) {
+    rlc(&cpu->regs.e, cpu);
+}
+
+static void rlc_h (gb_t *cpu) {
+    rlc(&cpu->regs.h, cpu);
+}
+
+static void rlc_l (gb_t *cpu) {
+    rlc(&cpu->regs.l, cpu);
+}
+
+static void rlc_hl (gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    rlc(&val, cpu);
+    setHL(val);
+}
+
+static void rlc_a (gb_t *cpu) {
+    rlc(&cpu->regs.a, cpu);
+}
+
+static inst cb_instr[0x100] = {
+    [0x00] = &rlc_b,
+    [0x01] = &rlc_c,
+    [0x02] = &rlc_d,
+    [0x03] = &rlc_e,
+    [0x04] = &rlc_h,
+    [0x05] = &rlc_l,
+    [0x06] = &rlc_hl,
+    [0x07] = &rlc_a,
+};
+
+static void cb(gb_t *cpu) {
+    uint8_t op = busRead8(++cpu->regs.pc);
+    cb_instr[op](cpu);
+}
+
 static inst instructions[0x100] = {
     // 0x00 - 0x0f
     [0x00] = &nop,
@@ -1787,6 +1850,7 @@ static inst instructions[0x100] = {
     [0xc8] = &ret_z,
     [0xc9] = &ret,
     [0xca] = &jp_z_nn,
+    [0xcb] = &cb,
     [0xcc] = &call_z_nn,
     [0xcd] = &call_nn,
     [0xce] = &adc_a_n,
