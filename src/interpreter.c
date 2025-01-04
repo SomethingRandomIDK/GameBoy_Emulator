@@ -2480,6 +2480,284 @@ static void res_7_a(gb_t *cpu) {
     res(&cpu->regs.a, 7, cpu);
 }
 
+// Sets the bit to 1
+static void set(uint8_t *val, uint8_t bit, gb_t *cpu) {
+    *val |= (1 << bit);
+    cpu->regs.pc++;
+}
+
+static void set_0_b(gb_t *cpu) {
+    set(&cpu->regs.b, 0, cpu);
+}
+
+static void set_0_c(gb_t *cpu) {
+    set(&cpu->regs.c, 0, cpu);
+}
+
+static void set_0_d(gb_t *cpu) {
+    set(&cpu->regs.d, 0, cpu);
+}
+
+static void set_0_e(gb_t *cpu) {
+    set(&cpu->regs.e, 0, cpu);
+}
+
+static void set_0_h(gb_t *cpu) {
+    set(&cpu->regs.h, 0, cpu);
+}
+
+static void set_0_l(gb_t *cpu) {
+    set(&cpu->regs.l, 0, cpu);
+}
+
+static void set_0_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    set(&val, 0, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void set_0_a(gb_t *cpu) {
+    set(&cpu->regs.a, 0, cpu);
+}
+
+static void set_1_b(gb_t *cpu) {
+    set(&cpu->regs.b, 1, cpu);
+}
+
+static void set_1_c(gb_t *cpu) {
+    set(&cpu->regs.c, 1, cpu);
+}
+
+static void set_1_d(gb_t *cpu) {
+    set(&cpu->regs.d, 1, cpu);
+}
+
+static void set_1_e(gb_t *cpu) {
+    set(&cpu->regs.e, 1, cpu);
+}
+
+static void set_1_h(gb_t *cpu) {
+    set(&cpu->regs.h, 1, cpu);
+}
+
+static void set_1_l(gb_t *cpu) {
+    set(&cpu->regs.l, 1, cpu);
+}
+
+static void set_1_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    set(&val, 1, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void set_1_a(gb_t *cpu) {
+    set(&cpu->regs.a, 1, cpu);
+}
+
+static void set_2_b(gb_t *cpu) {
+    set(&cpu->regs.b, 2, cpu);
+}
+
+static void set_2_c(gb_t *cpu) {
+    set(&cpu->regs.c, 2, cpu);
+}
+
+static void set_2_d(gb_t *cpu) {
+    set(&cpu->regs.d, 2, cpu);
+}
+
+static void set_2_e(gb_t *cpu) {
+    set(&cpu->regs.e, 2, cpu);
+}
+
+static void set_2_h(gb_t *cpu) {
+    set(&cpu->regs.h, 2, cpu);
+}
+
+static void set_2_l(gb_t *cpu) {
+    set(&cpu->regs.l, 2, cpu);
+}
+
+static void set_2_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    set(&val, 2, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void set_2_a(gb_t *cpu) {
+    set(&cpu->regs.a, 2, cpu);
+}
+
+static void set_3_b(gb_t *cpu) {
+    set(&cpu->regs.b, 3, cpu);
+}
+
+static void set_3_c(gb_t *cpu) {
+    set(&cpu->regs.c, 3, cpu);
+}
+
+static void set_3_d(gb_t *cpu) {
+    set(&cpu->regs.d, 3, cpu);
+}
+
+static void set_3_e(gb_t *cpu) {
+    set(&cpu->regs.e, 3, cpu);
+}
+
+static void set_3_h(gb_t *cpu) {
+    set(&cpu->regs.h, 3, cpu);
+}
+
+static void set_3_l(gb_t *cpu) {
+    set(&cpu->regs.l, 3, cpu);
+}
+
+static void set_3_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    set(&val, 3, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void set_3_a(gb_t *cpu) {
+    set(&cpu->regs.a, 3, cpu);
+}
+
+static void set_4_b(gb_t *cpu) {
+    set(&cpu->regs.b, 4, cpu);
+}
+
+static void set_4_c(gb_t *cpu) {
+    set(&cpu->regs.c, 4, cpu);
+}
+
+static void set_4_d(gb_t *cpu) {
+    set(&cpu->regs.d, 4, cpu);
+}
+
+static void set_4_e(gb_t *cpu) {
+    set(&cpu->regs.e, 4, cpu);
+}
+
+static void set_4_h(gb_t *cpu) {
+    set(&cpu->regs.h, 4, cpu);
+}
+
+static void set_4_l(gb_t *cpu) {
+    set(&cpu->regs.l, 4, cpu);
+}
+
+static void set_4_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    set(&val, 4, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void set_4_a(gb_t *cpu) {
+    set(&cpu->regs.a, 4, cpu);
+}
+
+static void set_5_b(gb_t *cpu) {
+    set(&cpu->regs.b, 5, cpu);
+}
+
+static void set_5_c(gb_t *cpu) {
+    set(&cpu->regs.c, 5, cpu);
+}
+
+static void set_5_d(gb_t *cpu) {
+    set(&cpu->regs.d, 5, cpu);
+}
+
+static void set_5_e(gb_t *cpu) {
+    set(&cpu->regs.e, 5, cpu);
+}
+
+static void set_5_h(gb_t *cpu) {
+    set(&cpu->regs.h, 5, cpu);
+}
+
+static void set_5_l(gb_t *cpu) {
+    set(&cpu->regs.l, 5, cpu);
+}
+
+static void set_5_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    set(&val, 5, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void set_5_a(gb_t *cpu) {
+    set(&cpu->regs.a, 5, cpu);
+}
+
+static void set_6_b(gb_t *cpu) {
+    set(&cpu->regs.b, 6, cpu);
+}
+
+static void set_6_c(gb_t *cpu) {
+    set(&cpu->regs.c, 6, cpu);
+}
+
+static void set_6_d(gb_t *cpu) {
+    set(&cpu->regs.d, 6, cpu);
+}
+
+static void set_6_e(gb_t *cpu) {
+    set(&cpu->regs.e, 6, cpu);
+}
+
+static void set_6_h(gb_t *cpu) {
+    set(&cpu->regs.h, 6, cpu);
+}
+
+static void set_6_l(gb_t *cpu) {
+    set(&cpu->regs.l, 6, cpu);
+}
+
+static void set_6_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    set(&val, 6, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void set_6_a(gb_t *cpu) {
+    set(&cpu->regs.a, 6, cpu);
+}
+
+static void set_7_b(gb_t *cpu) {
+    set(&cpu->regs.b, 7, cpu);
+}
+
+static void set_7_c(gb_t *cpu) {
+    set(&cpu->regs.c, 7, cpu);
+}
+
+static void set_7_d(gb_t *cpu) {
+    set(&cpu->regs.d, 7, cpu);
+}
+
+static void set_7_e(gb_t *cpu) {
+    set(&cpu->regs.e, 7, cpu);
+}
+
+static void set_7_h(gb_t *cpu) {
+    set(&cpu->regs.h, 7, cpu);
+}
+
+static void set_7_l(gb_t *cpu) {
+    set(&cpu->regs.l, 7, cpu);
+}
+
+static void set_7_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    set(&val, 7, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void set_7_a(gb_t *cpu) {
+    set(&cpu->regs.a, 7, cpu);
+}
+
 static inst cb_instr[0x100] = {
     //0x00 - 0x0f
     [0x00] = &rlc_b,
@@ -2696,6 +2974,78 @@ static inst cb_instr[0x100] = {
     [0xbd] = &res_7_l,
     [0xbe] = &res_7_hl,
     [0xbf] = &res_7_a,
+
+    //0xc0 - 0xcf
+    [0xc0] = &set_0_b,
+    [0xc1] = &set_0_c,
+    [0xc2] = &set_0_d,
+    [0xc3] = &set_0_e,
+    [0xc4] = &set_0_h,
+    [0xc5] = &set_0_l,
+    [0xc6] = &set_0_hl,
+    [0xc7] = &set_0_a,
+    [0xc8] = &set_1_b,
+    [0xc9] = &set_1_c,
+    [0xca] = &set_1_d,
+    [0xcb] = &set_1_e,
+    [0xcc] = &set_1_h,
+    [0xcd] = &set_1_l,
+    [0xce] = &set_1_hl,
+    [0xcf] = &set_1_a,
+
+    //0xd0 - 0xdf
+    [0xd0] = &set_2_b,
+    [0xd1] = &set_2_c,
+    [0xd2] = &set_2_d,
+    [0xd3] = &set_2_e,
+    [0xd4] = &set_2_h,
+    [0xd5] = &set_2_l,
+    [0xd6] = &set_2_hl,
+    [0xd7] = &set_2_a,
+    [0xd8] = &set_3_b,
+    [0xd9] = &set_3_c,
+    [0xda] = &set_3_d,
+    [0xdb] = &set_3_e,
+    [0xdc] = &set_3_h,
+    [0xdd] = &set_3_l,
+    [0xde] = &set_3_hl,
+    [0xdf] = &set_3_a,
+
+    //0xe0 - 0xef
+    [0xe0] = &set_4_b,
+    [0xe1] = &set_4_c,
+    [0xe2] = &set_4_d,
+    [0xe3] = &set_4_e,
+    [0xe4] = &set_4_h,
+    [0xe5] = &set_4_l,
+    [0xe6] = &set_4_hl,
+    [0xe7] = &set_4_a,
+    [0xe8] = &set_5_b,
+    [0xe9] = &set_5_c,
+    [0xea] = &set_5_d,
+    [0xeb] = &set_5_e,
+    [0xec] = &set_5_h,
+    [0xed] = &set_5_l,
+    [0xee] = &set_5_hl,
+    [0xef] = &set_5_a,
+
+    //0xf0 - 0xff
+    [0xf0] = &set_6_b,
+    [0xf1] = &set_6_c,
+    [0xf2] = &set_6_d,
+    [0xf3] = &set_6_e,
+    [0xf4] = &set_6_h,
+    [0xf5] = &set_6_l,
+    [0xf6] = &set_6_hl,
+    [0xf7] = &set_6_a,
+    [0xf8] = &set_7_b,
+    [0xf9] = &set_7_c,
+    [0xfa] = &set_7_d,
+    [0xfb] = &set_7_e,
+    [0xfc] = &set_7_h,
+    [0xfd] = &set_7_l,
+    [0xfe] = &set_7_hl,
+    [0xff] = &set_7_a,
 };
 
 static void cb(gb_t *cpu) {
