@@ -2202,6 +2202,284 @@ static void bit_7_a(gb_t *cpu) {
     bit(cpu->regs.a, 7, cpu);
 }
 
+// Sets the bit to 0
+static void res(uint8_t *val, uint8_t bit, gb_t *cpu) {
+    *val &= ~(1 << bit);
+    cpu->regs.pc++;
+}
+
+static void res_0_b(gb_t *cpu) {
+    res(&cpu->regs.b, 0, cpu);
+}
+
+static void res_0_c(gb_t *cpu) {
+    res(&cpu->regs.c, 0, cpu);
+}
+
+static void res_0_d(gb_t *cpu) {
+    res(&cpu->regs.d, 0, cpu);
+}
+
+static void res_0_e(gb_t *cpu) {
+    res(&cpu->regs.e, 0, cpu);
+}
+
+static void res_0_h(gb_t *cpu) {
+    res(&cpu->regs.h, 0, cpu);
+}
+
+static void res_0_l(gb_t *cpu) {
+    res(&cpu->regs.l, 0, cpu);
+}
+
+static void res_0_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    res(&val, 0, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void res_0_a(gb_t *cpu) {
+    res(&cpu->regs.a, 0, cpu);
+}
+
+static void res_1_b(gb_t *cpu) {
+    res(&cpu->regs.b, 1, cpu);
+}
+
+static void res_1_c(gb_t *cpu) {
+    res(&cpu->regs.c, 1, cpu);
+}
+
+static void res_1_d(gb_t *cpu) {
+    res(&cpu->regs.d, 1, cpu);
+}
+
+static void res_1_e(gb_t *cpu) {
+    res(&cpu->regs.e, 1, cpu);
+}
+
+static void res_1_h(gb_t *cpu) {
+    res(&cpu->regs.h, 1, cpu);
+}
+
+static void res_1_l(gb_t *cpu) {
+    res(&cpu->regs.l, 1, cpu);
+}
+
+static void res_1_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    res(&val, 1, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void res_1_a(gb_t *cpu) {
+    res(&cpu->regs.a, 1, cpu);
+}
+
+static void res_2_b(gb_t *cpu) {
+    res(&cpu->regs.b, 2, cpu);
+}
+
+static void res_2_c(gb_t *cpu) {
+    res(&cpu->regs.c, 2, cpu);
+}
+
+static void res_2_d(gb_t *cpu) {
+    res(&cpu->regs.d, 2, cpu);
+}
+
+static void res_2_e(gb_t *cpu) {
+    res(&cpu->regs.e, 2, cpu);
+}
+
+static void res_2_h(gb_t *cpu) {
+    res(&cpu->regs.h, 2, cpu);
+}
+
+static void res_2_l(gb_t *cpu) {
+    res(&cpu->regs.l, 2, cpu);
+}
+
+static void res_2_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    res(&val, 2, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void res_2_a(gb_t *cpu) {
+    res(&cpu->regs.a, 2, cpu);
+}
+
+static void res_3_b(gb_t *cpu) {
+    res(&cpu->regs.b, 3, cpu);
+}
+
+static void res_3_c(gb_t *cpu) {
+    res(&cpu->regs.c, 3, cpu);
+}
+
+static void res_3_d(gb_t *cpu) {
+    res(&cpu->regs.d, 3, cpu);
+}
+
+static void res_3_e(gb_t *cpu) {
+    res(&cpu->regs.e, 3, cpu);
+}
+
+static void res_3_h(gb_t *cpu) {
+    res(&cpu->regs.h, 3, cpu);
+}
+
+static void res_3_l(gb_t *cpu) {
+    res(&cpu->regs.l, 3, cpu);
+}
+
+static void res_3_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    res(&val, 3, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void res_3_a(gb_t *cpu) {
+    res(&cpu->regs.a, 3, cpu);
+}
+
+static void res_4_b(gb_t *cpu) {
+    res(&cpu->regs.b, 4, cpu);
+}
+
+static void res_4_c(gb_t *cpu) {
+    res(&cpu->regs.c, 4, cpu);
+}
+
+static void res_4_d(gb_t *cpu) {
+    res(&cpu->regs.d, 4, cpu);
+}
+
+static void res_4_e(gb_t *cpu) {
+    res(&cpu->regs.e, 4, cpu);
+}
+
+static void res_4_h(gb_t *cpu) {
+    res(&cpu->regs.h, 4, cpu);
+}
+
+static void res_4_l(gb_t *cpu) {
+    res(&cpu->regs.l, 4, cpu);
+}
+
+static void res_4_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    res(&val, 4, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void res_4_a(gb_t *cpu) {
+    res(&cpu->regs.a, 4, cpu);
+}
+
+static void res_5_b(gb_t *cpu) {
+    res(&cpu->regs.b, 5, cpu);
+}
+
+static void res_5_c(gb_t *cpu) {
+    res(&cpu->regs.c, 5, cpu);
+}
+
+static void res_5_d(gb_t *cpu) {
+    res(&cpu->regs.d, 5, cpu);
+}
+
+static void res_5_e(gb_t *cpu) {
+    res(&cpu->regs.e, 5, cpu);
+}
+
+static void res_5_h(gb_t *cpu) {
+    res(&cpu->regs.h, 5, cpu);
+}
+
+static void res_5_l(gb_t *cpu) {
+    res(&cpu->regs.l, 5, cpu);
+}
+
+static void res_5_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    res(&val, 5, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void res_5_a(gb_t *cpu) {
+    res(&cpu->regs.a, 5, cpu);
+}
+
+static void res_6_b(gb_t *cpu) {
+    res(&cpu->regs.b, 6, cpu);
+}
+
+static void res_6_c(gb_t *cpu) {
+    res(&cpu->regs.c, 6, cpu);
+}
+
+static void res_6_d(gb_t *cpu) {
+    res(&cpu->regs.d, 6, cpu);
+}
+
+static void res_6_e(gb_t *cpu) {
+    res(&cpu->regs.e, 6, cpu);
+}
+
+static void res_6_h(gb_t *cpu) {
+    res(&cpu->regs.h, 6, cpu);
+}
+
+static void res_6_l(gb_t *cpu) {
+    res(&cpu->regs.l, 6, cpu);
+}
+
+static void res_6_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    res(&val, 6, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void res_6_a(gb_t *cpu) {
+    res(&cpu->regs.a, 6, cpu);
+}
+
+static void res_7_b(gb_t *cpu) {
+    res(&cpu->regs.b, 7, cpu);
+}
+
+static void res_7_c(gb_t *cpu) {
+    res(&cpu->regs.c, 7, cpu);
+}
+
+static void res_7_d(gb_t *cpu) {
+    res(&cpu->regs.d, 7, cpu);
+}
+
+static void res_7_e(gb_t *cpu) {
+    res(&cpu->regs.e, 7, cpu);
+}
+
+static void res_7_h(gb_t *cpu) {
+    res(&cpu->regs.h, 7, cpu);
+}
+
+static void res_7_l(gb_t *cpu) {
+    res(&cpu->regs.l, 7, cpu);
+}
+
+static void res_7_hl(gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    res(&val, 7, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void res_7_a(gb_t *cpu) {
+    res(&cpu->regs.a, 7, cpu);
+}
+
 static inst cb_instr[0x100] = {
     //0x00 - 0x0f
     [0x00] = &rlc_b,
@@ -2346,6 +2624,78 @@ static inst cb_instr[0x100] = {
     [0x7d] = &bit_7_l,
     [0x7e] = &bit_7_hl,
     [0x7f] = &bit_7_a,
+
+    //0x80 - 0x8f
+    [0x80] = &res_0_b,
+    [0x81] = &res_0_c,
+    [0x82] = &res_0_d,
+    [0x83] = &res_0_e,
+    [0x84] = &res_0_h,
+    [0x85] = &res_0_l,
+    [0x86] = &res_0_hl,
+    [0x87] = &res_0_a,
+    [0x88] = &res_1_b,
+    [0x89] = &res_1_c,
+    [0x8a] = &res_1_d,
+    [0x8b] = &res_1_e,
+    [0x8c] = &res_1_h,
+    [0x8d] = &res_1_l,
+    [0x8e] = &res_1_hl,
+    [0x8f] = &res_1_a,
+
+    //0x90 - 0x9f
+    [0x90] = &res_2_b,
+    [0x91] = &res_2_c,
+    [0x92] = &res_2_d,
+    [0x93] = &res_2_e,
+    [0x94] = &res_2_h,
+    [0x95] = &res_2_l,
+    [0x96] = &res_2_hl,
+    [0x97] = &res_2_a,
+    [0x98] = &res_3_b,
+    [0x99] = &res_3_c,
+    [0x9a] = &res_3_d,
+    [0x9b] = &res_3_e,
+    [0x9c] = &res_3_h,
+    [0x9d] = &res_3_l,
+    [0x9e] = &res_3_hl,
+    [0x9f] = &res_3_a,
+
+    //0xa0 - 0xaf
+    [0xa0] = &res_4_b,
+    [0xa1] = &res_4_c,
+    [0xa2] = &res_4_d,
+    [0xa3] = &res_4_e,
+    [0xa4] = &res_4_h,
+    [0xa5] = &res_4_l,
+    [0xa6] = &res_4_hl,
+    [0xa7] = &res_4_a,
+    [0xa8] = &res_5_b,
+    [0xa9] = &res_5_c,
+    [0xaa] = &res_5_d,
+    [0xab] = &res_5_e,
+    [0xac] = &res_5_h,
+    [0xad] = &res_5_l,
+    [0xae] = &res_5_hl,
+    [0xaf] = &res_5_a,
+
+    //0xb0 - 0xbf
+    [0xb0] = &res_6_b,
+    [0xb1] = &res_6_c,
+    [0xb2] = &res_6_d,
+    [0xb3] = &res_6_e,
+    [0xb4] = &res_6_h,
+    [0xb5] = &res_6_l,
+    [0xb6] = &res_6_hl,
+    [0xb7] = &res_6_a,
+    [0xb8] = &res_7_b,
+    [0xb9] = &res_7_c,
+    [0xba] = &res_7_d,
+    [0xbb] = &res_7_e,
+    [0xbc] = &res_7_h,
+    [0xbd] = &res_7_l,
+    [0xbe] = &res_7_hl,
+    [0xbf] = &res_7_a,
 };
 
 static void cb(gb_t *cpu) {
