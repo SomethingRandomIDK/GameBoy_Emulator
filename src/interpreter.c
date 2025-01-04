@@ -1791,6 +1791,52 @@ static void sla_a (gb_t *cpu) {
     sla(&cpu->regs.a, cpu);
 }
 
+// Shift right with 0 bit going into the carry flag, and the new 7 bit being
+// unchanged
+
+static void sra (uint8_t *val, gb_t *cpu) {
+    setC(!!(*val & 0x1));
+    *val = (*val >> 1) | (*val & 0x80);
+    setH(false);
+    setN(false);
+    setZ(*val == 0);
+    cpu->regs.pc++;
+}
+
+static void sra_b (gb_t *cpu) {
+    sra(&cpu->regs.b, cpu);
+}
+
+static void sra_c (gb_t *cpu) {
+    sra(&cpu->regs.c, cpu);
+}
+
+static void sra_d (gb_t *cpu) {
+    sra(&cpu->regs.d, cpu);
+}
+
+static void sra_e (gb_t *cpu) {
+    sra(&cpu->regs.e, cpu);
+}
+
+static void sra_h (gb_t *cpu) {
+    sra(&cpu->regs.h, cpu);
+}
+
+static void sra_l (gb_t *cpu) {
+    sra(&cpu->regs.l, cpu);
+}
+
+static void sra_hl (gb_t *cpu) {
+    uint8_t val = busRead8(regHL());
+    sra(&val, cpu);
+    busWrite8(regHL(), val);
+}
+
+static void sra_a (gb_t *cpu) {
+    sra(&cpu->regs.a, cpu);
+}
+
 static inst cb_instr[0x100] = {
     //0x00 - 0x0f
     [0x00] = &rlc_b,
@@ -1837,6 +1883,14 @@ static inst cb_instr[0x100] = {
     [0x25] = &sla_l,
     [0x26] = &sla_hl,
     [0x27] = &sla_a,
+    [0x28] = &sra_b,
+    [0x29] = &sra_c,
+    [0x2a] = &sra_d,
+    [0x2b] = &sra_e,
+    [0x2c] = &sra_h,
+    [0x2d] = &sra_l,
+    [0x2e] = &sra_hl,
+    [0x2f] = &sra_a,
 };
 
 static void cb(gb_t *cpu) {
