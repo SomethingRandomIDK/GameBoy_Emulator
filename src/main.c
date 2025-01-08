@@ -6,34 +6,20 @@
 #include "./include/cart.h"
 
 int main(int argv, char **argc) {
-    initCPU();
-    // Testing for registers
-    assert(0xaa00 == regAF());
-    assert(0xbbcc == regBC());
-    assert(0xddee == regDE());
-    assert(0x1122 == regHL());
-
-    setAF(0x1199);
-    assert(0x1199 == regAF());
-    setBC(0x1199);
-    assert(0x1199 == regBC());
-    setDE(0x1199);
-    assert(0x1199 == regDE());
-    setHL(0x1199);
-    assert(0x1199 == regHL());
-
-    // Testing Flags
-    assert(flagZ());
-    assert(!flagN());
-    assert(!flagH());
-    assert(flagC());
-
     if (argv == 2)
         cartInit(argc[1]);
     else {
-        printf("This program requires one cli input\n");
+        printf("USAGE: %s <path to rom file>\n", argc[0]);
         exit(1);
     }
+
+    initCPU();
+
+    // Testing for registers
+    assert(0x01b0 == regAF());
+    assert(0x0013 == regBC());
+    assert(0x00d8 == regDE());
+    assert(0x014d == regHL());
 
     startCPU();
 

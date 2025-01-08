@@ -126,14 +126,11 @@ void hramWrite(uint16_t addr, uint8_t val){
 
 void initCPU() {
     bootRom();
-    gbcpu.regs.a = 0xaa;
-    gbcpu.regs.b = 0xbb;
-    gbcpu.regs.c = 0xcc;
-    gbcpu.regs.d = 0xdd;
-    gbcpu.regs.e = 0xee;
-    gbcpu.regs.h = 0x11;
-    gbcpu.regs.l = 0x22;
-    gbcpu.regs.f = 0x00;
+    gbcpu.regs.a = 0x01;
+    setBC(0x0013);
+    setDE(0x00d8);
+    setHL(0x014d);
+    gbcpu.regs.f = 0xb0;
     gbcpu.regs.sp = 0xfffe;
     gbcpu.regs.pc = 0x100;
 }

@@ -2,6 +2,12 @@
 #include "./include/bus.h"
 #include "./include/cpu.h"
 
+bool booting = true;
+
+// Copy a version of the gameboy boot rom here
+static uint8_t bootRom[0x100] = {
+};
+
 uint8_t busRead8(uint16_t addr) {
     if (addr < 0x8000) {
         // Read from cart

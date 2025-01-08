@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+extern bool booting;
+
 uint8_t busRead8(uint16_t addr);
 void busWrite8(uint16_t addr, uint8_t val);
 
