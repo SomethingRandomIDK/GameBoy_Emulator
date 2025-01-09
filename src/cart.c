@@ -1044,9 +1044,12 @@ void cartInit(char *file) {
 
     displayInfo();
     cartTypeSelector();
+}
 
-    // Need to move these to the exit function When made
-    // free(rom.cartridge);
-    // free(rom.filename);
+void freeRomResources() {
+    free(rom.cartridge);
+    free(rom.filename);
+    if(rom.ramAvail)
+        free(rom.ram);
 }
 

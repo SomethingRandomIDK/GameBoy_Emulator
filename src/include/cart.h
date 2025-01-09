@@ -86,5 +86,7 @@ void cartInit(char *file);
 
 void updateRtcRegs();
 
+void freeRomResources();
+
 #endif
 
