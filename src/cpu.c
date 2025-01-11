@@ -133,6 +133,7 @@ void initCPU() {
     gbcpu.regs.f = 0xb0;
     gbcpu.regs.sp = 0xfffe;
     gbcpu.regs.pc = 0x100;
+    gbcpu.interrupts = false;
 }
 
 void startCPU() {

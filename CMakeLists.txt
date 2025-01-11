@@ -15,6 +15,7 @@ add_executable(gbemu
     src/cpu.c
     src/cart.c
     src/bus.c
+    src/interrupt.c
     src/interpreter.c
     src/logging/log.c
 )
