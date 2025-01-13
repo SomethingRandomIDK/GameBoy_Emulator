@@ -5,12 +5,16 @@
 #include "./include/interpreter.h"
 #include "./include/bus.h"
 #include "./include/cpu.h"
+#include "./include/timer.h"
 
 typedef void (*inst)(gb_t *);
+
+static uint32_t numCycles = 0;
 
 // NOP
 
 static void nop(gb_t *cpu) {
+    numCycles = 4;
     cpu->regs.pc ++;
 }
 
@@ -19,7 +23,9 @@ static void nop(gb_t *cpu) {
 // Immediate 8 bits to register
 
 static void ld_reg_n(uint8_t *val, gb_t *cpu) {
+    incAllTimers(4);
     *val = busRead8(++cpu->regs.pc);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
@@ -52,435 +58,556 @@ static void ld_l_n(gb_t *cpu) {
 }
 
 static void ld_hl_n(gb_t *cpu) {
+    incAllTimers(8);
     busWrite8(regHL(), busRead8(++cpu->regs.pc));
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 // Register to Register
 
 static void ld_b_b(gb_t *cpu) {
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_b_c(gb_t *cpu) {
     cpu->regs.b = cpu->regs.c;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_b_d(gb_t *cpu) {
     cpu->regs.b = cpu->regs.d;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_b_e(gb_t *cpu) {
     cpu->regs.b = cpu->regs.e;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_b_h(gb_t *cpu) {
     cpu->regs.b = cpu->regs.h;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_b_l(gb_t *cpu) {
     cpu->regs.b = cpu->regs.l;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_b_hl(gb_t *cpu) {
+    incAllTimers(4);
     cpu->regs.b = busRead8(regHL());
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_b_a(gb_t *cpu) {
     cpu->regs.b = cpu->regs.a;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_c_b(gb_t *cpu) {
     cpu->regs.c = cpu->regs.b;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_c_c(gb_t *cpu) {
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_c_d(gb_t *cpu) {
     cpu->regs.c = cpu->regs.d;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_c_e(gb_t *cpu) {
     cpu->regs.c = cpu->regs.e;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_c_h(gb_t *cpu) {
     cpu->regs.c = cpu->regs.h;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_c_l(gb_t *cpu) {
     cpu->regs.c = cpu->regs.l;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_c_hl(gb_t *cpu) {
+    incAllTimers(4);
     cpu->regs.c = busRead8(regHL());
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_c_a(gb_t *cpu) {
     cpu->regs.c = cpu->regs.a;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_d_b(gb_t *cpu) {
     cpu->regs.d = cpu->regs.b;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_d_c(gb_t *cpu) {
     cpu->regs.d = cpu->regs.c;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_d_d(gb_t *cpu) {
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_d_e(gb_t *cpu) {
     cpu->regs.d = cpu->regs.e;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_d_h(gb_t *cpu) {
     cpu->regs.d = cpu->regs.h;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_d_l(gb_t *cpu) {
     cpu->regs.d = cpu->regs.l;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_d_hl(gb_t *cpu) {
+    incAllTimers(4);
     cpu->regs.d = busRead8(regHL());
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_d_a(gb_t *cpu) {
     cpu->regs.d = cpu->regs.a;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_e_b(gb_t *cpu) {
     cpu->regs.e = cpu->regs.b;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_e_c(gb_t *cpu) {
     cpu->regs.e = cpu->regs.c;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_e_d(gb_t *cpu) {
     cpu->regs.e = cpu->regs.d;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_e_e(gb_t *cpu) {
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_e_h(gb_t *cpu) {
     cpu->regs.e = cpu->regs.h;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_e_l(gb_t *cpu) {
     cpu->regs.e = cpu->regs.l;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_e_hl(gb_t *cpu) {
+    incAllTimers(4);
     cpu->regs.e = busRead8(regHL());
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_e_a(gb_t *cpu) {
     cpu->regs.e = cpu->regs.a;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_h_b(gb_t *cpu) {
     cpu->regs.h = cpu->regs.b;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_h_c(gb_t *cpu) {
     cpu->regs.h = cpu->regs.c;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_h_d(gb_t *cpu) {
     cpu->regs.h = cpu->regs.d;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_h_e(gb_t *cpu) {
     cpu->regs.h = cpu->regs.e;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_h_h(gb_t *cpu) {
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_h_l(gb_t *cpu) {
     cpu->regs.h = cpu->regs.l;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_h_hl(gb_t *cpu) {
+    incAllTimers(4);
     cpu->regs.h = busRead8(regHL());
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_h_a(gb_t *cpu) {
     cpu->regs.h = cpu->regs.a;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_l_b(gb_t *cpu) {
     cpu->regs.l = cpu->regs.b;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_l_c(gb_t *cpu) {
     cpu->regs.l = cpu->regs.c;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_l_d(gb_t *cpu) {
     cpu->regs.l = cpu->regs.d;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_l_e(gb_t *cpu) {
     cpu->regs.l = cpu->regs.e;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_l_h(gb_t *cpu) {
     cpu->regs.l = cpu->regs.h;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_l_l(gb_t *cpu) {
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_l_hl(gb_t *cpu) {
+    incAllTimers(4);
     cpu->regs.l = busRead8(regHL());
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_l_a(gb_t *cpu) {
     cpu->regs.l = cpu->regs.a;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_hl_b(gb_t *cpu) {
+    incAllTimers(4);
     busWrite8(regHL(), cpu->regs.b);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_hl_c(gb_t *cpu) {
+    incAllTimers(4);
     busWrite8(regHL(), cpu->regs.c);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_hl_d(gb_t *cpu) {
+    incAllTimers(4);
     busWrite8(regHL(), cpu->regs.d);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_hl_e(gb_t *cpu) {
+    incAllTimers(4);
     busWrite8(regHL(), cpu->regs.e);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_hl_h(gb_t *cpu) {
+    incAllTimers(4);
     busWrite8(regHL(), cpu->regs.h);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_hl_l(gb_t *cpu) {
+    incAllTimers(4);
     busWrite8(regHL(), cpu->regs.l);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_hl_a(gb_t *cpu) {
+    incAllTimers(4);
     busWrite8(regHL(), cpu->regs.a);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_a_b(gb_t *cpu) {
     cpu->regs.a = cpu->regs.b;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_a_c(gb_t *cpu) {
     cpu->regs.a = cpu->regs.c;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_a_d(gb_t *cpu) {
     cpu->regs.a = cpu->regs.d;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_a_e(gb_t *cpu) {
     cpu->regs.a = cpu->regs.e;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_a_h(gb_t *cpu) {
     cpu->regs.a = cpu->regs.h;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_a_l(gb_t *cpu) {
     cpu->regs.a = cpu->regs.l;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_a_hl(gb_t *cpu) {
+    incAllTimers(4);
     cpu->regs.a = busRead8(regHL());
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_a_a(gb_t *cpu) {
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 // Load value into A
 
 static void ld_a_bc(gb_t *cpu) {
+    incAllTimers(4);
     cpu->regs.a = busRead8(regBC());
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_a_de(gb_t *cpu) {
+    incAllTimers(4);
     cpu->regs.a = busRead8(regDE());
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_a_nn(gb_t *cpu) {
+    incAllTimers(8);
     uint16_t addr = busRead16(++cpu->regs.pc);
     cpu->regs.pc +=2;
+    incAllTimers(4);
     cpu->regs.a = busRead8(addr);
+    numCycles = 4;
 }
 
 static void ld_a_hld(gb_t *cpu) {
+    incAllTimers(4);
     cpu->regs.a = busRead8(regHL());
     setHL(regHL() - 1);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_a_hli(gb_t *cpu) {
+    incAllTimers(4);
     cpu->regs.a = busRead8(regHL());
     setHL(regHL() + 1);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 // This saves C + 0xff00 into A instead of saving C into A
 static void ld_a_addr_c(gb_t *cpu) {
+    incAllTimers(4);
     uint16_t addr = 0xff00 | cpu->regs.c;
     cpu->regs.a = busRead8(addr);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 // This saves n + 0xff00 into A instead of saving n into A
 static void ldh_a_n(gb_t *cpu) {
+    incAllTimers(4);
     uint16_t addr = 0xff00 | busRead8(++cpu->regs.pc);
+    incAllTimers(4);
     cpu->regs.a = busRead8(addr);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 // Load A into value
 
 static void ld_bc_a(gb_t *cpu) {
+    incAllTimers(4);
     busWrite8(regBC(), cpu->regs.a);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_de_a(gb_t *cpu) {
+    incAllTimers(4);
     busWrite8(regDE(), cpu->regs.a);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_nn_a(gb_t *cpu) {
+    incAllTimers(8);
     uint16_t addr = busRead16(++cpu->regs.pc);
     cpu->regs.pc += 2;
+    incAllTimers(4);
     busWrite8(addr, cpu->regs.a);
+    numCycles = 4;
 }
 
 static void ld_hld_a(gb_t *cpu) {
+    incAllTimers(4);
     busWrite8(regHL(), cpu->regs.a);
     setHL(regHL() - 1);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ld_hli_a(gb_t *cpu) {
+    incAllTimers(4);
     busWrite8(regHL(), cpu->regs.a);
     setHL(regHL() + 1);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 // This saves A into C + 0xff00 instead of saving A into C
 static void ld_addr_c_a(gb_t *cpu) {
+    incAllTimers(4);
     uint16_t addr = 0xff00 | cpu->regs.c;
     busWrite8(addr, cpu->regs.a);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ldh_n_a(gb_t *cpu) {
+    incAllTimers(4);
     uint16_t addr = 0xff00 | busRead8(++cpu->regs.pc);
+    incAllTimers(4);
     busWrite8(addr, cpu->regs.a);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 // 16-BIT LD
 
 static void ld_bc_nn(gb_t *cpu) {
+    incAllTimers(8);
     setBC(busRead16(++cpu->regs.pc));
+    numCycles = 4;
     cpu->regs.pc += 2;
 }
 
 static void ld_de_nn(gb_t *cpu) {
+    incAllTimers(8);
     setDE(busRead16(++cpu->regs.pc));
+    numCycles = 4;
     cpu->regs.pc += 2;
 }
 
 static void ld_hl_nn(gb_t *cpu) {
+    incAllTimers(8);
     setHL(busRead16(++cpu->regs.pc));
+    numCycles = 4;
     cpu->regs.pc += 2;
 }
 
 static void ld_sp_nn(gb_t *cpu) {
+    incAllTimers(8);
     cpu->regs.sp = busRead16(++cpu->regs.pc);
+    numCycles = 4;
     cpu->regs.pc += 2;
 }
 
 static void ld_sp_hl(gb_t *cpu) {
     cpu->regs.sp = regHL();
+    numCycles = 8;
     cpu->regs.pc++;
 }
 
 static void ld_hl_sp_n(gb_t *cpu) {
+    incAllTimers(4);
     int8_t arg = (int8_t)busRead8(++cpu->regs.pc);
     setHL(cpu->regs.sp + arg);
     cpu->regs.pc++;
@@ -491,11 +618,15 @@ static void ld_hl_sp_n(gb_t *cpu) {
     // XORing everything is supposed to show where there is a carry
     setC(!!(temp & 0x100));
     setH(!!(temp & 0x10));
+    numCycles = 8;
 }
 
 static void ld_nn_sp(gb_t *cpu) {
+    incAllTimers(8);
     uint16_t addr = busRead16(++cpu->regs.pc);
+    incAllTimers(8);
     busWrite16(addr, cpu->regs.sp);
+    numCycles = 4;
     cpu->regs.pc += 2;
 }
 
@@ -503,7 +634,9 @@ static void ld_nn_sp(gb_t *cpu) {
 
 static void push(uint16_t val, gb_t *cpu) {
     cpu->regs.sp -= 2;
+    incAllTimers(8);
     busWrite16(cpu->regs.sp, val);
+    numCycles = 8;
     cpu->regs.pc ++;
 }
 
@@ -526,8 +659,10 @@ static void push_hl(gb_t *cpu){
 // All stack pop operations
 
 static uint16_t pop(gb_t *cpu){
+    incAllTimers(8);
     uint16_t val = busRead16(cpu->regs.sp);
     cpu->regs.sp += 2;
+    numCycles = 4;
     cpu->regs.pc ++;
     return val;
 }
@@ -570,6 +705,7 @@ static void add8(uint8_t val, gb_t *cpu) {
     // (Can remove temp variable and perform the operations before the addition,
     // if this doesn't work)
     setH(!!(temp & 0x10));
+    numCycles = 4;
 }
 
 static void add_a_b(gb_t *cpu) {
@@ -603,6 +739,7 @@ static void add_a_l(gb_t *cpu) {
 }
 
 static void add_a_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     add8(val, cpu);
     cpu->regs.pc++;
@@ -614,6 +751,7 @@ static void add_a_a(gb_t *cpu) {
 }
 
 static void add_a_n(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(++cpu->regs.pc);
     add8(val, cpu);
     cpu->regs.pc++;
@@ -630,6 +768,7 @@ static void adc(uint8_t val, gb_t *cpu) {
     setZ(cpu->regs.a == 0);
     setC((cpu->regs.a < val) || (flagC() && cpu->regs.a == val));
     setH(!!(temp & 0x10));
+    numCycles = 4;
 }
 
 static void adc_a_b(gb_t *cpu) {
@@ -663,6 +802,7 @@ static void adc_a_l(gb_t *cpu) {
 }
 
 static void adc_a_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     adc(val, cpu);
     cpu->regs.pc++;
@@ -674,6 +814,7 @@ static void adc_a_a(gb_t *cpu) {
 }
 
 static void adc_a_n(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(++cpu->regs.pc);
     adc(val, cpu);
     cpu->regs.pc++;
@@ -694,6 +835,7 @@ static void sub(uint8_t val, gb_t *cpu) {
     setN(true);
     setZ(cpu->regs.a == 0);
     setH(!!(temp & 0x10));
+    numCycles = 4;
 }
 
 static void sub_b(gb_t *cpu) {
@@ -727,6 +869,7 @@ static void sub_l(gb_t *cpu) {
 }
 
 static void sub_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     sub(val, cpu);
     cpu->regs.pc++;
@@ -738,6 +881,7 @@ static void sub_a(gb_t *cpu) {
 }
 
 static void sub_n(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(++cpu->regs.pc);
     sub(val, cpu);
     cpu->regs.pc++;
@@ -760,6 +904,7 @@ static void sbc(uint8_t val, gb_t *cpu) {
     // unsure
     // Tested it in a notebook, so this should hold up
     setH(!!(temp & 0x10));
+    numCycles = 4;
 }
 
 static void sbc_a_b(gb_t *cpu) {
@@ -793,6 +938,7 @@ static void sbc_a_l(gb_t *cpu) {
 }
 
 static void sbc_a_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     sbc(val, cpu);
     cpu->regs.pc++;
@@ -804,6 +950,7 @@ static void sbc_a_a(gb_t *cpu) {
 }
 
 static void sbc_a_n(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(++cpu->regs.pc);
     sbc(val, cpu);
     cpu->regs.pc++;
@@ -818,6 +965,7 @@ static void and(uint8_t val, gb_t *cpu) {
     setH(true);
     setC(false);
     setZ(cpu->regs.a == 0);
+    numCycles = 4;
 }
 
 static void and_b(gb_t *cpu) {
@@ -851,6 +999,7 @@ static void and_l(gb_t *cpu) {
 }
 
 static void and_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     and(val, cpu);
     cpu->regs.pc++;
@@ -862,6 +1011,7 @@ static void and_a(gb_t *cpu) {
 }
 
 static void and_n(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(++cpu->regs.pc);
     and(val, cpu);
     cpu->regs.pc++;
@@ -875,6 +1025,7 @@ static void xor(uint8_t val, gb_t *cpu) {
     setN(false);
     setH(false);
     setC(false);
+    numCycles = 4;
 }
 
 static void xor_b(gb_t *cpu) {
@@ -908,6 +1059,7 @@ static void xor_l(gb_t *cpu) {
 }
 
 static void xor_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     xor(val, cpu);
     cpu->regs.pc++;
@@ -919,6 +1071,7 @@ static void xor_a(gb_t *cpu) {
 }
 
 static void xor_n(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(++cpu->regs.pc);
     xor(val, cpu);
     cpu->regs.pc++;
@@ -933,6 +1086,7 @@ static void or(uint8_t val, gb_t *cpu) {
     setN(false);
     setH(false);
     setC(false);
+    numCycles = 4;
 }
 
 static void or_b(gb_t *cpu) {
@@ -966,6 +1120,7 @@ static void or_l(gb_t *cpu) {
 }
 
 static void or_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     or(val, cpu);
     cpu->regs.pc++;
@@ -977,6 +1132,7 @@ static void or_a(gb_t *cpu) {
 }
 
 static void or_n(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(++cpu->regs.pc);
     or(val, cpu);
     cpu->regs.pc++;
@@ -989,6 +1145,7 @@ static void cp(uint8_t val, gb_t *cpu){
     setN(true);
     setH((cpu->regs.a & 0xf) < (val & 0xf));
     setC(cpu->regs.a < val);
+    numCycles = 4;
 }
 
 static void cp_b(gb_t *cpu) {
@@ -1022,6 +1179,7 @@ static void cp_l(gb_t *cpu) {
 }
 
 static void cp_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     cp(val, cpu);
     cpu->regs.pc++;
@@ -1033,6 +1191,7 @@ static void cp_a(gb_t *cpu) {
 }
 
 static void cp_n(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(++cpu->regs.pc);
     cp(val, cpu);
     cpu->regs.pc++;
@@ -1045,6 +1204,7 @@ static void inc(uint8_t *val, gb_t *cpu) {
     setZ(*val == 0);
     setN(false);
     setH((*val & 0xf) == 0);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
@@ -1074,8 +1234,10 @@ static void inc_l(gb_t *cpu) {
 
 // Naming conflict so this one is different
 static void inc_addr_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     inc(&val, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -1090,6 +1252,7 @@ static void dec(uint8_t *val, gb_t *cpu) {
     setZ(*val == 0);
     setN(true);
     setH((*val & 0xf) == 0xf);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
@@ -1119,8 +1282,10 @@ static void dec_l(gb_t *cpu) {
 
 // Changed to avoid naming conflict
 static void dec_addr_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     dec(&val, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -1155,6 +1320,7 @@ static void daa(gb_t *cpu) {
     }
 
     setZ(cpu->regs.a == 0);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
@@ -1164,6 +1330,7 @@ static void cpl(gb_t *cpu) {
     cpu->regs.a ^= 0xff;
     setN(true);
     setH(true);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
@@ -1173,6 +1340,7 @@ static void ccf(gb_t *cpu) {
     setC(!flagC());
     setN(false);
     setH(false);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
@@ -1182,6 +1350,7 @@ static void scf(gb_t *cpu) {
     setN(false);
     setH(false);
     setC(true);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
@@ -1199,6 +1368,7 @@ static void add_hl(uint16_t val, gb_t *cpu) {
     setH(!!(temp &0x1000));
     setC(regHL() < val);
 
+    numCycles = 8;
     cpu->regs.pc++;
 }
 
@@ -1221,6 +1391,7 @@ static void add_hl_sp(gb_t *cpu) {
 //ADD SP n
 
 static void add_sp_n(gb_t *cpu) {
+    incAllTimers(4);
     int8_t  val = (int8_t)busRead8(++cpu->regs.pc);
     uint16_t temp = cpu->regs.sp;
     cpu->regs.sp += val;
@@ -1232,27 +1403,32 @@ static void add_sp_n(gb_t *cpu) {
     setN(false);
     setH(!!(temp & 0x10));
     setC(!!(temp & 0x100));
+    numCycles = 12;
 }
 
 // 16 bit INC
 
 static void inc_bc(gb_t *cpu) {
     setBC(regBC() + 1);
+    numCycles = 8;
     cpu->regs.pc++;
 }
 
 static void inc_de(gb_t *cpu) {
     setDE(regDE() + 1);
+    numCycles = 8;
     cpu->regs.pc++;
 }
 
 static void inc_hl(gb_t *cpu) {
     setHL(regHL() + 1);
+    numCycles = 8;
     cpu->regs.pc++;
 }
 
 static void inc_sp(gb_t *cpu) {
     cpu->regs.sp++;
+    numCycles = 8;
     cpu->regs.pc++;
 }
 
@@ -1260,21 +1436,25 @@ static void inc_sp(gb_t *cpu) {
 
 static void dec_bc(gb_t *cpu) {
     setBC(regBC() - 1);
+    numCycles = 8;
     cpu->regs.pc++;
 }
 
 static void dec_de(gb_t *cpu) {
     setDE(regDE() - 1);
+    numCycles = 8;
     cpu->regs.pc++;
 }
 
 static void dec_hl(gb_t *cpu) {
     setHL(regHL() - 1);
+    numCycles = 8;
     cpu->regs.pc++;
 }
 
 static void dec_sp(gb_t *cpu) {
     cpu->regs.sp--;
+    numCycles = 8;
     cpu->regs.pc++;
 }
 
@@ -1283,7 +1463,9 @@ static void dec_sp(gb_t *cpu) {
 // Jump to immediate 16 bits
 
 static void jp_nn(gb_t *cpu) {
+    incAllTimers(8);
     uint16_t addr = busRead16(++cpu->regs.pc);
+    numCycles = 8;
     cpu->regs.pc = addr;
 }
 
@@ -1293,6 +1475,7 @@ static void jp_nz_nn(gb_t *cpu) {
     if (!flagZ()) {
         jp_nn(cpu);
     } else {
+        numCycles = 12;
         cpu->regs.pc += 3;
     }
 }
@@ -1301,6 +1484,7 @@ static void jp_z_nn(gb_t *cpu) {
     if (flagZ()) {
         jp_nn(cpu);
     } else {
+        numCycles = 12;
         cpu->regs.pc += 3;
     }
 }
@@ -1309,6 +1493,7 @@ static void jp_nc_nn(gb_t *cpu) {
     if (!flagC()) {
         jp_nn(cpu);
     } else {
+        numCycles = 12;
         cpu->regs.pc += 3;
     }
 }
@@ -1317,6 +1502,7 @@ static void jp_c_nn(gb_t *cpu) {
     if (flagC()) {
         jp_nn(cpu);
     } else {
+        numCycles = 12;
         cpu->regs.pc += 3;
     }
 }
@@ -1325,12 +1511,15 @@ static void jp_c_nn(gb_t *cpu) {
 
 static void jp_hl(gb_t *cpu) {
     cpu->regs.pc = regHL();
+    numCycles = 4;
 }
 
 // Relative Jumps
 
 static void jr_n(gb_t *cpu) {
+    incAllTimers(4);
     int8_t jmpDiff = (int8_t)busRead8(++cpu->regs.pc);
+    numCycles = 8;
     cpu->regs.pc++;
     cpu->regs.pc += jmpDiff;
 }
@@ -1341,6 +1530,7 @@ static void jr_nz_n(gb_t *cpu) {
     if (!flagZ()) {
         jr_n(cpu);
     } else {
+        numCycles = 8;
         cpu->regs.pc += 2;
     }
 }
@@ -1349,6 +1539,7 @@ static void jr_z_n(gb_t *cpu) {
     if (flagZ()) {
         jr_n(cpu);
     } else {
+        numCycles = 8;
         cpu->regs.pc += 2;
     }
 }
@@ -1357,6 +1548,7 @@ static void jr_nc_n(gb_t *cpu) {
     if (!flagC()) {
         jr_n(cpu);
     } else {
+        numCycles = 8;
         cpu->regs.pc += 2;
     }
 }
@@ -1365,6 +1557,7 @@ static void jr_c_n(gb_t *cpu) {
     if (flagC()) {
         jr_n(cpu);
     } else {
+        numCycles = 8;
         cpu->regs.pc += 2;
     }
 }
@@ -1372,6 +1565,7 @@ static void jr_c_n(gb_t *cpu) {
 // CALLS
 
 static void call_nn(gb_t *cpu) {
+    incAllTimers(8);
     uint16_t addr = busRead16(++cpu->regs.pc);
     push(cpu->regs.pc + 2, cpu);
     cpu->regs.pc = addr;
@@ -1383,6 +1577,7 @@ static void call_nz_nn(gb_t *cpu) {
     if (!flagZ()) {
         call_nn(cpu);
     } else {
+        numCycles = 12;
         cpu->regs.pc += 3;
     }
 }
@@ -1391,6 +1586,7 @@ static void call_z_nn(gb_t *cpu) {
     if (flagZ()) {
         call_nn(cpu);
     } else {
+        numCycles = 12;
         cpu->regs.pc += 3;
     }
 }
@@ -1399,6 +1595,7 @@ static void call_nc_nn(gb_t *cpu) {
     if (!flagC()) {
         call_nn(cpu);
     } else {
+        numCycles = 12;
         cpu->regs.pc += 3;
     }
 }
@@ -1407,6 +1604,7 @@ static void call_c_nn(gb_t *cpu) {
     if (flagC()) {
         call_nn(cpu);
     } else {
+        numCycles = 12;
         cpu->regs.pc += 3;
     }
 }
@@ -1454,34 +1652,47 @@ static void rst_38(gb_t *cpu) {
 
 static void ret(gb_t *cpu) {
     cpu->regs.pc = pop(cpu);
+    numCycles += 4;
 }
 
 static void ret_nz(gb_t *cpu) {
-    if (!flagZ())
+    if (!flagZ()) {
         ret(cpu);
-    else
+        numCycles += 4;
+    } else {
         cpu->regs.pc++;
+        numCycles = 8;
+    }
 }
 
 static void ret_z(gb_t *cpu) {
-    if (flagZ())
+    if (flagZ()) {
         ret(cpu);
-    else
+        numCycles += 4;
+    } else {
         cpu->regs.pc++;
+        numCycles = 8;
+    }
 }
 
 static void ret_nc(gb_t *cpu) {
-    if (!flagC())
+    if (!flagC()) {
         ret(cpu);
-    else
+        numCycles += 4;
+    } else {
         cpu->regs.pc++;
+        numCycles = 8;
+    }
 }
 
 static void ret_c(gb_t *cpu) {
-    if (flagC())
+    if (flagC()) {
         ret(cpu);
-    else
+        numCycles += 4;
+    } else {
         cpu->regs.pc++;
+        numCycles = 8;
+    }
 }
 
 static void reti(gb_t *cpu) {
@@ -1494,11 +1705,13 @@ static void reti(gb_t *cpu) {
 static void di(gb_t *cpu) {
     cpu->interrupts = false;
     cpu->interEnableBuffer = false;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void ei(gb_t *cpu) {
     cpu->interEnableBuffer = true;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
@@ -1506,11 +1719,13 @@ static void ei(gb_t *cpu) {
 
 static void halt(gb_t *cpu) {
     cpu->halted = true;
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
 static void stop(gb_t *cpu) {
     cpu->stopped = true;
+    numCycles = 4;
     cpu->regs.pc += 2;
 }
 
@@ -1523,6 +1738,7 @@ static void rlca(gb_t *cpu) {
     setH(false);
     setN(false);
     setZ(false);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
@@ -1534,6 +1750,7 @@ static void rla(gb_t *cpu) {
     setH(false);
     setN(false);
     setZ(false);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
@@ -1544,6 +1761,7 @@ static void rrca(gb_t *cpu) {
     setH(false);
     setN(false);
     setZ(false);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
@@ -1555,6 +1773,7 @@ static void rra(gb_t *cpu) {
     setH(false);
     setN(false);
     setZ(false);
+    numCycles = 4;
     cpu->regs.pc++;
 }
 
@@ -1597,8 +1816,10 @@ static void rlc_l (gb_t *cpu) {
 }
 
 static void rlc_hl (gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     rlc(&val, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -1642,8 +1863,10 @@ static void rrc_l (gb_t *cpu) {
 }
 
 static void rrc_hl (gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     rrc(&val, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -1689,8 +1912,10 @@ static void rl_l (gb_t *cpu) {
 }
 
 static void rl_hl (gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     rl(&val, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -1736,8 +1961,10 @@ static void rr_l (gb_t *cpu) {
 }
 
 static void rr_hl (gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     rr(&val, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -1782,8 +2009,10 @@ static void sla_l (gb_t *cpu) {
 }
 
 static void sla_hl (gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     sla(&val, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -1828,8 +2057,10 @@ static void sra_l (gb_t *cpu) {
 }
 
 static void sra_hl (gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     sra(&val, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -1873,8 +2104,10 @@ static void swap_l (gb_t *cpu) {
 }
 
 static void swap_hl (gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     swap(&val, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -1919,8 +2152,10 @@ static void srl_l(gb_t *cpu) {
 }
 
 static void srl_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     srl(&val, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -1963,7 +2198,9 @@ static void bit_0_l(gb_t *cpu) {
 }
 
 static void bit_0_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
+    numCycles += 4;
     bit(val, 0, cpu);
 }
 
@@ -1996,7 +2233,9 @@ static void bit_1_l(gb_t *cpu) {
 }
 
 static void bit_1_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
+    numCycles += 4;
     bit(val, 1, cpu);
 }
 
@@ -2029,7 +2268,9 @@ static void bit_2_l(gb_t *cpu) {
 }
 
 static void bit_2_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
+    numCycles += 4;
     bit(val, 2, cpu);
 }
 
@@ -2062,7 +2303,9 @@ static void bit_3_l(gb_t *cpu) {
 }
 
 static void bit_3_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
+    numCycles += 4;
     bit(val, 3, cpu);
 }
 
@@ -2095,7 +2338,9 @@ static void bit_4_l(gb_t *cpu) {
 }
 
 static void bit_4_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
+    numCycles += 4;
     bit(val, 4, cpu);
 }
 
@@ -2128,7 +2373,9 @@ static void bit_5_l(gb_t *cpu) {
 }
 
 static void bit_5_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
+    numCycles += 4;
     bit(val, 5, cpu);
 }
 
@@ -2161,7 +2408,9 @@ static void bit_6_l(gb_t *cpu) {
 }
 
 static void bit_6_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
+    numCycles += 4;
     bit(val, 6, cpu);
 }
 
@@ -2194,7 +2443,9 @@ static void bit_7_l(gb_t *cpu) {
 }
 
 static void bit_7_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
+    numCycles += 4;
     bit(val, 7, cpu);
 }
 
@@ -2233,8 +2484,10 @@ static void res_0_l(gb_t *cpu) {
 }
 
 static void res_0_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     res(&val, 0, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -2267,8 +2520,10 @@ static void res_1_l(gb_t *cpu) {
 }
 
 static void res_1_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     res(&val, 1, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -2301,8 +2556,10 @@ static void res_2_l(gb_t *cpu) {
 }
 
 static void res_2_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     res(&val, 2, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -2335,8 +2592,10 @@ static void res_3_l(gb_t *cpu) {
 }
 
 static void res_3_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     res(&val, 3, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -2369,8 +2628,10 @@ static void res_4_l(gb_t *cpu) {
 }
 
 static void res_4_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     res(&val, 4, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -2403,8 +2664,10 @@ static void res_5_l(gb_t *cpu) {
 }
 
 static void res_5_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     res(&val, 5, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -2437,8 +2700,10 @@ static void res_6_l(gb_t *cpu) {
 }
 
 static void res_6_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     res(&val, 6, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -2471,8 +2736,10 @@ static void res_7_l(gb_t *cpu) {
 }
 
 static void res_7_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     res(&val, 7, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -2511,8 +2778,10 @@ static void set_0_l(gb_t *cpu) {
 }
 
 static void set_0_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     set(&val, 0, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -2545,8 +2814,10 @@ static void set_1_l(gb_t *cpu) {
 }
 
 static void set_1_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     set(&val, 1, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -2579,8 +2850,10 @@ static void set_2_l(gb_t *cpu) {
 }
 
 static void set_2_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     set(&val, 2, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -2613,8 +2886,10 @@ static void set_3_l(gb_t *cpu) {
 }
 
 static void set_3_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     set(&val, 3, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -2647,8 +2922,10 @@ static void set_4_l(gb_t *cpu) {
 }
 
 static void set_4_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     set(&val, 4, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -2681,8 +2958,10 @@ static void set_5_l(gb_t *cpu) {
 }
 
 static void set_5_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     set(&val, 5, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -2715,8 +2994,10 @@ static void set_6_l(gb_t *cpu) {
 }
 
 static void set_6_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     set(&val, 6, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -2749,8 +3030,10 @@ static void set_7_l(gb_t *cpu) {
 }
 
 static void set_7_hl(gb_t *cpu) {
+    incAllTimers(4);
     uint8_t val = busRead8(regHL());
     set(&val, 7, cpu);
+    incAllTimers(4);
     busWrite8(regHL(), val);
 }
 
@@ -3050,6 +3333,7 @@ static inst cb_instr[0x100] = {
 
 static void cb(gb_t *cpu) {
     uint8_t op = busRead8(++cpu->regs.pc);
+    numCycles = 8;
     cb_instr[op](cpu);
 }
 
@@ -3622,7 +3906,7 @@ static char *instNames[0x100] = {
     [0xff] = "RST 38H",
 };
 
-void runInst(gb_t *cpu) {
+void step(gb_t *cpu) {
     uint8_t opcode = busRead8(cpu->regs.pc);
     if (instructions[opcode]) {
         if (cpu->interEnableBuffer) {
@@ -3631,6 +3915,9 @@ void runInst(gb_t *cpu) {
         }
 
         instructions[opcode](cpu);
+
+        incAllTimers(numCycles);
+        numCycles = 0;
 
 //        if (instNames[opcode]) {
 //            char msg[128];

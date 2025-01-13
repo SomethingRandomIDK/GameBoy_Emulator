@@ -13,6 +13,10 @@ void raiseInterrupt(inter_t inter) {
 void handleInterrupt(gb_t *cpu) {
     uint8_t interCheck = interFlags & interEnable & 0x1f;
 
+    if (!cpu->interrupts) {
+        cpu->halted = false;
+    }
+
     if (cpu->interrupts && !!(interCheck)) {
         if (interCheck & 0x1) {
             // VBLANK

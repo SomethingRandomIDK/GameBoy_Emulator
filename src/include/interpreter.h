@@ -3,7 +3,7 @@
 
 #include "./cpu.h"
 
-void runInst(gb_t *cpu);
+void step(gb_t *cpu);
 
 #endif
 

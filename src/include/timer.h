@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+void incAllTimers(uint32_t cycles);
+
 void incTimer(uint32_t cycles);
 
 uint8_t readTimer(uint16_t addr);

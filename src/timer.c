@@ -47,6 +47,10 @@ void incTimer(uint32_t cycles) {
     }
 }
 
+void incAllTimers(uint32_t cycles) {
+    incTimer(cycles);
+}
+
 uint8_t readTimer(uint16_t addr) {
     switch(addr) {
         case 0xff04:

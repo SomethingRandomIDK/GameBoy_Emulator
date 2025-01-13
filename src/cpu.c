@@ -140,7 +140,7 @@ void startCPU() {
     initLogger(NULL, TRACE);
 
     while(1) {
-        runInst(&gbcpu);
+        step(&gbcpu);
     }
 }
 
