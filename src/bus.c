@@ -1,6 +1,7 @@
 #include "./include/cart.h"
 #include "./include/bus.h"
 #include "./include/cpu.h"
+#include "./include/io.h"
 
 bool booting = true;
 
@@ -38,13 +39,13 @@ uint8_t busRead8(uint16_t addr) {
         return 0;
     } else if (addr < 0xff80) {
         // IO Registers
-        return 0;
+        return ioRead(addr);
     } else if (addr < 0xffff) {
         // HRAM
         return hramRead(addr);
     } else {
         // Interupt register
-        return 0;
+        return ioRead(addr);
     }
     return 0;
 }
@@ -79,13 +80,13 @@ void busWrite8(uint16_t addr, uint8_t val){
         return;
     } else if (addr < 0xff80) {
         // IO Registers
-        return;
+        ioWrite(addr, val);
     } else if (addr < 0xffff) {
         // HRAM
         hramWrite(addr, val);
     } else {
         // Interupt register
-        return;
+        ioWrite(addr, val);
     }
     return;
 }

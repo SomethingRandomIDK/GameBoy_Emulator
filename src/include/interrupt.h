@@ -3,6 +3,9 @@
 
 #include "./cpu.h"
 
+extern uint8_t interFlags;
+extern uint8_t interEnable;
+
 typedef enum {
     VBLANK = 0,
     LCD = 1,

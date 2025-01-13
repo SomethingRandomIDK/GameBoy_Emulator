@@ -3632,14 +3632,14 @@ void runInst(gb_t *cpu) {
 
         instructions[opcode](cpu);
 
-        if (instNames[opcode]) {
-            char msg[128];
-            sprintf(msg, "INST: %s OPCODE: %02x PC: %04x SP: %04x A: %02x BC: %04x DE: %04x HL: %04x F: %02x",
-                    instNames[opcode], opcode, cpu->regs.pc, cpu->regs.sp,
-                    cpu->regs.a, regBC(), regDE(), regHL(), cpu->regs.f);
-            logMessage(msg, TRACE);
-        } else
-            logMessage("Instruction Information Not Found", WARNING);
+//        if (instNames[opcode]) {
+//            char msg[128];
+//            sprintf(msg, "INST: %s OPCODE: %02x PC: %04x SP: %04x A: %02x BC: %04x DE: %04x HL: %04x F: %02x",
+//                    instNames[opcode], opcode, cpu->regs.pc, cpu->regs.sp,
+//                    cpu->regs.a, regBC(), regDE(), regHL(), cpu->regs.f);
+//            logMessage(msg, TRACE);
+//        } else
+//            logMessage("Instruction Information Not Found", WARNING);
     } else {
         char msg[64];
         sprintf(msg, "Instruction not recognized INST: %x PC: %x", opcode, cpu->regs.pc);

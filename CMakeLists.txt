@@ -13,6 +13,7 @@ endif()
 add_executable(gbemu
     src/main.c
     src/timer.c
+    src/io.c
     src/cpu.c
     src/cart.c
     src/bus.c
