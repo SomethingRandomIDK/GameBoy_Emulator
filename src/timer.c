@@ -47,3 +47,35 @@ void incTimer(uint32_t cycles) {
     }
 }
 
+uint8_t readTimer(uint16_t addr) {
+    switch(addr) {
+        case 0xff04:
+            return divReg >> 8;
+        case 0xff05:
+            return tima;
+        case 0xff06:
+            return tma;
+        case 0xff07:
+            return tac;
+    }
+    // Should never reach here
+    return 0xff;
+}
+
+void writeTimer(uint16_t addr, uint8_t val) {
+    switch(addr) {
+        case 0xff04:
+            divReg = 0;
+            break;
+        case 0xff05:
+            tima = val;
+            break;
+        case 0xff06:
+            tma = val;
+            break;
+        case 0xff07:
+            tac = val;
+            break;
+    }
+}
+
