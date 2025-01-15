@@ -25,16 +25,16 @@ void incTimer(uint32_t cycles) {
     bool checkIncTIMA = false;
     switch(tac & 0x3) {
         case 0x0:
-            checkIncTIMA = ((prevDiv >> 9) & 1) ^ ((divReg >> 9) & 1);
+            checkIncTIMA = ((prevDiv >> 10) & 1) ^ ((divReg >> 9) & 1);
             break;
         case 0x1:
-            checkIncTIMA = ((prevDiv >> 3) & 1) ^ ((divReg >> 3) & 1);
+            checkIncTIMA = ((prevDiv >> 4) & 1) ^ ((divReg >> 3) & 1);
             break;
         case 0x2:
-            checkIncTIMA = ((prevDiv >> 5) & 1) ^ ((divReg >> 5) & 1);
+            checkIncTIMA = ((prevDiv >> 6) & 1) ^ ((divReg >> 5) & 1);
             break;
         case 0x3:
-            checkIncTIMA = ((prevDiv >> 7) & 1) ^ ((divReg >> 7) & 1);
+            checkIncTIMA = ((prevDiv >> 8) & 1) ^ ((divReg >> 7) & 1);
             break;
     }
 
