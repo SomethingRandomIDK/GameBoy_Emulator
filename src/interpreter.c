@@ -1308,13 +1308,13 @@ static void daa(gb_t *cpu) {
             setH(false);
         }
     } else {
-        if (flagH()) {
-            cpu->regs.a += 0xfa;
+        if (flagC() && flagH()) {
+            cpu->regs.a += 0x9a;
             setH(false);
         } else if (flagC()) {
             cpu->regs.a += 0xa0;
-        } else if (flagH() && flagC()) {
-            cpu->regs.a += 0x9a;
+        } else if (flagH()) {
+            cpu->regs.a += 0xfa;
             setH(false);
         }
     }
