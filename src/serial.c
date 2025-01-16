@@ -12,20 +12,20 @@ static uint8_t sc = 0;
 
 void incSerialTimer(uint32_t cycles) {
     if ((sc & 0x81) == 0x81) {
-        buff[buffIdx] = (char) sb;
-        buffIdx++;
-        sb = 0xff;
-        sc &= 0x7f;
-        raiseInterrupt(SERIAL);
-        printf("%s\n", buff);
-        // serialCycles += cycles;
-        // if ((serialCycles >> 9) & 1) {
-        //     printf("%c", (char)sb);
-        //     sb = 0xff;
-        //     sc &= 0x7f;
-        //     serialCycles = 0;
-        //     raiseInterrupt(SERIAL);
-        // }
+        // buff[buffIdx] = (char) sb;
+        // buffIdx++;
+        // sb = 0xff;
+        // sc &= 0x7f;
+        // raiseInterrupt(SERIAL);
+        // printf("%s\n", buff);
+        serialCycles += cycles;
+        if ((serialCycles >> 9) & 1) {
+            printf("%c", (char)sb);
+            sb = 0xff;
+            sc &= 0x7f;
+            serialCycles = 0;
+            raiseInterrupt(SERIAL);
+        }
     }
 }
 
