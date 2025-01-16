@@ -6,7 +6,7 @@
 #define CLOCK 4194304
 
 // Can't name something div because of the function in the stdlib.h
-static uint16_t divReg = 0xab00;
+static uint16_t divReg = 0xabcc;
 static uint8_t tima = 0;
 static uint8_t tma = 0;
 static uint8_t tac = 0;
