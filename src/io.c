@@ -4,19 +4,19 @@
 #include "./include/serial.h"
 
 uint8_t ioRead(uint16_t addr) {
-    switch(addr & 0xff) {
-        case 0x01:
+    switch(addr) {
+        case 0xff01:
             return readSB();
-        case 0x02:
+        case 0xff02:
             return readSC();
-        case 0x04:
-        case 0x05:
-        case 0x06:
-        case 0x07:
+        case 0xff04:
+        case 0xff05:
+        case 0xff06:
+        case 0xff07:
             return readTimer(addr);
-        case 0x0f:
+        case 0xff0f:
             return interFlags;
-        case 0xff:
+        case 0xffff:
             return interEnable;
         default:
             return 0;
@@ -24,23 +24,23 @@ uint8_t ioRead(uint16_t addr) {
 }
 
 void ioWrite(uint16_t addr, uint8_t val) {
-    switch(addr & 0xff) {
-        case 0x01:
+    switch(addr) {
+        case 0xff01:
             writeSB(val);
             break;
-        case 0x02:
+        case 0xff02:
             writeSC(val);
             break;
-        case 0x04:
-        case 0x05:
-        case 0x06:
-        case 0x07:
+        case 0xff04:
+        case 0xff05:
+        case 0xff06:
+        case 0xff07:
             writeTimer(addr, val);
             break;
-        case 0x0f:
+        case 0xff0f:
             interFlags = (val | 0xe0);
             break;
-        case 0xff:
+        case 0xffff:
             interEnable = val;
             break;
     }

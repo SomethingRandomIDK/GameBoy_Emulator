@@ -3,6 +3,8 @@
 #include "./include/cpu.h"
 #include "./include/bus.h"
 #include "./include/interpreter.h"
+#include "./include/interrupt.h"
+#include "./include/timer.h"
 #include "./logging/log.h"
 
 gb_t gbcpu;
@@ -140,7 +142,13 @@ void startCPU() {
     initLogger(NULL, TRACE);
 
     while(1) {
-        step(&gbcpu);
+        if(gbcpu.halted || gbcpu.stopped) {
+            incAllTimers(4);
+        } else {
+            step(&gbcpu);
+        }
+
+        handleInterrupt(&gbcpu);
     }
 }
 
