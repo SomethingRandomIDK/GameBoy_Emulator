@@ -1,25 +1,12 @@
 #include <stdio.h>
 
 #include "./include/cpu.h"
-#include "./include/bus.h"
 #include "./include/interpreter.h"
 #include "./include/interrupt.h"
 #include "./include/timer.h"
 #include "./logging/log.h"
 
 gb_t gbcpu;
-
-// This will do everything that the bootrom is supposed to do on start up
-static void bootRom() {
-    gbcpu.regs.sp = 0xfffe;
-    gbcpu.regs.a = 0x00;
-    setHL(0x9fff);
-    while (regHL() > 0x7fff) {
-        busWrite8(regHL(), gbcpu.regs.a);
-        setHL(regHL() - 1);
-    }
-    printf("boot rom not fully implemented yet\n");
-}
 
 uint16_t regAF() {
     uint16_t ret;
@@ -127,7 +114,6 @@ void hramWrite(uint16_t addr, uint8_t val){
 }
 
 void initCPU() {
-    bootRom();
     gbcpu.regs.a = 0x01;
     setBC(0x0013);
     setDE(0x00d8);
