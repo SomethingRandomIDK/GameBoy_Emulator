@@ -13,8 +13,9 @@ void raiseInterrupt(inter_t inter) {
 void handleInterrupt(gb_t *cpu) {
     uint8_t interCheck = interFlags & interEnable & 0x1f;
 
-    if (!cpu->interrupts) {
+    if (!cpu->interrupts && interCheck) {
         cpu->halted = false;
+        return;
     }
 
     if (cpu->interrupts && !!(interCheck)) {
