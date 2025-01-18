@@ -19,7 +19,7 @@ uint8_t ioRead(uint16_t addr) {
         case 0xffff:
             return interEnable;
         default:
-            return 0;
+            return 0xff;
     }
 }
 
