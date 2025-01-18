@@ -21,6 +21,7 @@ void incSerialTimer(uint32_t cycles) {
         serialCycles += cycles;
         if ((serialCycles >> 9) & 1) {
             printf("%c", (char)sb);
+            fflush(stdout);
             sb = 0xff;
             sc &= 0x7f;
             serialCycles = 0;
