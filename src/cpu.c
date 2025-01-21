@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "./include/cpu.h"
+#include "./include/gui.h"
 #include "./include/interpreter.h"
 #include "./include/interrupt.h"
 #include "./include/timer.h"
@@ -126,8 +127,10 @@ void initCPU() {
 
 void startCPU() {
     initLogger(NULL, TRACE);
+    initGUI();
+    bool running = true;
 
-    while(1) {
+    while(running) {
         if(gbcpu.halted || gbcpu.stopped) {
             incAllTimers(4);
         } else {
@@ -135,6 +138,9 @@ void startCPU() {
         }
 
         handleInterrupt(&gbcpu);
+        running = pollGUIEvents();
     }
+
+    closeGUI();
 }
 
