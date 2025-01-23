@@ -4,7 +4,7 @@
 #include "./logging/log.h"
 
 static SDL_Window *win = NULL;
-static SDL_Surface *surf = NULL;
+static SDL_Renderer *rend = NULL;
 static SDL_Event ev;
 
 
@@ -16,11 +16,13 @@ void initGUI() {
 
     win = SDL_CreateWindow("Gameboy Emulator", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 160, 144, SDL_WINDOW_RESIZABLE);
 
-    surf = SDL_GetWindowSurface(win);
+    rend = SDL_CreateRenderer(win, -1, 0);
+    SDL_RenderClear(rend);
+    SDL_RenderPresent(rend);
 }
 
 void closeGUI() {
-    SDL_FreeSurface(surf);
+    SDL_DestroyRenderer(rend);
     SDL_DestroyWindow(win);
     SDL_Quit();
 }
