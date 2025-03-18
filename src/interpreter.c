@@ -2160,7 +2160,7 @@ static void bit_0_l(gb_t *cpu) {
 static void bit_0_hl(gb_t *cpu) {
     incAllTimers(4);
     uint8_t val = busRead8(regHL());
-    numCycles += 4;
+    numCycles = 12;
     bit(val, 0, cpu);
 }
 
@@ -2195,7 +2195,7 @@ static void bit_1_l(gb_t *cpu) {
 static void bit_1_hl(gb_t *cpu) {
     incAllTimers(4);
     uint8_t val = busRead8(regHL());
-    numCycles += 4;
+    numCycles = 12;
     bit(val, 1, cpu);
 }
 
@@ -2230,7 +2230,7 @@ static void bit_2_l(gb_t *cpu) {
 static void bit_2_hl(gb_t *cpu) {
     incAllTimers(4);
     uint8_t val = busRead8(regHL());
-    numCycles += 4;
+    numCycles = 12;
     bit(val, 2, cpu);
 }
 
@@ -2265,7 +2265,7 @@ static void bit_3_l(gb_t *cpu) {
 static void bit_3_hl(gb_t *cpu) {
     incAllTimers(4);
     uint8_t val = busRead8(regHL());
-    numCycles += 4;
+    numCycles = 12;
     bit(val, 3, cpu);
 }
 
@@ -2300,7 +2300,7 @@ static void bit_4_l(gb_t *cpu) {
 static void bit_4_hl(gb_t *cpu) {
     incAllTimers(4);
     uint8_t val = busRead8(regHL());
-    numCycles += 4;
+    numCycles = 12;
     bit(val, 4, cpu);
 }
 
@@ -2335,7 +2335,7 @@ static void bit_5_l(gb_t *cpu) {
 static void bit_5_hl(gb_t *cpu) {
     incAllTimers(4);
     uint8_t val = busRead8(regHL());
-    numCycles += 4;
+    numCycles = 12;
     bit(val, 5, cpu);
 }
 
@@ -2370,7 +2370,7 @@ static void bit_6_l(gb_t *cpu) {
 static void bit_6_hl(gb_t *cpu) {
     incAllTimers(4);
     uint8_t val = busRead8(regHL());
-    numCycles += 4;
+    numCycles = 12;
     bit(val, 6, cpu);
 }
 
@@ -2405,7 +2405,7 @@ static void bit_7_l(gb_t *cpu) {
 static void bit_7_hl(gb_t *cpu) {
     incAllTimers(4);
     uint8_t val = busRead8(regHL());
-    numCycles += 4;
+    numCycles = 12;
     bit(val, 7, cpu);
 }
 
