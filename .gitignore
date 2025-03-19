@@ -9,6 +9,9 @@ build/
 redocmake.sh
 redocmake.bat
 
+# Swap files
+*.swp
+
 # Prerequisites
 *.d
 
