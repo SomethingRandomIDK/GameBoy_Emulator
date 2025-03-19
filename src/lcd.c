@@ -28,7 +28,7 @@ static uint8_t lcdRegs[] = {
 void incLCDTimer(uint32_t cycles) {
     clock += cycles;
     while (clock > 4 && dmaTransfer) {
-        busWrite8((0xfe00 & lowerAddr), busRead8((upperAddr << 8) & lowerAddr));
+        busWrite8((0xfe00 | lowerAddr), busRead8((upperAddr << 8) | lowerAddr));
         lowerAddr++;
         clock -= 4;
         dmaTransfer = lowerAddr < 0xa0;
