@@ -1,6 +1,7 @@
 #include <stdbool.h>
 
 #include "./include/lcd.h"
+#include "./include/interrupt.h"
 #include "./include/bus.h"
 
 #define LCDC 0x0
@@ -26,6 +27,17 @@ static uint8_t lcdRegs[] = {
     0x91, 0x81, 0x00, 0x00, 0x91, 0x00, 0xff, 0xfc, 0xff, 0xff, 0x00, 0x00
 };
 
+static void checkLy() {
+    if (lcdRegs[LY] == lcdRegs[LYC]) {
+	lcdRegs[STAT] |= 0x4;
+	if (lcdRegs[STAT] & 0x40) {
+	    raiseInterrupt(LCD);
+	}
+    } else {
+	lcdRegs[STAT] &= ~(0x4);
+    }
+}
+
 void incLCDTimer(uint32_t cycles) {
     dmaClock += cycles;
     lcdClock += cycles;
@@ -38,6 +50,11 @@ void incLCDTimer(uint32_t cycles) {
 
     switch (lcdRegs[STAT] & 0x3) {
 	case 0:
+	    if (lcdClock >= 456) {
+		lcdClock -= 456;
+		lcdRegs[LY]++;
+		checkLy();
+	    }
 	    break;
 	case 1:
 	    break;

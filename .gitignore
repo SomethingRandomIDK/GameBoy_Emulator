@@ -9,6 +9,10 @@ build/
 redocmake.sh
 redocmake.bat
 
+# Clangd Files
+.cache/
+compile_commands.json
+
 # Swap files
 *.swp
 
