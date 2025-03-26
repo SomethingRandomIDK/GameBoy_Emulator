@@ -1,4 +1,4 @@
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "./include/gui.h"
 #include "./logging/log.h"

@@ -1,6 +1,5 @@
 #include <assert.h>
 #include <stdio.h>
-#include <SDL2/SDL.h>
 
 #include "./include/cpu.h"
 #include "./include/cart.h"

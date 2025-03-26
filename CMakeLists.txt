@@ -6,10 +6,6 @@ include(GNUInstallDirs)
 
 find_package(SDL2 REQUIRED)
 
-if(WIN32)
-    add_definitions(-DSDL_MAIN_HANDLED)
-endif()
-
 add_executable(gbemu
     src/main.c
     src/timer.c
@@ -24,6 +20,16 @@ add_executable(gbemu
     src/interpreter.c
     src/logging/log.c
 )
+
+if(WIN32)
+    add_definitions(-DSDL_MAIN_HANDLED)
+    include_directories(${SDL2_INCLUDE_DIR})
+    link_directories(${SDL2_LIBDIR})
+    add_custom_command(TARGET gbemu POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+	    "${SDL2_LIBDIR}/SDL2.dll"
+	    $<TARGET_FILE_DIR:gbemu>)
+endif()
 
 target_link_libraries(gbemu
     SDL2::SDL2
