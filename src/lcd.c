@@ -92,8 +92,17 @@ void incLCDTimer(uint32_t cycles) {
 	    }
 	    break;
 	case 2: // OAM scan
+	    if (lcdClock >= 80) {
+		lcdRegs[STAT] = lcdRegs[STAT] & ~(0x3) | 0x3;
+	    }
 	    break;
 	case 3: // Drawing Pixels
+	    if (lcdClock >= 252) {
+		lcdRegs[STAT] = lcdRegs[STAT] & ~(0x3) | 0x0;
+		if (lcdRegs[STAT] & 0x08) {
+		    raiseInterrupt(LCD);
+		}
+	    }
 	    break;
     }
 }
