@@ -75,6 +75,21 @@ void incLCDTimer(uint32_t cycles) {
 	    }
 	    break;
 	case 1: // Vertical Blank
+	    if (lcdClock >= 456) {
+		lcdClock -= 456;
+		bool newFrame = false;
+		lcdRegs[LY]++;
+		if (lcdRegs[LY] >= 154) {
+		    lcdRegs[LY] = 0;
+		    newFrame = true;
+		    checkLy();
+		    lcdRegs[STAT] = lcdRegs[STAT] & ~(0x3) | 0x2;
+
+		    if (lcdRegs[STAT] & 0x20) {
+			raiseInterrupt(LCD);
+		    }
+		}
+	    }
 	    break;
 	case 2: // OAM scan
 	    break;
