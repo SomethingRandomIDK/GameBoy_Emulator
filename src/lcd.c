@@ -49,18 +49,36 @@ void incLCDTimer(uint32_t cycles) {
     }
 
     switch (lcdRegs[STAT] & 0x3) {
-	case 0:
+	case 0: // Horizontal Blank
 	    if (lcdClock >= 456) {
 		lcdClock -= 456;
 		lcdRegs[LY]++;
 		checkLy();
+		if (lcdRegs[LY] >= 144) {
+		    lcdRegs[STAT] = lcdRegs[STAT] & ~(0x3) | 0x1;
+
+		    raiseInterrupt(VBLANK);
+
+		    if (lcdRegs[STAT] & 0x10) {
+			raiseInterrupt(LCD);
+		    }
+
+		    // TODO Draw Screen Here
+
+		} else {
+		    lcdRegs[STAT] = lcdRegs[STAT] & ~(0x3) | 0x2;
+
+		    if (lcdRegs[STAT] & 0x20) {
+			raiseInterrupt(LCD);
+		    }
+		}
 	    }
 	    break;
-	case 1:
+	case 1: // Vertical Blank
 	    break;
-	case 2:
+	case 2: // OAM scan
 	    break;
-	case 3:
+	case 3: // Drawing Pixels
 	    break;
     }
 }
