@@ -50,10 +50,13 @@ typedef struct {
     struct romHeader header;
     char *filename;
     size_t filenameSize;
+    char *ramFilename;
+    size_t ramFilenameSize;
     uint8_t *cartridge;
     size_t cartSize;
 
     enum cartType cType;
+    bool battery;
     bool ramAvail;
     // This will also act to determine whether the ram is ram or IR register, 
     // with ram indicated by true and IR register indicated by false

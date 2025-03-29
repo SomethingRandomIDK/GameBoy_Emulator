@@ -583,6 +583,32 @@ static void displayInfo() {
     printf("Global Checksum: %d\n", rom.header.globalChecksum);
 }
 
+static void loadRamFile() {
+    // 6 is the length .gbsav
+    rom.ramFilenameSize = rom.filenameSize + 6;
+    rom.ramFilename = (char *)malloc((rom.ramFilenameSize + 1) * sizeof(char));
+
+    strcpy(rom.ramFilename, rom.filename);
+    strcat(rom.ramFilename, ".gbsav");
+
+    FILE *f = fopen(rom.ramFilename, "rb");
+
+    if (f != NULL) {
+	fseek(f, 0, SEEK_END);
+	size_t fileSize = ftell(f);
+	rewind(f);
+	size_t ramSize = rom.numRamBanks * 0x2000;
+
+	if (fileSize < ramSize) {
+	    fread(rom.ram, 1, fileSize, f);
+	} else {
+	    fread(rom.ram, 1, ramSize, f);
+	}
+
+	fclose(f);
+    }
+}
+
 static void cartTypeSelector() {
     rom.rtcAvail = false;
     switch(rom.header.type) {
@@ -722,6 +748,39 @@ static void cartTypeSelector() {
             printf("INVALID RAM SIZE\n");
             exit(1);
     }
+
+    rom.battery = false;
+    switch(rom.header.type) {
+	case 0x03:
+	case 0x06:
+	case 0x09:
+	case 0x0d:
+	case 0x0f:
+	case 0x10:
+	case 0x13:
+	case 0x1b:
+	case 0x1e:
+	case 0x22:
+	case 0xff:
+	    rom.battery = true;
+	    loadRamFile();
+	    break;
+    }
+}
+
+// TODO Need to test the ram saving methods after I get the screen to work
+static void saveRam() {
+    if (!rom.battery) return;
+
+    FILE *f = fopen(rom.ramFilename, "wb");
+
+    if (f != NULL) {
+	size_t ramSize = rom.numRamBanks * 0x2000;
+
+	fwrite(rom.ram, 1, ramSize, f);
+
+	fclose(f);
+    }
 }
 
 // NO Mapper/ Just ROM read and write functions
@@ -735,8 +794,10 @@ static uint8_t mapperRomRead(uint16_t addr) {
 }
 
 static void mapperRomWrite(uint16_t addr, uint8_t val) {
-    if (addr > 0x9fff && addr < 0xc000 && rom.ramAvail)
+    if (addr > 0x9fff && addr < 0xc000 && rom.ramAvail) {
         rom.ram[addr - 0xa000] = val;
+	saveRam();
+    }
 }
 
 // Read and Write function for the MBC1 cartridge
@@ -761,12 +822,18 @@ static uint8_t mapperMBC1Read(uint16_t addr) {
 static void mapperMBC1Write(uint16_t addr, uint8_t val) {
     if (addr < 0x2000) {
         rom.ramEnable = (val & 0xf) == 0xa;
+	if (!rom.ramEnable) {
+	    saveRam();
+	}
     } else if (addr < 0x4000) {
         // There are a few unofficial docs that use values where this won't be
         // supported, but it's unofficial so I don't want to make support for it
         // rn
 
-        // TODO: add implementation for banking modes
+        // Done: add implementation for banking modes
+	// I think I have already added the banking modes, but I don't remember,
+	// I need to check back later
+	// Yeah banking moed are implemented
         int shiftAmt = 8 - rom.header.romSize + 1;
         rom.curRomBankNum = (val & (0xff >> (shiftAmt)));
         if (shiftAmt < 4) {
@@ -815,6 +882,9 @@ static void mapperMBC2Write(uint16_t addr, uint8_t val) {
             rom.curRomBank = rom.cartridge + ((val & 0xf) * 0x4000);
         } else {
             rom.ramEnable = val == 0x0a;
+	    if (!rom.ramEnable) {
+		saveRam();
+	    }
         }
     } else if (addr > 0x9fff && addr < 0xc000 && rom.ramAvail && rom.ramEnable) {
         addr &= 0x1ff;
@@ -884,6 +954,9 @@ static uint8_t mapperMBC3Read(uint16_t addr) {
 static void mapperMBC3Write(uint16_t addr, uint8_t val) {
     if (addr < 0x2000) {
         rom.ramEnable = val == 0x0a;
+	if (!rom.ramEnable) {
+	    saveRam();
+	}
     } else if (addr < 0x4000) {
         rom.curRomBankNum = val & 0x7f;
         if (!rom.curRomBankNum)
@@ -940,6 +1013,9 @@ static uint8_t mapperMBC5Read(uint16_t addr) {
 static void mapperMBC5Write(uint16_t addr, uint8_t val) {
     if (addr < 0x2000) {
         rom.ramEnable = val == 0x0a;
+	if (!rom.ramEnable) {
+	    saveRam();
+	}
     } else if (addr < 0x3000) {
         rom.curRomBankNum &= 0x100;
         rom.curRomBankNum |= val;
@@ -1012,7 +1088,7 @@ void cartInit(char *file) {
     strncpy(rom.filename, file, rom.filenameSize);
     rom.filename[rom.filenameSize] = 0;
 
-    FILE *f = fopen(rom.filename, "r");
+    FILE *f = fopen(rom.filename, "rb");
     if (f == NULL) {
         printf("File Failed to Open\n");
         exit(1);
@@ -1051,5 +1127,7 @@ void freeRomResources() {
     free(rom.filename);
     if(rom.ramAvail)
         free(rom.ram);
+    if(rom.battery)
+	free(rom.ramFilename);
 }
 
