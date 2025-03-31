@@ -2,6 +2,7 @@
 #include "./include/bus.h"
 #include "./include/cpu.h"
 #include "./include/io.h"
+#include "./include/ppu.h"
 
 bool booting = true;
 
@@ -15,7 +16,7 @@ uint8_t busRead8(uint16_t addr) {
         return romRead(addr);
     } else if (addr < 0xa000) {
         // Read from vram
-        return 0;
+        return ppuVramRead(addr);
     } else if (addr < 0xc000) {
         // Read from cart (RAM)
         return romRead(addr);
@@ -29,7 +30,7 @@ uint8_t busRead8(uint16_t addr) {
     } else if (addr < 0xfea0) {
         // OAM (Object attribute memory) I think this is where the sprites are
         // saved
-        return 0;
+	return ppuOamRead(addr);
     } else if (addr < 0xff00) {
         // Nintendo says that using this space is prohibited, but there is still
         // some stuff that happens when you do use it
@@ -56,7 +57,7 @@ void busWrite8(uint16_t addr, uint8_t val){
         romWrite(addr, val);
     } else if (addr < 0xa000) {
         // Write from vram
-        return;
+	return ppuVramWrite(addr, val);
     } else if (addr < 0xc000) {
         // Write from cart (RAM)
         romWrite(addr, val);
@@ -70,7 +71,7 @@ void busWrite8(uint16_t addr, uint8_t val){
     } else if (addr < 0xfea0) {
         // OAM (Object attribute memory) I think this is where the sprites are
         // saved
-        return;
+	ppuOamWrite(addr, val);
     } else if (addr < 0xff00) {
         // Nintendo says that using this space is prohibited, but there is still
         // some stuff that happens when you do use it

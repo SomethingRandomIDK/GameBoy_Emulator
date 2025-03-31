@@ -1,8 +1,7 @@
-#include <stdbool.h>
-
 #include "./include/lcd.h"
 #include "./include/interrupt.h"
 #include "./include/bus.h"
+#include "./include/ppu.h"
 
 #define LCDC 0x0
 #define STAT 0x1
@@ -27,6 +26,10 @@ static uint8_t lcdRegs[] = {
     0x91, 0x81, 0x00, 0x00, 0x91, 0x00, 0xff, 0xfc, 0xff, 0xff, 0x00, 0x00
 };
 
+bool dmaTransfering() {
+    return dmaTransfer;
+}
+
 static void checkLy() {
     if (lcdRegs[LY] == lcdRegs[LYC]) {
 	lcdRegs[STAT] |= 0x4;
@@ -42,7 +45,7 @@ void incLCDTimer(uint32_t cycles) {
     dmaClock += cycles;
     lcdClock += cycles;
     while (dmaClock > 3 && dmaTransfer) {
-        busWrite8((0xfe00 | lowerAddr), busRead8((upperAddr << 8) | lowerAddr));
+        dmaWrite((0xfe00 | lowerAddr), busRead8((upperAddr << 8) | lowerAddr));
         lowerAddr++;
         dmaClock -= 4;
         dmaTransfer = lowerAddr < 0xa0;

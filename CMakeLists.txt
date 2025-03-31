@@ -14,6 +14,7 @@ add_executable(gbemu
     src/cart.c
     src/bus.c
     src/gui.c
+    src/ppu.c
     src/lcd.c
     src/serial.c
     src/interrupt.c
