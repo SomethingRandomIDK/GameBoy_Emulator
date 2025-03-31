@@ -9,5 +9,7 @@ void closeGUI();
 
 bool pollGUIEvents();
 
+void frameDelay();
+
 #endif
 

@@ -1,6 +1,7 @@
 #include "./include/lcd.h"
 #include "./include/interrupt.h"
 #include "./include/bus.h"
+#include "./include/gui.h"
 #include "./include/ppu.h"
 
 #define LCDC 0x0
@@ -51,62 +52,70 @@ void incLCDTimer(uint32_t cycles) {
         dmaTransfer = lowerAddr < 0xa0;
     }
 
-    switch (lcdRegs[STAT] & 0x3) {
-	case 0: // Horizontal Blank
-	    if (lcdClock >= 456) {
-		lcdClock -= 456;
-		lcdRegs[LY]++;
-		checkLy();
-		if (lcdRegs[LY] >= 144) {
-		    lcdRegs[STAT] = lcdRegs[STAT] & ~(0x3) | 0x1;
-
-		    raiseInterrupt(VBLANK);
-
-		    if (lcdRegs[STAT] & 0x10) {
-			raiseInterrupt(LCD);
-		    }
-
-		    // TODO Draw Screen Here
-
-		} else {
-		    lcdRegs[STAT] = lcdRegs[STAT] & ~(0x3) | 0x2;
-
-		    if (lcdRegs[STAT] & 0x20) {
-			raiseInterrupt(LCD);
-		    }
-		}
-	    }
-	    break;
-	case 1: // Vertical Blank
-	    if (lcdClock >= 456) {
-		lcdClock -= 456;
-		bool newFrame = false;
-		lcdRegs[LY]++;
-		if (lcdRegs[LY] >= 154) {
-		    lcdRegs[LY] = 0;
-		    newFrame = true;
+    if (lcdRegs[LCDC] & 0x80) {
+	switch (lcdRegs[STAT] & 0x3) {
+	    case 0: // Horizontal Blank
+		if (lcdClock >= 456) {
+		    lcdClock -= 456;
+		    lcdRegs[LY]++;
 		    checkLy();
-		    lcdRegs[STAT] = lcdRegs[STAT] & ~(0x3) | 0x2;
+		    if (lcdRegs[LY] >= 144) {
+			lcdRegs[STAT] = lcdRegs[STAT] & ~(0x3) | 0x1;
 
-		    if (lcdRegs[STAT] & 0x20) {
+			raiseInterrupt(VBLANK);
+
+			if (lcdRegs[STAT] & 0x10) {
+			    raiseInterrupt(LCD);
+			}
+
+			// TODO Draw Screen Here and wait
+			drawFrame();
+			frameDelay();
+
+		    } else {
+			lcdRegs[STAT] = lcdRegs[STAT] & ~(0x3) | 0x2;
+
+			if (lcdRegs[STAT] & 0x20) {
+			    raiseInterrupt(LCD);
+			}
+		    }
+		}
+		break;
+	    case 1: // Vertical Blank
+		if (lcdClock >= 456) {
+		    lcdClock -= 456;
+		    bool newFrame = false;
+		    lcdRegs[LY]++;
+		    if (lcdRegs[LY] >= 154) {
+			lcdRegs[LY] = 0;
+			newFrame = true;
+			checkLy();
+			lcdRegs[STAT] = lcdRegs[STAT] & ~(0x3) | 0x2;
+
+			if (lcdRegs[STAT] & 0x20) {
+			    raiseInterrupt(LCD);
+			}
+		    }
+		}
+		break;
+	    case 2: // OAM scan
+		if (lcdClock >= 80) {
+		    lcdRegs[STAT] = lcdRegs[STAT] & ~(0x3) | 0x3;
+		}
+		break;
+	    case 3: // Drawing Pixels
+		if (lcdClock >= 252) {
+
+		    // TODO Possibly draw the line here at the end of the Mode 3
+		    drawLine();
+
+		    lcdRegs[STAT] = lcdRegs[STAT] & ~(0x3) | 0x0;
+		    if (lcdRegs[STAT] & 0x08) {
 			raiseInterrupt(LCD);
 		    }
 		}
-	    }
-	    break;
-	case 2: // OAM scan
-	    if (lcdClock >= 80) {
-		lcdRegs[STAT] = lcdRegs[STAT] & ~(0x3) | 0x3;
-	    }
-	    break;
-	case 3: // Drawing Pixels
-	    if (lcdClock >= 252) {
-		lcdRegs[STAT] = lcdRegs[STAT] & ~(0x3) | 0x0;
-		if (lcdRegs[STAT] & 0x08) {
-		    raiseInterrupt(LCD);
-		}
-	    }
-	    break;
+		break;
+	}
     }
 }
 
