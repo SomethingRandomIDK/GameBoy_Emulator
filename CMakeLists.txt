@@ -6,6 +6,8 @@ include(GNUInstallDirs)
 
 find_package(SDL2 REQUIRED)
 
+add_compile_options(-g)
+
 add_executable(gbemu
     src/main.c
     src/timer.c

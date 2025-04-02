@@ -6,6 +6,8 @@
 
 bool dmaTransfering();
 
+void incLCDTimer(uint32_t cycles);
+
 uint8_t readLCD(uint16_t addr);
 void writeLCD(uint16_t addr, uint8_t val);
 

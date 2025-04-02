@@ -9,6 +9,12 @@
 
 gb_t gbcpu;
 
+bool running = true;
+
+void stopRunning() {
+    running = false;
+}
+
 uint16_t regAF() {
     uint16_t ret;
     ret = (gbcpu.regs.a << 8) | gbcpu.regs.f;
@@ -128,7 +134,6 @@ void initCPU() {
 void startCPU() {
     initLogger(NULL, TRACE);
     initGUI();
-    bool running = true;
 
     while(running) {
         if(gbcpu.halted || gbcpu.stopped) {
@@ -138,7 +143,6 @@ void startCPU() {
         }
 
         handleInterrupt(&gbcpu);
-        running = pollGUIEvents();
     }
 
     closeGUI();

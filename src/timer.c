@@ -2,6 +2,7 @@
 #include "./include/cart.h"
 #include "./include/interrupt.h"
 #include "./include/serial.h"
+#include "./include/lcd.h"
 
 #define CLOCK 4194304
 
@@ -53,6 +54,7 @@ void incTimer(uint32_t cycles) {
 void incAllTimers(uint32_t cycles) {
     incTimer(cycles);
     incSerialTimer(cycles);
+    incLCDTimer(cycles);
 }
 
 uint8_t readTimer(uint16_t addr) {

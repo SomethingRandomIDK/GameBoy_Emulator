@@ -57,7 +57,7 @@ void busWrite8(uint16_t addr, uint8_t val){
         romWrite(addr, val);
     } else if (addr < 0xa000) {
         // Write from vram
-	return ppuVramWrite(addr, val);
+	ppuVramWrite(addr, val);
     } else if (addr < 0xc000) {
         // Write from cart (RAM)
         romWrite(addr, val);

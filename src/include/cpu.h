@@ -57,5 +57,7 @@ void initCPU(void);
 
 void startCPU(void);
 
+void stopRunning();
+
 #endif
 

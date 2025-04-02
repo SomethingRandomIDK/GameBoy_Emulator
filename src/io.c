@@ -1,9 +1,13 @@
 #include "./include/io.h"
+#include "./include/lcd.h"
 #include "./include/interrupt.h"
 #include "./include/timer.h"
 #include "./include/serial.h"
 
 uint8_t ioRead(uint16_t addr) {
+    if (addr > 0xff3f && addr < 0xff4c) {
+	return readLCD(addr);
+    }
     switch(addr) {
         case 0xff01:
             return readSB();
@@ -24,6 +28,9 @@ uint8_t ioRead(uint16_t addr) {
 }
 
 void ioWrite(uint16_t addr, uint8_t val) {
+    if (addr > 0xff3f && addr < 0xff4c) {
+	writeLCD(addr, val);
+    }
     switch(addr) {
         case 0xff01:
             writeSB(val);
