@@ -132,6 +132,14 @@ void writeLCD(uint16_t addr, uint8_t val) {
     /* } */
     /* lcdRegs[addr - 0xff40] = val; */
     switch(addr - 0xff40) {
+	case LCDC:
+	    lcdRegs[LCDC] = val;
+	    if (!(val & 0x80)) {
+		lcdRegs[STAT] &= 0x7c;
+		lcdRegs[LY] = 0;
+		lcdClock = 0;
+	    }
+	    break;
 	case DMA:
 	    dmaTransfer = true;
 	    upperAddr = val;

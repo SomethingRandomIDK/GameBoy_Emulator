@@ -62,7 +62,7 @@ static void drawBgLine(uint8_t lcdc, uint8_t line) {
 	for(int i = 0; i < 8; i++) {
 	    uint8_t curPix = xPix + i;
 	    if (curPix >= xStart && curPix < endLine) {
-		int color = (((topByte >> i) & 0x1) << 1) | ((botByte >> i) & 0x1);
+		int color = (((topByte >> (7 - i)) & 0x1) << 1) | ((botByte >> (7 - i)) & 0x1);
 		screen[line][curPix - xStart] = bgPalette[color];
 	    }
 	}
@@ -75,8 +75,6 @@ void drawLine() {
     uint8_t line = readLCD(0xff44);
 
     drawBgLine(lcdc, line);
-
-    return;
 }
 
 void drawFrame() {
