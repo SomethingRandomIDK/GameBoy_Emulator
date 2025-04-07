@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+void resetWindowLine();
+
 void drawLine();
 void drawFrame();
 

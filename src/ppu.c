@@ -9,19 +9,18 @@ static uint8_t screen[144][160];
 
 static uint8_t palette[4] = {0xff, 0xab, 0x55, 0x00};
 
+static uint8_t windowLine = 0;
+
 enum tileData_t{
     TILE_BLOCK_1,
     TILE_BLOCK_2
 };
 
-static void drawBgLine(uint8_t lcdc, uint8_t line) {
-    if (!(lcdc & 0x01)) {
-	for (int i = 0; i < 160; i++) {
-	    screen[line][i] = 0xff;
-	}
-	return;
-    }
+void resetWindowLine() {
+    windowLine = 0;
+}
 
+static void drawWinLine(uint8_t lcdc, uint8_t line) {
     uint8_t bgPaletteNum = readLCD(0xff47);
     uint8_t bgPalette[4] = {
 	palette[bgPaletteNum & 0x3],
@@ -29,6 +28,61 @@ static void drawBgLine(uint8_t lcdc, uint8_t line) {
 	palette[(bgPaletteNum >> 4) & 0x3],
 	palette[(bgPaletteNum >> 6) & 0x3]
     };
+
+    uint8_t yWin = readLCD(0xff4a);
+    uint8_t xWin = readLCD(0xff4b);
+
+    if (!(lcdc & 0x1 && lcdc & 0x20) || line < yWin || xWin > 166) {
+	return;
+    }
+
+    uint16_t tileMapAddr = (lcdc & 0x40) ? 0x1c00 : 0x1800;
+    enum tileData_t tileBlock = (lcdc & 0x10) ? TILE_BLOCK_1 : TILE_BLOCK_2;
+
+    uint16_t xPix = xWin;
+
+    for (; xPix < 167; xPix += 8) {
+	uint16_t xTile = xPix - xWin; 
+
+	uint16_t tileLoc = tileMapAddr + ((xTile >> 3) | ((windowLine >> 3) << 5));
+	uint16_t tileNum = vram[tileLoc];
+	uint16_t rowAddr;
+	if (tileBlock == TILE_BLOCK_1) {
+	    rowAddr = tileNum << 4;
+	} else {
+	    rowAddr = (tileNum & 0x80) ? (((tileNum & 0x7f) << 4) + 0x800) : ((tileNum << 4) + 0x1000);
+	}
+
+	rowAddr += (windowLine & 0x7) << 1;
+	uint8_t botByte = vram[rowAddr];
+	uint8_t topByte = vram[rowAddr + 1];
+
+	for(int i = 0; i < 8; i++) {
+	    uint16_t curPix = xPix + i;
+	    if (curPix >= 7 && curPix < 167) {
+		int color = (((topByte >> (7 - i)) & 0x1) << 1) | ((botByte >> (7 - i)) & 0x1);
+		screen[line][curPix - 7] = bgPalette[color];
+	    }
+	}
+    }
+    windowLine++;
+}
+
+static void drawBgLine(uint8_t lcdc, uint8_t line) {
+    uint8_t bgPaletteNum = readLCD(0xff47);
+    uint8_t bgPalette[4] = {
+	palette[bgPaletteNum & 0x3],
+	palette[(bgPaletteNum >> 2) & 0x3],
+	palette[(bgPaletteNum >> 4) & 0x3],
+	palette[(bgPaletteNum >> 6) & 0x3]
+    };
+
+    if (!(lcdc & 0x01)) {
+	for (int i = 0; i < 160; i++) {
+	    screen[line][i] = bgPalette[0];
+	}
+	return;
+    }
 
     // Actual map values are 0x9800 and 0x9c00, but we are going to be directly
     // accessing the vram
@@ -76,6 +130,7 @@ void drawLine() {
     uint8_t line = readLCD(0xff44);
 
     drawBgLine(lcdc, line);
+    drawWinLine(lcdc, line);
 }
 
 void drawFrame() {

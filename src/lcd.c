@@ -101,6 +101,7 @@ void incLCDTimer(uint32_t cycles) {
 		    lcdRegs[LY]++;
 		    if (lcdRegs[LY] >= 154) {
 			lcdRegs[LY] = 0;
+			resetWindowLine();
 			statInter &= 0x7;
 			checkLy();
 			statInter &= 0xa;
@@ -146,13 +147,16 @@ uint8_t readLCD(uint16_t addr) {
 void writeLCD(uint16_t addr, uint8_t val) {
     switch(addr - 0xff40) {
 	case LCDC:
-	    lcdRegs[LCDC] = val;
 	    if (!(val & 0x80)) {
 		lcdRegs[STAT] &= 0x7c;
 		lcdRegs[LY] = 0;
+		resetWindowLine();
 		lcdClock = 0;
 		statInter = 0;
+	    } else if ((val & 0x80) && !(lcdRegs[LCDC] & 0x80)) {
+		lcdRegs[STAT] = (lcdRegs[STAT] & ~(0x3)) | 0x2;
 	    }
+	    lcdRegs[LCDC] = val;
 	    break;
 	case DMA:
 	    dmaTransfer = true;
