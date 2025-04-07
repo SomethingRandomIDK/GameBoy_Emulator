@@ -835,13 +835,8 @@ static void mapperMBC1Write(uint16_t addr, uint8_t val) {
 	// I need to check back later
 	// Yeah banking moed are implemented
         int shiftAmt = 8 - rom.header.romSize + 1;
-        rom.curRomBankNum = (val & (0xff >> (shiftAmt)));
-        if (shiftAmt < 4) {
-            rom.curRomBankNum &= 0x1f;
-            rom.curRomBankNum |= ((rom.curRamBankNum & 0x3) << 5);
-            rom.curRomBank0 = rom.cartridge + ((rom.curRomBankNum & 0x60) * 0x4000);
-        }
-        if ((rom.curRomBankNum & 0x1f) == 0) {
+        rom.curRomBankNum = val & 0x1f;
+        if (rom.curRomBankNum == 0) {
             rom.curRomBankNum += 1;
         }
         rom.curRomBank = rom.cartridge + (rom.curRomBankNum * 0x4000);

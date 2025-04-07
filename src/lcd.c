@@ -22,6 +22,7 @@ static uint8_t upperAddr;
 static uint8_t lowerAddr;
 static uint32_t dmaClock = 0;
 static uint32_t lcdClock = 0;
+static uint8_t statInter = 0;
 
 static uint8_t lcdRegs[] = {
     0x91, 0x81, 0x00, 0x00, 0x91, 0x00, 0xff, 0xfc, 0xff, 0xff, 0x00, 0x00
@@ -35,10 +36,14 @@ static void checkLy() {
     if (lcdRegs[LY] == lcdRegs[LYC]) {
 	lcdRegs[STAT] |= 0x4;
 	if (lcdRegs[STAT] & 0x40) {
-	    raiseInterrupt(LCD);
+	    if (statInter == 0) {
+		raiseInterrupt(LCD);
+	    }
+	    statInter |= 0x8;
 	}
     } else {
 	lcdRegs[STAT] &= ~(0x4);
+	statInter &= ~(0x8);
     }
 }
 
@@ -65,36 +70,51 @@ void incLCDTimer(uint32_t cycles) {
 			raiseInterrupt(VBLANK);
 
 			if (lcdRegs[STAT] & 0x10) {
-			    raiseInterrupt(LCD);
+			    if (!(statInter & 0x9)) {
+				raiseInterrupt(LCD);
+			    }
+			    statInter |= 0x2;
 			}
+			statInter &= 0xe;
 
 			// TODO Draw Screen Here and wait
 			drawFrame();
 			frameDelay();
 
 		    } else {
-			lcdRegs[STAT] = lcdRegs[STAT] & ~(0x3) | 0x2;
+			statInter &= 0x9;
+			lcdRegs[STAT] = (lcdRegs[STAT] & ~(0x3)) | 0x2;
 
 			if (lcdRegs[STAT] & 0x20) {
-			    raiseInterrupt(LCD);
+			    if (statInter == 0) {
+				raiseInterrupt(LCD);
+			    }
+			    statInter |= 0x4;
 			}
+			statInter &= 0xe;
 		    }
 		}
 		break;
 	    case 1: // Vertical Blank
 		if (lcdClock >= 456) {
 		    lcdClock -= 456;
-		    bool newFrame = false;
 		    lcdRegs[LY]++;
 		    if (lcdRegs[LY] >= 154) {
 			lcdRegs[LY] = 0;
-			newFrame = true;
+			statInter &= 0x7;
 			checkLy();
-			lcdRegs[STAT] = lcdRegs[STAT] & ~(0x3) | 0x2;
+			statInter &= 0xa;
+			lcdRegs[STAT] = (lcdRegs[STAT] & (~(0x3))) | 0x2;
 
 			if (lcdRegs[STAT] & 0x20) {
-			    raiseInterrupt(LCD);
+			    if (statInter == 0) {
+				raiseInterrupt(LCD);
+			    }
+			    statInter |= 0x4;
 			}
+			statInter &= 0xd;
+		    } else {
+			checkLy();
 		    }
 		}
 		break;
@@ -124,13 +144,6 @@ uint8_t readLCD(uint16_t addr) {
 }
 
 void writeLCD(uint16_t addr, uint8_t val) {
-    /* if (addr == (DMA + 0xff40)) { */
-    /*     dmaTransfer = true; */
-    /*     upperAddr = val; */
-    /*     lowerAddr = 0; */
-    /*     dmaClock = 0; */
-    /* } */
-    /* lcdRegs[addr - 0xff40] = val; */
     switch(addr - 0xff40) {
 	case LCDC:
 	    lcdRegs[LCDC] = val;
@@ -138,6 +151,7 @@ void writeLCD(uint16_t addr, uint8_t val) {
 		lcdRegs[STAT] &= 0x7c;
 		lcdRegs[LY] = 0;
 		lcdClock = 0;
+		statInter = 0;
 	    }
 	    break;
 	case DMA:
@@ -175,6 +189,6 @@ void writeLCD(uint16_t addr, uint8_t val) {
 	default:
 	    lcdRegs[addr - 0xff40] = val;
 	    break;
-    } 
+    }
 }
 

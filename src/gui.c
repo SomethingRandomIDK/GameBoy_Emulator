@@ -38,7 +38,7 @@ static void setPixSize() {
     } else {
 	pixSize = heightPix;
 	startY = 0;
-	int extraWidth = h - (pixSize * 160);
+	int extraWidth = w - (pixSize * 160);
 	startX = extraWidth/2;
     }
 }
@@ -66,6 +66,7 @@ void frameDelay() {
     if (curTime < frameTime) {
 	SDL_Delay(frameTime - curTime);
     }
+    frameStart = SDL_GetTicks();
 }
 
 static void pollGUIEvents() {

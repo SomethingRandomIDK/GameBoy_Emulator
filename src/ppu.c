@@ -32,21 +32,22 @@ static void drawBgLine(uint8_t lcdc, uint8_t line) {
 
     // Actual map values are 0x9800 and 0x9c00, but we are going to be directly
     // accessing the vram
-    uint16_t tileMapAddr = (lcdc & 0x8) ? 0x1800 : 0x1c00;
+    uint16_t tileMapAddr = (lcdc & 0x8) ? 0x1c00 : 0x1800;
     enum tileData_t tileBlock = (lcdc & 0x10) ? TILE_BLOCK_1 : TILE_BLOCK_2;
 
-    uint8_t yPix = readLCD(0xff43) + line;
-    uint8_t xStart = readLCD(0xff42);
-    uint8_t endLine = xStart + 160;
+    uint8_t yPix = readLCD(0xff42) + line;
+    uint8_t xStart = readLCD(0xff43);
+    uint16_t endLine = xStart + 160;
     // Sets xPix to the start of the tile
-    uint8_t xPix = xStart & 0xf8;
+    uint16_t xPix = xStart & 0xfff8;
 
     for (;xPix < endLine; xPix += 8) {
+	uint8_t xRow = (xPix & 0xff);
 
 	// Divides xPix and yPix by 8 to the get the tile locations
 	// and then multiplied yPix by 32 to ensure that we are looking at the
 	// right row
-	uint16_t tileLoc = tileMapAddr + ((xPix >> 3) | ((yPix >> 3) << 5));
+	uint16_t tileLoc = tileMapAddr + ((xRow >> 3) | ((yPix >> 3) << 5));
 	uint16_t tileNum = vram[tileLoc];
 	uint16_t rowAddr;
 	if (tileBlock == TILE_BLOCK_1) {
@@ -60,7 +61,7 @@ static void drawBgLine(uint8_t lcdc, uint8_t line) {
 	uint8_t topByte = vram[rowAddr + 1];
 
 	for(int i = 0; i < 8; i++) {
-	    uint8_t curPix = xPix + i;
+	    uint16_t curPix = xPix + i;
 	    if (curPix >= xStart && curPix < endLine) {
 		int color = (((topByte >> (7 - i)) & 0x1) << 1) | ((botByte >> (7 - i)) & 0x1);
 		screen[line][curPix - xStart] = bgPalette[color];
