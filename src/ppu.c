@@ -1,11 +1,15 @@
+#include <stdint.h>
+#include <stdbool.h>
+#include <sys/types.h>
+
 #include "./include/ppu.h"
 #include "./include/gui.h"
 #include "./include/lcd.h"
-#include <stdint.h>
 
 static uint8_t vram[0x2000];
 static uint8_t oam[0xa0];
 static uint8_t screen[144][160];
+static uint8_t bgScreen[144][160];
 
 static uint8_t palette[4] = {0xff, 0xab, 0x55, 0x00};
 
@@ -15,6 +19,129 @@ enum tileData_t{
     TILE_BLOCK_1,
     TILE_BLOCK_2
 };
+
+// Sort all sprites by x position using stable sort to not mess up the priority from reading
+static void sortSprites(int spritePriority[10][2], int oamNum) {
+    int i, j, k, m;
+    for (i = 1; i < oamNum; i++) {
+	m = spritePriority[i][0];
+	k = spritePriority[i][1];
+	j = i - 1;
+
+	while (j >= 0 && k < spritePriority[j][1]) {
+	    spritePriority[j + 1][0] = spritePriority[j][0];
+	    spritePriority[j + 1][1] = spritePriority[j][1];
+	    j--;
+	}
+	spritePriority[j + 1][0] = m;
+	spritePriority[j + 1][1] = k;
+    }
+}
+ 
+static void drawSpriteLine(uint8_t lcdc, uint8_t line) {
+    if (!(lcdc & 0x2)) {
+	 return;
+    }
+    uint8_t obj0PaletteNum = readLCD(0xff48);
+    uint8_t obj1PaletteNum = readLCD(0xff49);
+
+    uint8_t obj0[4] = {
+	palette[obj0PaletteNum & 0x3],
+	palette[(obj0PaletteNum >> 2) & 0x3],
+	palette[(obj0PaletteNum >> 4) & 0x3],
+	palette[(obj0PaletteNum >> 6) & 0x3]
+    };
+    uint8_t obj1[4] = {
+	palette[obj1PaletteNum & 0x3],
+	palette[(obj1PaletteNum >> 2) & 0x3],
+	palette[(obj1PaletteNum >> 4) & 0x3],
+	palette[(obj1PaletteNum >> 6) & 0x3]
+    };
+
+    bool size = !!(lcdc & 0x4);
+    int oamIdx = 0;
+    int oamNum = 0;
+    // idx 0 would be the oam index and idx 1 would be the x value
+    int oamPriority[10][2];
+
+    for(int i = 0; i < 0xa0; i += 4) {
+	if (size && line >= (oam[i] - 16) && line < oam[i]) {
+	    oamPriority[oamNum][0] = oamIdx;
+	    oamPriority[oamNum][1] = oam[i + 1];
+	    oamNum++;
+	    if (oamNum == 10) break;
+	} else if (!size && line >= (oam[i] - 16) && line < (oam[i] - 8)){
+	    oamPriority[oamNum][0] = oamIdx;
+	    oamPriority[oamNum][1] = oam[i + 1];
+	    oamNum++;
+	    if (oamNum == 10) break;
+	}
+	oamIdx++;
+    }
+
+    sortSprites(oamPriority, oamNum);
+
+    uint8_t spriteLine[160] = {0};
+
+    for (int i = oamNum - 1; i >= 0; i--) {
+	uint8_t spriteIdx = oamPriority[i][0] << 2;
+	uint8_t yPos = oam[spriteIdx];
+	uint8_t xPos = oam[spriteIdx + 1];
+	uint8_t tileNum = oam[spriteIdx + 2];
+	uint8_t attr = oam[spriteIdx + 3];
+
+	if (size) {
+	    tileNum &= ~(0x1);
+	}
+
+	uint16_t tileLoc = tileNum << 4;
+	uint16_t rowAddr;
+	if (attr & 0x40) {
+	    if (size) {
+		rowAddr = yPos - line - 1;
+	    } else {
+		rowAddr = yPos - line - 9;
+	    }
+	} else {
+	    rowAddr = line + 16 - yPos;
+	}
+
+	rowAddr = rowAddr << 1;
+	rowAddr += tileLoc;
+
+	uint8_t botByte = vram[rowAddr];
+	uint8_t topByte = vram[rowAddr + 1];
+
+	for (int j = 0; j < 8; j++) {
+	    int curPix = xPos + j - 8;
+	    if (curPix >= 0 && curPix < 160) {
+		uint8_t color;
+		if (attr & 0x20) {
+		    color = (((topByte >> j) & 0x1) << 1) | ((botByte >> j) & 0x1);
+		} else {
+		    color = (((topByte >> (7 - j)) & 0x1) << 1) | ((botByte >> (7 - j)) & 0x1);
+		}
+
+		uint8_t pix = 0;
+		pix |= (attr & 0x80);
+		pix |= (attr & 0x10);
+		pix |= (color & 0x03);
+
+		spriteLine[curPix] = pix;
+	    }
+	}
+    }
+
+    for (int i = 0; i < 160; i++) {
+	if (spriteLine[i] & 0x80) {
+	    if (!bgScreen[line][i] && !!(spriteLine[i] & 0x3)) {
+		screen[line][i] = (spriteLine[i] & 0x10) ? (obj1[(spriteLine[i] & 0x3)]): (obj0[(spriteLine[i] & 0x3)]);
+	    }
+	} else if (spriteLine[i] & 0x3) {
+		screen[line][i] = (spriteLine[i] & 0x10) ? (obj1[(spriteLine[i] & 0x3)]): (obj0[(spriteLine[i] & 0x3)]);
+	}
+    }
+}
 
 void resetWindowLine() {
     windowLine = 0;
@@ -62,6 +189,7 @@ static void drawWinLine(uint8_t lcdc, uint8_t line) {
 	    if (curPix >= 7 && curPix < 167) {
 		int color = (((topByte >> (7 - i)) & 0x1) << 1) | ((botByte >> (7 - i)) & 0x1);
 		screen[line][curPix - 7] = bgPalette[color];
+		bgScreen[line][curPix - 7] = color;
 	    }
 	}
     }
@@ -119,6 +247,7 @@ static void drawBgLine(uint8_t lcdc, uint8_t line) {
 	    if (curPix >= xStart && curPix < endLine) {
 		int color = (((topByte >> (7 - i)) & 0x1) << 1) | ((botByte >> (7 - i)) & 0x1);
 		screen[line][curPix - xStart] = bgPalette[color];
+		bgScreen[line][curPix - xStart] = color;
 	    }
 	}
 	
@@ -131,6 +260,7 @@ void drawLine() {
 
     drawBgLine(lcdc, line);
     drawWinLine(lcdc, line);
+    drawSpriteLine(lcdc, line);
 }
 
 void drawFrame() {
