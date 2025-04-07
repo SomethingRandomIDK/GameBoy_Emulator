@@ -127,6 +127,7 @@ static void drawSpriteLine(uint8_t lcdc, uint8_t line) {
 		pix |= (attr & 0x10);
 		pix |= (color & 0x03);
 
+		if (color)
 		spriteLine[curPix] = pix;
 	    }
 	}
