@@ -6,6 +6,7 @@
 
 #include "./include/gui.h"
 #include "./include/cpu.h"
+#include "./include/interrupt.h"
 #include "./logging/log.h"
 
 static SDL_Window *win = NULL;
@@ -20,6 +21,19 @@ uint32_t frameCur;
 // little difficult
 // Frames should be between 58.8 fps and 62.5 fps
 const uint32_t frameTime = 1000/60;
+
+static uint8_t joypadMode = 0;
+
+struct {
+    bool a;
+    bool b;
+    bool start;
+    bool select;
+    bool up;
+    bool down;
+    bool left;
+    bool right;
+} buttons;
 
 static void setPixSize() {
     int w, h;
@@ -74,15 +88,139 @@ static void pollGUIEvents() {
         switch (ev.type) {
             case SDL_QUIT:
 		stopRunning();
+		break;
 	    case SDL_WINDOWEVENT:
 		if (ev.window.event == SDL_WINDOWEVENT_RESIZED ||
 			ev.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
 		    setPixSize();
 		}
+		break;
+	    case SDL_KEYDOWN:
+		switch(ev.key.keysym.sym) {
+		    case SDLK_UP:
+			buttons.up = true;
+			if (!(joypadMode & 0x1)) {
+			    raiseInterrupt(JOYPAD);
+			}
+			break;
+		    case SDLK_DOWN:
+			buttons.down = true;
+			if (!(joypadMode & 0x1)) {
+			    raiseInterrupt(JOYPAD);
+			}
+			break;
+		    case SDLK_LEFT:
+			buttons.left = true;
+			if (!(joypadMode & 0x1)) {
+			    raiseInterrupt(JOYPAD);
+			}
+			break;
+		    case SDLK_RIGHT:
+			buttons.right = true;
+			if (!(joypadMode & 0x1)) {
+			    raiseInterrupt(JOYPAD);
+			}
+			break;
+		    case SDLK_q:
+			buttons.a = true;
+			if (!(joypadMode & 0x2)) {
+			    raiseInterrupt(JOYPAD);
+			}
+			break;
+		    case SDLK_s:
+			buttons.b = true;
+			if (!(joypadMode & 0x2)) {
+			    raiseInterrupt(JOYPAD);
+			}
+			break;
+		    case SDLK_TAB:
+			buttons.select = true;
+			if (!(joypadMode & 0x2)) {
+			    raiseInterrupt(JOYPAD);
+			}
+			break;
+		    case SDLK_RETURN:
+			buttons.start = true;
+			if (!(joypadMode & 0x2)) {
+			    raiseInterrupt(JOYPAD);
+			}
+			break;
+		}
+		break;
+	    case SDL_KEYUP:
+		switch(ev.key.keysym.sym) {
+		    case SDLK_UP:
+			buttons.up = false;
+			break;
+		    case SDLK_DOWN:
+			buttons.down = false;
+			break;
+		    case SDLK_LEFT:
+			buttons.left = false;
+			break;
+		    case SDLK_RIGHT:
+			buttons.right = false;
+			break;
+		    case SDLK_q:
+			buttons.a = false;
+			break;
+		    case SDLK_s:
+			buttons.b = false;
+			break;
+		    case SDLK_TAB:
+			buttons.select = false;
+			break;
+		    case SDLK_RETURN:
+			buttons.start = false;
+			break;
+		}
+		break;
         }
     }
 }
 
+bool checkStop() {
+    return buttons.a || buttons.b || buttons.up || buttons.down || buttons.left || buttons.right || buttons.select || buttons.start;
+}
+
+uint8_t readJoypad() {
+    uint8_t joyOutput = ((joypadMode << 4) & 0x30);
+    joyOutput |= 0xf;
+    if (!(joypadMode & 0x1)) {
+	joyOutput &= ~(buttons.down << 3);
+	joyOutput &= ~(buttons.up << 2);
+	joyOutput &= ~(buttons.left << 1);
+	joyOutput &= ~(buttons.right);
+    }
+    if (!(joypadMode & 0x2)) {
+	joyOutput &= ~(buttons.start << 3);
+	joyOutput &= ~(buttons.select << 2);
+	joyOutput &= ~(buttons.b << 1);
+	joyOutput &= ~(buttons.a);
+    }
+    return joyOutput;
+}
+
+void writeJoypad(uint8_t val) {
+    joypadMode = ((val >> 4) & 0x3);
+    uint8_t joyOutput = 0x0f;
+    if (!(joypadMode & 0x1)) {
+	joyOutput &= ~(buttons.down << 3);
+	joyOutput &= ~(buttons.up << 2);
+	joyOutput &= ~(buttons.left << 1);
+	joyOutput &= ~(buttons.right);
+    }
+    if (!(joypadMode & 0x2)) {
+	joyOutput &= ~(buttons.start << 3);
+	joyOutput &= ~(buttons.select << 2);
+	joyOutput &= ~(buttons.b << 1);
+	joyOutput &= ~(buttons.a);
+    }
+
+    if ((joyOutput & 0x0f) != 0x0f) {
+	raiseInterrupt(JOYPAD);
+    }
+}
 
 void renderFrame(uint8_t screen[144][160]) {
     pollGUIEvents();

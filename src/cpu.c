@@ -5,7 +5,9 @@
 #include "./include/interpreter.h"
 #include "./include/interrupt.h"
 #include "./include/timer.h"
+#include "./include/serial.h"
 #include "./logging/log.h"
+#include "./include/lcd.h"
 
 gb_t gbcpu;
 
@@ -137,7 +139,16 @@ void startCPU() {
 
     while(running) {
         if(gbcpu.halted || gbcpu.stopped) {
-            incAllTimers(4);
+	    incTimer(4);
+	    incSerialTimer(4);
+
+	    if (gbcpu.halted) {
+		incLCDTimer(4);
+	    }
+
+	    if (gbcpu.stopped) {
+		gbcpu.stopped = !checkStop();
+	    }
         } else {
             step(&gbcpu);
         }
