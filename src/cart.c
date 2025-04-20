@@ -609,6 +609,27 @@ static void loadRamFile() {
     }
 }
 
+static void findNumRomBanks() {
+    if (rom.header.romSize < 0x09) {
+	rom.numRomBanks = 1 << (rom.header.romSize + 1);
+	return;
+    }
+
+    switch(rom.header.romSize) {
+	case 0x52:
+	    rom.numRomBanks = 72;
+	    break;
+	case 0x53:
+	    rom.numRomBanks = 80;
+	    break;
+	case 0x54:
+	    rom.numRomBanks = 96;
+	    break;
+	default:
+	    rom.numRomBanks = 2;
+    }
+}
+
 static void cartTypeSelector() {
     rom.rtcAvail = false;
     switch(rom.header.type) {
@@ -624,7 +645,8 @@ static void cartTypeSelector() {
             // Set the pointer for curRomBank to the first Rom Bank
             rom.curRomBank0 = rom.cartridge;
             rom.curRomBank = rom.cartridge + 0x4000;
-            rom.numRomBanks = 1 << rom.header.romSize;
+            rom.curRomBankAlt = rom.cartridge + 0x4000;
+	    findNumRomBanks();
             rom.curRomBankNum = 1;
             // MBC1 specific
             rom.bankingMode = 0;
@@ -634,7 +656,8 @@ static void cartTypeSelector() {
             rom.cType = MBC2;
             rom.curRomBank0 = rom.cartridge;
             rom.curRomBank = rom.cartridge + 0x4000;
-            rom.numRomBanks = 1 << rom.header.romSize;
+            rom.curRomBankAlt = rom.cartridge + 0x4000;
+	    findNumRomBanks();
             rom.curRomBankNum = 1;
             break;
         case 0x0b:
@@ -643,7 +666,8 @@ static void cartTypeSelector() {
             rom.cType = MMM01;
             rom.curRomBank0 = rom.cartridge;
             rom.curRomBank = rom.cartridge + 0x4000;
-            rom.numRomBanks = 1 << rom.header.romSize;
+            rom.curRomBankAlt = rom.cartridge + 0x4000;
+	    findNumRomBanks();
             rom.curRomBankNum = 1;
             break;
         case 0x0f:
@@ -666,7 +690,8 @@ static void cartTypeSelector() {
             rom.cType = MBC3;
             rom.curRomBank0 = rom.cartridge;
             rom.curRomBank = rom.cartridge + 0x4000;
-            rom.numRomBanks = 1 << rom.header.romSize;
+            rom.curRomBankAlt = rom.cartridge + 0x4000;
+	    findNumRomBanks();
             rom.curRomBankNum = 1;
             break;
         case 0x19:
@@ -678,35 +703,40 @@ static void cartTypeSelector() {
             rom.cType = MBC5;
             rom.curRomBank0 = rom.cartridge;
             rom.curRomBank = rom.cartridge + 0x4000;
-            rom.numRomBanks = 1 << rom.header.romSize;
+            rom.curRomBankAlt = rom.cartridge + 0x4000;
+	    findNumRomBanks();
             rom.curRomBankNum = 1;
             break;
         case 0x20:
             rom.cType = MBC6;
             rom.curRomBank0 = rom.cartridge;
             rom.curRomBank = rom.cartridge + 0x4000;
-            rom.numRomBanks = 1 << rom.header.romSize;
+            rom.curRomBankAlt = rom.cartridge + 0x4000;
+	    findNumRomBanks();
             rom.curRomBankNum = 1;
             break;
         case 0x22:
             rom.cType = MBC7;
             rom.curRomBank0 = rom.cartridge;
             rom.curRomBank = rom.cartridge + 0x4000;
-            rom.numRomBanks = 1 << rom.header.romSize;
+            rom.curRomBankAlt = rom.cartridge + 0x4000;
+	    findNumRomBanks();
             rom.curRomBankNum = 1;
             break;
         case 0xfe:
             rom.cType = HUC3;
             rom.curRomBank0 = rom.cartridge;
             rom.curRomBank = rom.cartridge + 0x4000;
-            rom.numRomBanks = 1 << rom.header.romSize;
+            rom.curRomBankAlt = rom.cartridge + 0x4000;
+	    findNumRomBanks();
             rom.curRomBankNum = 1;
             break;
         case 0xff:
             rom.cType = HUC1;
             rom.curRomBank0 = rom.cartridge;
             rom.curRomBank = rom.cartridge + 0x4000;
-            rom.numRomBanks = 1 << rom.header.romSize;
+            rom.curRomBankAlt = rom.cartridge + 0x4000;
+	    findNumRomBanks();
             rom.curRomBankNum = 1;
             break;
         default:
@@ -809,7 +839,7 @@ static uint8_t mapperMBC1Read(uint16_t addr) {
             return rom.cartridge[addr];
     }
     else if (addr < 0x8000)
-        return rom.curRomBank[addr - 0x4000];
+	return rom.curRomBank[addr - 0x4000];
     else if (addr > 0x9fff && addr < 0xc000 && rom.ramAvail && rom.ramEnable) {
         if (rom.bankingMode)
             return rom.curRamBank[addr - 0xa000];
@@ -834,17 +864,32 @@ static void mapperMBC1Write(uint16_t addr, uint8_t val) {
 	// I think I have already added the banking modes, but I don't remember,
 	// I need to check back later
 	// Yeah banking moed are implemented
-        int shiftAmt = 8 - rom.header.romSize + 1;
         rom.curRomBankNum = val & 0x1f;
         if (rom.curRomBankNum == 0) {
             rom.curRomBankNum += 1;
         }
+
+	rom.curRomBankNum |= (rom.curRamBankNum << 5);
+	rom.curRomBankNum &= (rom.numRomBanks - 1);
+
+	rom.curRomBank0 = rom.cartridge + ((rom.curRomBankNum & 0x60) * 0x4000);
         rom.curRomBank = rom.cartridge + (rom.curRomBankNum * 0x4000);
+        rom.curRomBankAlt = rom.cartridge + ((rom.curRomBankNum & 0x1f) * 0x4000);
     } else if (addr < 0x6000) {
         rom.curRamBankNum = (val & 0x3);
         if (rom.ramAvail){
-            rom.curRamBank = rom.ram + (rom.curRamBankNum * 0x2000);
+            rom.curRamBank = rom.ram + ((rom.curRamBankNum % rom.numRamBanks) * 0x2000);
         }
+
+        uint16_t temp = rom.curRomBankNum & 0x1f;
+	rom.curRomBankNum = temp;
+
+	rom.curRomBankNum |= (rom.curRamBankNum << 5);
+	rom.curRomBankNum &= (rom.numRomBanks - 1);
+
+	rom.curRomBank0 = rom.cartridge + ((rom.curRomBankNum & 0x60) * 0x4000);
+        rom.curRomBank = rom.cartridge + (rom.curRomBankNum * 0x4000);
+        rom.curRomBankAlt = rom.cartridge + ((rom.curRomBankNum & 0x1f) * 0x4000);
     } else if (addr < 0x8000) {
         rom.bankingMode = val & 0x1;
     } else if (addr > 0x9fff && addr < 0xc000 && rom.ramAvail && rom.ramEnable) {

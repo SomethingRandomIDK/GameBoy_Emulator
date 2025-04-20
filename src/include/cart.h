@@ -71,6 +71,7 @@ typedef struct {
     uint8_t *ram;
     uint8_t *curRamBank;
     uint8_t *curRomBank;
+    uint8_t *curRomBankAlt;
     // This is for mode 1 (in MBC1 for now)
     uint8_t *curRomBank0;
     uint16_t numRomBanks;

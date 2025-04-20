@@ -37,6 +37,7 @@ void ioWrite(uint16_t addr, uint8_t val) {
     switch(addr) {
 	case 0xff00:
 	    writeJoypad(val);
+	    break;
         case 0xff01:
             writeSB(val);
             break;

@@ -3841,7 +3841,7 @@ static char *instNames[0x100] = {
 
     // 0xf0 - 0xff
     [0xf0] = "LDH A (n)",
-    [0xf1] = "POP HL",
+    [0xf1] = "POP AF",
     [0xf2] = "LD A (C)",
     [0xf3] = "DI",
     [0xf4] = NULL,

@@ -25,23 +25,23 @@ void incTimer(uint32_t cycles) {
     divReg += cycles;
 
     if (tac & 0x04) {
-        uint16_t timaCounter = 0;
+        bool timaCounter = false;
         switch(tac & 0x3) {
             case 0x0:
-                timaCounter = ((divReg >> 10)) - ((prevDiv >> 10));
+                timaCounter = ((divReg >> 10)) > ((prevDiv >> 10));
                 break;
             case 0x1:
-                timaCounter = ((divReg >> 4)) - ((prevDiv >> 4));
+                timaCounter = ((divReg >> 4)) > ((prevDiv >> 4));
                 break;
             case 0x2:
-                timaCounter = ((divReg >> 6)) - ((prevDiv >> 6));
+                timaCounter = ((divReg >> 6)) > ((prevDiv >> 6));
                 break;
             case 0x3:
-                timaCounter = ((divReg >> 8)) - ((prevDiv >> 8));
+                timaCounter = ((divReg >> 8)) > ((prevDiv >> 8));
                 break;
         }
 
-        for (uint16_t i = 0; i < timaCounter; i++) {
+        if (timaCounter) {
             tima++;
             if (!(tima)) {
                 raiseInterrupt(TIMER);
