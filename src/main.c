@@ -4,11 +4,11 @@
 #include "./include/cpu.h"
 #include "./include/cart.h"
 
-int main(int argv, char **argc) {
-    if (argv == 2)
-        cartInit(argc[1]);
+int main(int argc, char **argv) {
+    if (argc == 2)
+        cartInit(argv[1]);
     else {
-        printf("USAGE: %s <path to rom file>\n", argc[0]);
+        printf("USAGE: %s <path to rom file>\n", argv[0]);
         exit(1);
     }
 
