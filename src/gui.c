@@ -1,5 +1,7 @@
 #include <SDL.h>
 #include <SDL_events.h>
+#include <SDL_gamecontroller.h>
+#include <SDL_joystick.h>
 #include <SDL_render.h>
 #include <SDL_video.h>
 #include <stdio.h>
@@ -11,7 +13,10 @@
 
 static SDL_Window *win = NULL;
 static SDL_Renderer *rend = NULL;
+static SDL_GameController* cont = NULL;
 static SDL_Event ev;
+
+static bool contConnected = false;
 
 int pixSize, startX, startY;
 
@@ -57,7 +62,7 @@ static void setPixSize() {
     }
 }
 void initGUI() {
-    if (SDL_Init(SDL_INIT_VIDEO)) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER)) {
         logMessage("SDL Failed to init", ERROR);
         exit(-1);
     }
@@ -71,6 +76,16 @@ void initGUI() {
     frameStart = SDL_GetTicks();
 
     setPixSize();
+
+    int nJoysticks = SDL_NumJoysticks();
+    int i;
+    for (i = 0; i < nJoysticks; i++) {
+	if (SDL_IsGameController(i)) {
+	    cont = SDL_GameControllerOpen(i);
+	    contConnected = true;
+	    break;
+	}
+    }
 }
 
 void frameDelay() {
@@ -173,6 +188,107 @@ static void pollGUIEvents() {
 		    case SDLK_RETURN:
 			buttons.start = false;
 			break;
+		}
+		break;
+	    case SDL_CONTROLLERBUTTONDOWN:
+		if (contConnected && ev.cbutton.which == SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(cont))) {
+		    switch(ev.cbutton.button) {
+			case SDL_CONTROLLER_BUTTON_DPAD_UP:
+			    buttons.up = true;
+			    if (!(joypadMode & 0x1)) {
+				raiseInterrupt(JOYPAD);
+			    }
+			    break;
+			case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+			    buttons.down = true;
+			    if (!(joypadMode & 0x1)) {
+				raiseInterrupt(JOYPAD);
+			    }
+			    break;
+			case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+			    buttons.left = true;
+			    if (!(joypadMode & 0x1)) {
+				raiseInterrupt(JOYPAD);
+			    }
+			    break;
+			case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+			    buttons.right = true;
+			    if (!(joypadMode & 0x1)) {
+				raiseInterrupt(JOYPAD);
+			    }
+			    break;
+			case SDL_CONTROLLER_BUTTON_A:
+			    buttons.a = true;
+			    if (!(joypadMode & 0x2)) {
+				raiseInterrupt(JOYPAD);
+			    }
+			    break;
+			case SDL_CONTROLLER_BUTTON_B:
+			    buttons.b = true;
+			    if (!(joypadMode & 0x2)) {
+				raiseInterrupt(JOYPAD);
+			    }
+			    break;
+			case SDL_CONTROLLER_BUTTON_BACK:
+			    buttons.select = true;
+			    if (!(joypadMode & 0x2)) {
+				raiseInterrupt(JOYPAD);
+			    }
+			    break;
+			case SDL_CONTROLLER_BUTTON_START:
+			    buttons.start = true;
+			    if (!(joypadMode & 0x2)) {
+				raiseInterrupt(JOYPAD);
+			    }
+			    break;
+		    }
+		}
+		break;
+	    case SDL_CONTROLLERBUTTONUP:
+		if (contConnected && ev.cbutton.which == SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(cont))) {
+		    switch(ev.cbutton.button) {
+			case SDL_CONTROLLER_BUTTON_DPAD_UP:
+			    buttons.up = false;
+			    break;
+			case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+			    buttons.down = false;
+			    break;
+			case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+			    buttons.left = false;
+			    break;
+			case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+			    buttons.right = false;
+			    break;
+			case SDL_CONTROLLER_BUTTON_A:
+			    buttons.a = false;
+			    break;
+			case SDL_CONTROLLER_BUTTON_B:
+			    buttons.b = false;
+			    break;
+			case SDL_CONTROLLER_BUTTON_BACK:
+			    buttons.select = false;
+			    break;
+			case SDL_CONTROLLER_BUTTON_START:
+			    buttons.start = false;
+			    break;
+		    }
+		}
+		break;
+	    case SDL_CONTROLLERDEVICEADDED:
+		if (!contConnected) {
+		    if (SDL_IsGameController(ev.cdevice.which)) {
+			cont = SDL_GameControllerOpen(ev.cdevice.which);
+			contConnected = true;
+		    }
+		}
+		break;
+	    case SDL_CONTROLLERDEVICEREMOVED:
+		if (contConnected) {
+		    if (ev.cdevice.which == SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(cont))) {
+			SDL_GameControllerClose(cont);
+			cont = NULL;
+			contConnected = false;
+		    }
 		}
 		break;
         }
