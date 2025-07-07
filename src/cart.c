@@ -748,6 +748,8 @@ static void cartTypeSelector() {
     rom.ramEnable = false;
     switch(rom.header.ramSize) {
         case 0x00:
+            // This check is based off the nintendo official cartridges needing
+            // to set the size to 0 if there is no RAM
             rom.ramAvail = false;
             break;
         case 0x02:
@@ -800,7 +802,7 @@ static void cartTypeSelector() {
 
 // TODO Need to test the ram saving methods after I get the screen to work
 static void saveRam() {
-    if (!rom.battery) return;
+    if (!rom.battery && !rom.ramAvail) return;
 
     FILE *f = fopen(rom.ramFilename, "wb");
 
@@ -919,9 +921,11 @@ static void mapperMBC2Write(uint16_t addr, uint8_t val) {
             if ((val & 0xf) == 0) {
                 val++;
             }
+            
+            val = (val & 0xf) % rom.numRomBanks;
             rom.curRomBank = rom.cartridge + ((val & 0xf) * 0x4000);
         } else {
-            rom.ramEnable = val == 0x0a;
+            rom.ramEnable = (val & 0xf) == 0x0a;
             if (!rom.ramEnable) {
                 saveRam();
             }
