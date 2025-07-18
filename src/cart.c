@@ -970,7 +970,7 @@ static uint8_t mapperMBC3Read(uint16_t addr) {
     } else if (addr < 0x8000) {
         return rom.curRomBank[addr - 0x4000];
     } else if (addr > 0x9fff && addr < 0xc000 && rom.ramEnable) {
-        if (rom.curRamBankNum < 0x4 && rom.ramAvail) {
+        if (rom.curRamBankNum < 0x8 && rom.ramAvail) {
             return rom.curRamBank[addr - 0xa000];
         } else if (rom.rtcAvail) {
             switch(rom.curRamBankNum){
@@ -1008,14 +1008,14 @@ static void mapperMBC3Write(uint16_t addr, uint8_t val) {
         rom.curRomBank = rom.cartridge + (rom.curRomBankNum * 0x4000);
     } else if (addr < 0x6000) {
         rom.curRamBankNum = val;
-        if (rom.curRamBankNum < 0x4)
+        if (rom.curRamBankNum < 0x8)
             rom.curRamBank = rom.ram + (rom.curRamBankNum * 0x2000);
     } else if (addr < 0x8000 && rom.ramEnable && rom.rtcAvail) {
         if (rom.prevLatch == 0 && val == 1)
             rom.latchedRegs = rom.curRtcRegs;
         rom.prevLatch = val;
     } else if (addr > 0x9fff && addr < 0xc000 && rom.ramEnable) {
-        if (rom.curRamBankNum < 0x4 && rom.ramAvail)
+        if (rom.curRamBankNum < 0x8 && rom.ramAvail)
             rom.curRamBank[addr - 0xa000] = val;
         else if (rom.rtcAvail) {
             switch(rom.curRamBankNum) {
@@ -1040,7 +1040,6 @@ static void mapperMBC3Write(uint16_t addr, uint8_t val) {
 }
 
 // There is no MBC4 mapper
-// Interesting fun fact, this might be because 4 is an unlucky number
 
 // Read and Write function for the MBC5 cartridge
 static uint8_t mapperMBC5Read(uint16_t addr) {
@@ -1056,17 +1055,19 @@ static uint8_t mapperMBC5Read(uint16_t addr) {
 
 static void mapperMBC5Write(uint16_t addr, uint8_t val) {
     if (addr < 0x2000) {
-        rom.ramEnable = val == 0x0a;
+        rom.ramEnable = (val & 0xf) == 0xa;
         if (!rom.ramEnable) {
             saveRam();
         }
     } else if (addr < 0x3000) {
         rom.curRomBankNum &= 0x100;
         rom.curRomBankNum |= val;
+        rom.curRomBankNum %= rom.numRomBanks;
         rom.curRomBank = rom.cartridge + (rom.curRomBankNum * 0x4000);
     } else if (addr < 0x4000) {
         rom.curRomBankNum &= 0xff;
         rom.curRomBankNum |= ((val & 0x1) << 8);
+        rom.curRomBankNum %= rom.numRomBanks;
         rom.curRomBank = rom.cartridge + (rom.curRomBankNum * 0x4000);
     } else if (addr < 0x6000) {
         rom.curRamBankNum = val & 0xf;
