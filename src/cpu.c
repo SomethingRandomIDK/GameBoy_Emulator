@@ -141,6 +141,7 @@ void startCPU() {
         if(gbcpu.halted || gbcpu.stopped) {
 	    incTimer(4);
 	    incSerialTimer(4);
+        incEventTimer(4);
 
 	    if (gbcpu.halted) {
 		incLCDTimer(4);

@@ -11,6 +11,13 @@
 #include "./include/interrupt.h"
 #include "./logging/log.h"
 
+// This means that the events will be checked twice each frame
+// A frame is about 70224 cycles
+
+#define GUI_CYCLES 35112
+
+static uint32_t guiCycleCount = 0;
+
 static SDL_Window *win = NULL;
 static SDL_Renderer *rend = NULL;
 static SDL_GameController* cont = NULL;
@@ -50,16 +57,14 @@ static void setPixSize() {
     heightPix = heightPix ? heightPix : 1;
 
     if (widPix < heightPix) {
-	pixSize = widPix;
-	startX = 0;
-	int extraHeight = h - (pixSize * 144);
-	startY = extraHeight/2;
+        pixSize = widPix;
     } else {
-	pixSize = heightPix;
-	startY = 0;
-	int extraWidth = w - (pixSize * 160);
-	startX = extraWidth/2;
+        pixSize = heightPix;
     }
+    int extraHeight = h - (pixSize * 144);
+    startY = extraHeight/2;
+    int extraWidth = w - (pixSize * 160);
+    startX = extraWidth/2;
 }
 void initGUI() {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER)) {
@@ -335,6 +340,14 @@ void writeJoypad(uint8_t val) {
 
     if ((joyOutput & 0x0f) != 0x0f) {
 	raiseInterrupt(JOYPAD);
+    }
+}
+
+void incEventTimer(uint32_t cycles) {
+    guiCycleCount += cycles;
+    if (guiCycleCount >= GUI_CYCLES) {
+        guiCycleCount -= GUI_CYCLES;
+        pollGUIEvents();
     }
 }
 
