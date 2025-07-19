@@ -3,6 +3,7 @@
 #include "./include/interrupt.h"
 #include "./include/serial.h"
 #include "./include/lcd.h"
+#include "./include/gui.h"
 
 #define CLOCK 4194304
 
@@ -52,6 +53,7 @@ void incTimer(uint32_t cycles) {
 }
 
 void incAllTimers(uint32_t cycles) {
+    incEventTimer(cycles);
     incTimer(cycles);
     incSerialTimer(cycles);
     incLCDTimer(cycles);
