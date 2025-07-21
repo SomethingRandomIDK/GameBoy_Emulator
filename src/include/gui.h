@@ -14,7 +14,6 @@ void closeGUI();
 
 void incEventTimer(uint32_t cycles);
 
-void frameDelay();
 void renderFrame(uint8_t screen[144][160]);
 
 #endif
