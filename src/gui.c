@@ -32,7 +32,7 @@ uint32_t frameCur;
 // Gameboy actually runs at 59.7 fps, but implementing that exactly will be a
 // little difficult
 // Frames should be between 58.8 fps and 62.5 fps
-const uint32_t frameTime = 1000/60;
+const uint32_t frameTime = 1000/120;
 
 static uint8_t joypadMode = 0;
 
@@ -93,7 +93,7 @@ void initGUI() {
     }
 }
 
-void frameDelay() {
+static void frameDelay() {
     frameCur = SDL_GetTicks();
     uint32_t curTime = frameCur - frameStart;
 
@@ -308,16 +308,16 @@ uint8_t readJoypad() {
     uint8_t joyOutput = ((joypadMode << 4) & 0x30);
     joyOutput |= 0xf;
     if (!(joypadMode & 0x1)) {
-	joyOutput &= ~(buttons.down << 3);
-	joyOutput &= ~(buttons.up << 2);
-	joyOutput &= ~(buttons.left << 1);
-	joyOutput &= ~(buttons.right);
+        joyOutput &= ~(buttons.down << 3);
+        joyOutput &= ~(buttons.up << 2);
+        joyOutput &= ~(buttons.left << 1);
+        joyOutput &= ~(buttons.right);
     }
     if (!(joypadMode & 0x2)) {
-	joyOutput &= ~(buttons.start << 3);
-	joyOutput &= ~(buttons.select << 2);
-	joyOutput &= ~(buttons.b << 1);
-	joyOutput &= ~(buttons.a);
+        joyOutput &= ~(buttons.start << 3);
+        joyOutput &= ~(buttons.select << 2);
+        joyOutput &= ~(buttons.b << 1);
+        joyOutput &= ~(buttons.a);
     }
     return joyOutput;
 }
@@ -348,6 +348,7 @@ void incEventTimer(uint32_t cycles) {
     if (guiCycleCount >= GUI_CYCLES) {
         guiCycleCount -= GUI_CYCLES;
         pollGUIEvents();
+        frameDelay();
     }
 }
 
