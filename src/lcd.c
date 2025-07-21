@@ -79,7 +79,6 @@ void incLCDTimer(uint32_t cycles) {
 
 			// TODO Draw Screen Here and wait
 			drawFrame();
-			frameDelay();
 
 		    } else {
 			statInter &= 0x9;
