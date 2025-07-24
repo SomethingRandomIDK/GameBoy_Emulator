@@ -1,5 +1,8 @@
 #include "./include/apu.h"
 
+#define FR_64_HZ 65535
+#define FR_256_HZ 16383
+
 // $FF10	NR10	Sound channel 1 sweep	R/W	All
 // $FF11	NR11	Sound channel 1 length timer & duty cycle	Mixed	All
 // $FF12	NR12	Sound channel 1 volume & envelope	R/W	All
@@ -49,7 +52,16 @@ uint8_t ch1CurPace = 0;
 uint16_t ch1CurPeriod = 0x7ff;
 uint16_t ch1CurPeriodVal = 0x7ff;
 uint8_t ch1VolReg = 0xf3;
+uint8_t ch1Vol = 0xf;
 uint8_t ch1DutyIdx = 0;
+uint32_t ch1VolClock = 0;
+uint8_t ch1VolTimer = 0;
+uint8_t ch1LenTimer = 0x3f;
+uint32_t ch1LenClock = 0;
+
+#define CH_1_CUR_VOL (ch1VolReg >> 4)
+#define CH_1_CUR_ENV (ch1VolReg & 0x8)
+#define CH_1_CUR_SWEEP (ch1VolReg & 0x7)
 
 static void ch1Tick(uint32_t cycles) {
     uint32_t mClocks = cycles >> 2;
@@ -68,6 +80,39 @@ static void ch1Tick(uint32_t cycles) {
         }
         ch1CurPeriodVal = ch1CurPeriod;
     }
+
+    if (CH_1_CUR_SWEEP) {
+        ch1VolClock += cycles;
+        if (ch1VolClock > FR_64_HZ) {
+            ch1VolClock -= (FR_64_HZ + 1);
+            ch1VolTimer++;
+            if (ch1VolTimer == CH_1_CUR_SWEEP) {
+                ch1VolTimer = 0;
+                if (CH_1_CUR_ENV) {
+                    if (ch1Vol < 0xf) {
+                        ch1Vol++;
+                    }
+                } else {
+                    if (ch1Vol > 0) {
+                        ch1Vol--;
+                    }
+                }
+            }
+        }
+    }
+
+    if (CH_1_LEN_EN) {
+        ch1LenClock += cycles;
+        if (ch1LenClock > FR_256_HZ) {
+            ch1LenClock -= (FR_256_HZ + 1);
+            ch1LenTimer++;
+            if (ch1LenTimer == 0x3f) {
+                // TODO Need to disable the Channel 1 here
+            }
+        }
+    }
+
+
 }
 
 // Channel 2 Functions and variables
