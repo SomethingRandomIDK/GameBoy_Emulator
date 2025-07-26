@@ -290,13 +290,83 @@ static void ch3Tick(uint32_t cycles) {
 #define CH_4_TRIG (soundRegs[0x13] & 0x80)
 
 uint8_t ch4VolReg = 0x00;
+uint8_t ch4Vol = 0;
+uint8_t ch4VolTimer = 0;
+uint32_t ch4VolClock = 0;
+uint8_t ch4LenTimer = 0x3f;
+uint32_t ch4LenClock = 0;
+uint32_t ch4Clock = 0;
+uint32_t ch4FreqCycles = 0;
+
+uint16_t ch4LSFR = 0;
+
+#define CH_4_CUR_VOL (ch4VolReg >> 4)
+#define CH_4_CUR_ENV (ch4VolReg & 0x8)
+#define CH_4_CUR_SWEEP (ch4VolReg & 0x7)
 
 static void ch4Tick(uint32_t cycles) {
-    return;
+    ch4Clock += cycles;
+    if (ch4Clock > ch4FreqCycles) {
+        ch4Clock = 0;
+
+        uint16_t bitSwitch = (ch4LSFR ^ (ch4LSFR >> 1)) & 0x1;
+
+        ch4LSFR &= ~0x8000;
+        ch4LSFR |= bitSwitch << 15;
+
+        if (CH_4_LSFR) {
+            ch4LSFR &= ~0x80;
+            ch4LSFR |= bitSwitch << 7;
+        }
+
+        ch4LSFR >>= 1;
+
+        if (CH_4_DIVIDER) {
+            ch4FreqCycles = 8;
+        } else {
+            ch4FreqCycles = 16 * CH_4_DIVIDER;
+        }
+        ch4FreqCycles <<= CH_4_SHIFT;
+    }
+
+    if (CH_4_CUR_SWEEP) {
+        ch4VolClock += cycles;
+        if (ch4VolClock > FR_64_HZ) {
+            ch4VolClock -= (FR_64_HZ + 1);
+            ch4VolTimer++;
+            if (ch4VolTimer >= CH_4_CUR_SWEEP) {
+                ch4VolTimer = 0;
+                if (CH_4_CUR_ENV) {
+                    if (ch4Vol < 0xf) {
+                        ch4Vol++;
+                    }
+                } else {
+                    if (ch4Vol > 0) {
+                        ch4Vol--;
+                    }
+                }
+            }
+        }
+    }
+
+    if (CH_4_LEN_EN) {
+        ch4LenClock += cycles;
+        if (ch4LenClock > FR_256_HZ) {
+            ch4LenClock -= (FR_256_HZ + 1);
+            ch4LenTimer++;
+            if (ch4LenTimer >= 0x3f) {
+                // Disable channel 4 here
+                soundRegs[0x16] &= (~0x08);
+            }
+        }
+    }
 }
 
 void incApuTimer(uint32_t cycles) {
-    return;
+    ch1Tick(cycles);
+    ch2Tick(cycles);
+    ch3Tick(cycles);
+    ch4Tick(cycles);
 }
 
 uint8_t readSound(uint16_t addr) {
