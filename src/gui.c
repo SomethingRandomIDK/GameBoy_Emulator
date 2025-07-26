@@ -32,7 +32,7 @@ uint32_t frameCur;
 // Gameboy actually runs at 59.7 fps, but implementing that exactly will be a
 // little difficult
 // Frames should be between 58.8 fps and 62.5 fps
-const uint32_t frameTime = 1000/1000;
+const uint32_t frameTime = 1000/60;
 
 static uint8_t joypadMode = 0;
 
@@ -98,6 +98,7 @@ static void frameDelay() {
     uint32_t curTime = frameCur - frameStart;
 
     if (curTime < frameTime) {
+        // printf("WAIT TIME: %d\n", frameTime - curTime);
 	SDL_Delay(frameTime - curTime);
     }
     frameStart = SDL_GetTicks();
@@ -348,7 +349,6 @@ void incEventTimer(uint32_t cycles) {
     if (guiCycleCount >= GUI_CYCLES) {
         guiCycleCount -= GUI_CYCLES;
         pollGUIEvents();
-        frameDelay();
     }
 }
 
@@ -372,14 +372,15 @@ void renderFrame(uint8_t screen[144][160]) {
     }
     SDL_RenderPresent(rend);
 
-    uint32_t timePassed = SDL_GetTicks() - frameTimeStart;
-    frameCount++;
-    if (timePassed > 1000) {
-        frameTimeStart = SDL_GetTicks();
-        printf("FPS: %d\n", frameCount);
-        printf("TIME: %d\n", timePassed);
-        frameCount = 0;
-    }
+    // uint32_t timePassed = SDL_GetTicks() - frameTimeStart;
+    // frameCount++;
+    // if (timePassed > 1000) {
+    //     frameTimeStart = SDL_GetTicks();
+    //     printf("FPS: %d\n", frameCount);
+    //     printf("TIME: %d\n", timePassed);
+    //     frameCount = 0;
+    // }
+    frameDelay();
 }
 
 void closeGUI() {

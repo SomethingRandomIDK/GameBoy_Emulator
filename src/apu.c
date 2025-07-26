@@ -1,6 +1,7 @@
 #include "./include/apu.h"
 
 #define FR_64_HZ 65535
+#define FR_128_HZ 32767
 #define FR_256_HZ 16383
 
 // $FF10	NR10	Sound channel 1 sweep	R/W	All
@@ -48,7 +49,6 @@ uint8_t soundRegs[0x30] = {
 #define CH_1_LEN_EN (soundRegs[0x04] & 0x40)
 #define CH_1_TRIG (soundRegs[0x04] & 0x80)
 
-uint8_t ch1CurPace = 0;
 uint16_t ch1CurPeriod = 0x7ff;
 uint16_t ch1CurPeriodVal = 0x7ff;
 uint8_t ch1VolReg = 0xf3;
@@ -58,10 +58,37 @@ uint32_t ch1VolClock = 0;
 uint8_t ch1VolTimer = 0;
 uint8_t ch1LenTimer = 0x3f;
 uint32_t ch1LenClock = 0;
+uint8_t ch1CurPace = 0;
+uint32_t ch1SweepClock = 0;
+uint8_t ch1SweepTimer = 0;
 
 #define CH_1_CUR_VOL (ch1VolReg >> 4)
 #define CH_1_CUR_ENV (ch1VolReg & 0x8)
 #define CH_1_CUR_SWEEP (ch1VolReg & 0x7)
+
+static uint16_t ch1CalcNewPeriod() {
+    uint16_t curPeriod = CH_1_PERIOD;
+    uint16_t deltaVal = curPeriod >> CH_1_STEP;
+
+    if (CH_1_DIR) {
+        curPeriod -= deltaVal;
+    } else {
+        curPeriod += deltaVal;
+
+        if (curPeriod > 0x7ff) {
+            // Disable the Channel 1 here
+            soundRegs[0x16] &= (~0x01);
+        }
+    }
+
+    // This assumes that if there is an underflow it would also be greater than
+    // 0x7ff, since it is a unsigned number
+    if (curPeriod > 0x7ff) {
+        curPeriod = CH_1_PERIOD;
+    }
+
+    return curPeriod;
+}
 
 static void ch1Tick(uint32_t cycles) {
     uint32_t mClocks = cycles >> 2;
@@ -78,7 +105,7 @@ static void ch1Tick(uint32_t cycles) {
             // the APU registers
             ch1CurPeriod = CH_1_PERIOD;
         }
-        ch1CurPeriodVal = ch1CurPeriod;
+        ch1CurPeriodVal = ch1CurPeriod + (ch1CurPeriodVal - 0x1000);
     }
 
     if (CH_1_CUR_SWEEP) {
@@ -86,7 +113,7 @@ static void ch1Tick(uint32_t cycles) {
         if (ch1VolClock > FR_64_HZ) {
             ch1VolClock -= (FR_64_HZ + 1);
             ch1VolTimer++;
-            if (ch1VolTimer == CH_1_CUR_SWEEP) {
+            if (ch1VolTimer >= CH_1_CUR_SWEEP) {
                 ch1VolTimer = 0;
                 if (CH_1_CUR_ENV) {
                     if (ch1Vol < 0xf) {
@@ -106,13 +133,31 @@ static void ch1Tick(uint32_t cycles) {
         if (ch1LenClock > FR_256_HZ) {
             ch1LenClock -= (FR_256_HZ + 1);
             ch1LenTimer++;
-            if (ch1LenTimer == 0x3f) {
-                // TODO Need to disable the Channel 1 here
+            if (ch1LenTimer >= 0x3f) {
+                // Disable the Channel 1 here
+                soundRegs[0x16] &= (~0x01);
             }
         }
     }
 
+    ch1SweepClock += cycles;
+    if (ch1SweepClock > FR_128_HZ) {
+        ch1SweepClock -= (FR_128_HZ + 1);
+        if (ch1CurPace == 0) {
+            ch1CalcNewPeriod();
+        } else {
+            ch1SweepTimer++;
+            if (ch1SweepTimer >= ch1CurPace) {
+                ch1SweepTimer = 0;
+                uint16_t newPeriod = ch1CalcNewPeriod();
 
+                // Setting the new Period
+                soundRegs[0x03] = (newPeriod & 0xf);
+                soundRegs[0x04] &= 0xf8;
+                soundRegs[0x04] |= ((newPeriod >> 8) & 0x7);
+            }
+        }
+    }
 }
 
 // Channel 2 Functions and variables
@@ -126,10 +171,68 @@ static void ch1Tick(uint32_t cycles) {
 #define CH_2_TRIG (soundRegs[0x09] & 0x80)
 
 uint16_t ch2CurPeriod = 0x7ff;
+uint16_t ch2CurPeriodVal = 0x7ff;
 uint8_t ch2VolReg = 0x00;
+uint8_t ch2Vol = 0x0;
+uint8_t ch2DutyIdx = 0;
+uint32_t ch2VolClock = 0;
+uint8_t ch2VolTimer = 0;
+uint8_t ch2LenTimer = 0x3f;
+uint32_t ch2LenClock = 0;
+
+#define CH_2_CUR_VOL (ch2VolReg >> 4)
+#define CH_2_CUR_ENV (ch2VolReg & 0x8)
+#define CH_2_CUR_SWEEP (ch2VolReg & 0x7)
 
 static void ch2Tick(uint32_t cycles) {
-    return;
+    uint32_t mClocks = cycles >> 2;
+    ch2CurPeriodVal += mClocks;
+    while (ch2CurPeriodVal > 0x7ff) {
+
+        // Need to implement what the duty actually does here
+        ch2DutyIdx++;
+
+        if (ch2DutyIdx > 0x7) {
+            ch2DutyIdx = 0;
+
+            // This means that a sample is over so the period can refresh from 
+            // the APU registers
+            ch2CurPeriod = CH_2_PERIOD;
+        }
+        ch2CurPeriodVal = ch2CurPeriod + (ch2CurPeriodVal - 0x1000);
+    }
+
+    if (CH_2_CUR_SWEEP) {
+        ch2VolClock += cycles;
+        if (ch2VolClock > FR_64_HZ) {
+            ch2VolClock -= (FR_64_HZ + 1);
+            ch2VolTimer++;
+            if (ch2VolTimer >= CH_2_CUR_SWEEP) {
+                ch2VolTimer = 0;
+                if (CH_2_CUR_ENV) {
+                    if (ch2Vol < 0xf) {
+                        ch2Vol++;
+                    }
+                } else {
+                    if (ch2Vol > 0) {
+                        ch2Vol--;
+                    }
+                }
+            }
+        }
+    }
+
+    if (CH_2_LEN_EN) {
+        ch2LenClock += cycles;
+        if (ch2LenClock > FR_256_HZ) {
+            ch2LenClock -= (FR_256_HZ + 1);
+            ch2LenTimer++;
+            if (ch2LenTimer >= 0x3f) {
+                // Disable the Channel 2 here
+                soundRegs[0x16] &= (~0x02);
+            }
+        }
+    }
 }
 
 // Channel 3 Functions and variables
@@ -141,9 +244,38 @@ static void ch2Tick(uint32_t cycles) {
 #define CH_3_TRIG (soundRegs[0x0e] & 0x80)
 
 uint16_t ch3CurPeriod = 0x7ff;
+uint16_t ch3CurPeriodVal = 0x7ff;
+uint16_t ch3LenTimer = 0xff;
+uint32_t ch3LenClock = 0;
+uint8_t waveRamIdx = 0;
 
 static void ch3Tick(uint32_t cycles) {
-    return;
+    uint32_t dotClock = cycles >> 1;
+    ch3CurPeriodVal += dotClock;
+    
+    while (ch3CurPeriodVal > 0x7ff) {
+
+        waveRamIdx++;
+
+        if (waveRamIdx > 0x1f) {
+            waveRamIdx = 0;
+
+            ch3CurPeriod = CH_3_PERIOD;
+        }
+        ch3CurPeriodVal = ch3CurPeriod + (ch3CurPeriodVal - 0x1000);
+    }
+
+    if (CH_3_LEN_EN) {
+        ch3LenClock += cycles;
+        if (ch3LenClock > FR_256_HZ) {
+            ch3LenClock -= (FR_256_HZ + 1);
+            ch3LenTimer++;
+            if (ch3LenTimer >= 0xff) {
+                // Disable the Channel 3 here
+                soundRegs[0x16] &= (~0x04);
+            }
+        }
+    }
 }
 
 // Channel 4 Functions and variables
