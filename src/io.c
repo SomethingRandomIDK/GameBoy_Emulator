@@ -4,11 +4,17 @@
 #include "./include/timer.h"
 #include "./include/serial.h"
 #include "./include/gui.h"
+#include "./include/apu.h"
 
 uint8_t ioRead(uint16_t addr) {
     if (addr > 0xff3f && addr < 0xff4c) {
 	return readLCD(addr);
     }
+
+    if (addr > 0xff0f && addr < 0xff40) {
+        return readSound(addr);
+    }
+
     switch(addr) {
 	case 0xff00:
 	    return readJoypad();
@@ -34,6 +40,12 @@ void ioWrite(uint16_t addr, uint8_t val) {
     if (addr > 0xff3f && addr < 0xff4c) {
 	writeLCD(addr, val);
     }
+
+    if (addr > 0xff0f && addr < 0xff40) {
+        writeSound(addr, val);
+        return;
+    }
+
     switch(addr) {
 	case 0xff00:
 	    writeJoypad(val);

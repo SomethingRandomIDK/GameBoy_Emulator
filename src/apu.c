@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #include "./include/apu.h"
 
 #define FR_64_HZ 65535
@@ -41,9 +43,7 @@ uint8_t soundRegs[0x30] = {
 #define CH_1_DIR (soundRegs[0x00] & 0x08)
 #define CH_1_STEP (soundRegs[0x00] & 0x07)
 #define CH_1_DUTY (soundRegs[0x01] >> 6)
-#define CH_1_VOL (soundRegs[0x02] >> 4)
-#define CH_1_ENV (soundRegs[0x02] & 0x8)
-#define CH_1_SWEEP (soundRegs[0x02] & 0x7)
+#define CH_1_VOL_REG (soundRegs[0x02])
 #define CH_1_LEN_EN (soundRegs[0x04] & 0x40)
 #define CH_1_TRIG (soundRegs[0x04] & 0x80)
 
@@ -55,12 +55,12 @@ uint8_t ch1Vol = 0xf;
 uint8_t ch1DutyIdx = 0;
 uint32_t ch1VolClock = 0;
 uint8_t ch1VolTimer = 0;
-uint8_t ch1Len = 0;
 uint8_t ch1LenTimer = 0x0;
 uint32_t ch1LenClock = 0;
 uint8_t ch1CurPace = 0;
 uint32_t ch1SweepClock = 0;
 uint8_t ch1SweepTimer = 0;
+bool sweepEn = true;
 
 #define CH_1_CUR_VOL (ch1VolReg >> 4)
 #define CH_1_CUR_ENV (ch1VolReg & 0x8)
@@ -76,12 +76,12 @@ static void ch1Reset() {
     ch1DutyIdx = 0;
     ch1VolClock = 0;
     ch1VolTimer = 0;
-    ch1Len = 0x0;
     ch1LenTimer = 0x0;
     ch1LenClock = 0;
     ch1CurPace = 0;
     ch1SweepClock = 0;
     ch1SweepTimer = 0;
+    sweepEn = false;
 
     // Reseting actual registers
     soundRegs[0x00] &= 0x80;
@@ -91,7 +91,7 @@ static void ch1Reset() {
 }
 
 static uint16_t ch1CalcNewPeriod() {
-    uint16_t curPeriod = ch1Period;
+    uint16_t curPeriod = ch1CurPeriod;
     uint16_t deltaVal = curPeriod >> CH_1_STEP;
 
     if (CH_1_DIR) {
@@ -108,10 +108,39 @@ static uint16_t ch1CalcNewPeriod() {
     // This assumes that if there is an underflow it would also be greater than
     // 0x7ff, since it is a unsigned number
     if (curPeriod > 0x7ff) {
-        curPeriod = ch1Period;
+        curPeriod = ch1CurPeriod;
     }
 
     return curPeriod;
+}
+
+static void ch1Trigger() {
+    ch1CurPeriod = ch1Period;
+    ch1CurPeriodVal = ch1CurPeriod;
+    ch1DutyIdx = 0;
+
+    ch1VolReg = CH_1_VOL_REG;
+    ch1VolClock = 0;
+    ch1VolTimer = 0;
+    ch1Vol = CH_1_CUR_VOL;
+    if (ch1VolReg & 0xf8) {
+        soundRegs[0x16] |= 0x01;
+    }
+
+    // Skeptical on whether this goes back to zero or the last written length
+    // value, might have to do some testing
+    if (ch1LenTimer > 0x3f) {
+        ch1LenClock = 0;
+        ch1LenTimer = 0;
+    }
+
+    ch1SweepClock = 0;
+    ch1SweepTimer = 0;
+    ch1CurPace = CH_1_PACE;
+    sweepEn = ch1CurPace + CH_1_STEP > 0;
+    if (CH_1_STEP) {
+        ch1CalcNewPeriod();
+    }
 }
 
 static void ch1Tick(uint32_t cycles) {
@@ -167,14 +196,14 @@ static void ch1Tick(uint32_t cycles) {
     ch1SweepClock += cycles;
     if (ch1SweepClock > FR_128_HZ) {
         ch1SweepClock -= (FR_128_HZ + 1);
-        if (ch1CurPace == 0) {
-            ch1CalcNewPeriod();
-        } else {
+        if (ch1CurPace > 0 && sweepEn) {
             ch1SweepTimer++;
             if (ch1SweepTimer >= ch1CurPace) {
                 ch1SweepTimer = 0;
                 ch1CurPace = CH_1_PACE;
                 ch1Period = ch1CalcNewPeriod();
+                ch1CurPeriod = ch1Period;
+                ch1CalcNewPeriod();
             }
         }
     }
@@ -182,9 +211,7 @@ static void ch1Tick(uint32_t cycles) {
 
 // Channel 2 Functions and variables
 #define CH_2_DUTY (soundRegs[0x06] >> 6)
-#define CH_2_VOL (soundRegs[0x07] >> 4)
-#define CH_2_ENV (soundRegs[0x07] & 0x8)
-#define CH_2_SWEEP (soundRegs[0x07] & 0x7)
+#define CH_2_VOL_REG (soundRegs[0x07])
 #define CH_2_PERIOD (soundRegs[0x08] | ((soundRegs[0x09] & 0x7) << 8))
 #define CH_2_LEN_EN (soundRegs[0x09] & 0x40)
 #define CH_2_TRIG (soundRegs[0x09] & 0x80)
@@ -197,7 +224,6 @@ uint8_t ch2Vol = 0x0;
 uint8_t ch2DutyIdx = 0;
 uint32_t ch2VolClock = 0;
 uint8_t ch2VolTimer = 0;
-uint8_t ch2Len = 0x3f;
 uint8_t ch2LenTimer = 0x3f;
 uint32_t ch2LenClock = 0;
 
@@ -215,7 +241,6 @@ static void ch2Reset() {
     ch2DutyIdx = 0;
     ch2VolClock = 0;
     ch2VolTimer = 0;
-    ch2Len = 0x0;
     ch2LenTimer = 0x0;
     ch2LenClock = 0;
 
@@ -223,6 +248,27 @@ static void ch2Reset() {
     soundRegs[0x06] &= 0x3f;
     soundRegs[0x07] = 0;
     soundRegs[0x09] &= 0xbf;
+}
+
+static void ch2Trigger() {
+    ch2CurPeriod = ch2Period;
+    ch2CurPeriodVal = ch2CurPeriod;
+    ch2DutyIdx = 0;
+
+    ch2VolReg = CH_2_VOL_REG;
+    ch2VolClock = 0;
+    ch2VolTimer = 0;
+    ch2Vol = CH_2_CUR_VOL;
+    if (ch2VolReg & 0xf8) {
+        soundRegs[0x16] |= 0x02;
+    }
+
+    // Skeptical on whether this goes back to zero or the last written length
+    // value, might have to do some testing
+    if (ch2LenTimer > 0x3f) {
+        ch2LenClock = 0;
+        ch2LenTimer = 0;
+    }
 }
 
 static void ch2Tick(uint32_t cycles) {
@@ -286,7 +332,6 @@ static void ch2Tick(uint32_t cycles) {
 uint16_t ch3Period = 0x7ff;
 uint16_t ch3CurPeriod = 0x7ff;
 uint16_t ch3CurPeriodVal = 0x7ff;
-uint16_t ch3Len = 0xff;
 uint16_t ch3LenTimer = 0xff;
 uint32_t ch3LenClock = 0;
 uint8_t waveRamIdx = 0;
@@ -296,7 +341,6 @@ static void ch3Reset() {
     ch3Period = 0x0;
     ch3CurPeriod = 0x0;
     ch3CurPeriodVal = 0x0;
-    ch3Len = 0x0;
     ch3LenTimer = 0x0;
     ch3LenClock = 0;
     waveRamIdx = 0;
@@ -304,6 +348,23 @@ static void ch3Reset() {
     soundRegs[0x0a] &= 0x7f;
     soundRegs[0x0c] &= 0x9f;
     soundRegs[0x0e] &= 0xbf;
+}
+
+static void ch3Trigger() {
+    ch3CurPeriod = ch3Period;
+    ch3CurPeriodVal = ch3CurPeriod;
+    waveRamIdx = 0;
+
+    if (CH_3_DAC) {
+        soundRegs[0x16] |= 0x08;
+    }
+
+    // Need to check if volume needs to be retriggered or just changed on write
+
+    if (ch3LenTimer > 0xff) {
+        ch3LenTimer = 0;
+        ch3LenClock = 0;
+    }
 }
 
 static void ch3Tick(uint32_t cycles) {
@@ -336,9 +397,7 @@ static void ch3Tick(uint32_t cycles) {
 }
 
 // Channel 4 Functions and variables
-#define CH_4_VOL (soundRegs[0x11] >> 0x04)
-#define CH_4_ENV (soundRegs[0x11] & 0x08)
-#define CH_4_SWEEP (soundRegs[0x11] & 0x07)
+#define CH_4_VOL_REG (soundRegs[0x11] >> 0x04)
 #define CH_4_SHIFT (soundRegs[0x12] >> 0x04)
 #define CH_4_LSFR (soundRegs[0x12] & 0x08)
 #define CH_4_DIVIDER (soundRegs[0x12] & 0x07)
@@ -349,7 +408,6 @@ uint8_t ch4VolReg = 0x00;
 uint8_t ch4Vol = 0;
 uint8_t ch4VolTimer = 0;
 uint32_t ch4VolClock = 0;
-uint8_t ch4Len = 0x3f;
 uint8_t ch4LenTimer = 0x3f;
 uint32_t ch4LenClock = 0;
 uint32_t ch4Clock = 0;
@@ -366,7 +424,6 @@ static void ch4Reset() {
     ch4Vol = 0;
     ch4VolTimer = 0;
     ch4VolClock = 0;
-    ch4Len = 0x0;
     ch4LenTimer = 0x0;
     ch4LenClock = 0;
     ch4Clock = 0;
@@ -376,6 +433,25 @@ static void ch4Reset() {
     soundRegs[0x11] = 0;
     soundRegs[0x12] = 0;
     soundRegs[0x13] &= 0xbf;
+}
+
+static void ch4Trigger() {
+    ch4VolReg = CH_4_VOL_REG;
+    ch4VolClock = 0;
+    ch4VolTimer = 0;
+    ch4Vol = CH_4_CUR_VOL;
+    if (ch4VolReg & 0xf8) {
+        soundRegs[0x16] |= 0x08;
+    }
+    //
+    // Skeptical on whether this goes back to zero or the last written length
+    // value, might have to do some testing
+    if (ch4LenTimer > 0x3f) {
+        ch4LenClock = 0;
+        ch4LenTimer = 0;
+    }
+
+    ch4LSFR = 0;
 }
 
 static void ch4Tick(uint32_t cycles) {
@@ -475,29 +551,127 @@ void incApuTimer(uint32_t cycles) {
 }
 
 uint8_t readSound(uint16_t addr) {
+    if (addr > 0xff2f && addr < 0xff40 && CH3_ON) {
+        return 0xff;
+    }
     return soundRegs[addr - 0xff10];
 }
 
 void writeSound(uint16_t addr, uint8_t val) {
     uint16_t relAddr = addr - 0xff10;
-    switch(relAddr) {
-        case 0x16:
-            if ((soundRegs[relAddr] & 0x80) > (val & 0x80)) {
-                // TODO Turing the APU off
-                
-                soundRegs[0x16] &= 0x70;
-                soundRegs[0x15] = 0;
-                soundRegs[0x14] = 0;
+    if (relAddr == 0x16) {
+        if ((soundRegs[relAddr] & 0x80) > (val & 0x80)) {
+            
+            soundRegs[0x16] &= 0x70;
+            soundRegs[0x15] = 0;
+            soundRegs[0x14] = 0;
 
-                ch1Reset();
-                ch2Reset();
-                ch3Reset();
-                ch4Reset();
-            }
-            soundRegs[0x16] = (val & 0x80) | (soundRegs[0x16] & 0x7f);
-            break;
-        default:
+            ch1Reset();
+            ch2Reset();
+            ch3Reset();
+            ch4Reset();
+        }
+        soundRegs[0x16] = (val & 0x80) | (soundRegs[0x16] & 0x7f);
+
+        return;
+    }
+
+    if (relAddr > 0x1f && relAddr < 0x30) {
+        if (!CH3_ON) {
             soundRegs[relAddr] = val;
+        }
+
+        return;
+    }
+
+    if (AUD_ON) {
+        switch(relAddr) {
+            case 0x12:
+            case 0x14:
+            case 0x15:
+                soundRegs[relAddr] = val;
+                break;
+            case 0x00:
+                soundRegs[relAddr] = (soundRegs[relAddr] & 0x80) | (val & 0x7f);
+                break;
+            case 0x01:
+                soundRegs[relAddr] = (soundRegs[relAddr] & 0x3f) | (val & 0xc0);
+                ch1LenTimer = val & 0x3f;
+                break;
+            case 0x02:
+                if (!(val & 0xf8)) {
+                    soundRegs[0x16] &= (~0x01);
+                }
+                soundRegs[relAddr] = val;
+                break;
+            case 0x03:
+                ch1Period = (ch1Period & 0x700) | (val);
+                break;
+            case 0x04:
+                ch1Period = (ch1Period & 0xff) | ((val & 0x3) << 8);
+                soundRegs[relAddr] = (soundRegs[relAddr] & 0xbf) | (val & 0x40);
+                if (val & 0x80) {
+                    ch1Trigger();
+                }
+                break;
+            case 0x06:
+                soundRegs[relAddr] = (soundRegs[relAddr] & 0x3f) | (val & 0xc0);
+                ch2LenTimer = val & 0x3f;
+                break;
+            case 0x07:
+                if (!(val & 0xf8)) {
+                    soundRegs[0x16] &= (~0x02);
+                }
+                soundRegs[relAddr] = val;
+                break;
+            case 0x08:
+                ch2Period = (ch2Period & 0x700) | (val);
+                break;
+            case 0x09:
+                ch2Period = (ch2Period & 0xff) | ((val & 0x3) << 8);
+                soundRegs[relAddr] = (soundRegs[relAddr] & 0xbf) | (val & 0x40);
+                if (val & 0x80) {
+                    ch2Trigger();
+                }
+                break;
+            case 0x0a:
+                soundRegs[relAddr] = (soundRegs[relAddr] & 0x7f) | (val & 0x80);
+                if (!(val & 0x80)) {
+                    soundRegs[0x16] &= (~0x04);
+                }
+                break;
+            case 0x0b:
+                ch3LenTimer = val;
+                break;
+            case 0x0c:
+                soundRegs[relAddr] = (soundRegs[relAddr] & 0x9f) | (val & 0x60);
+                break;
+            case 0x0d:
+                ch3Period = (ch3Period & 0x700) | val;
+                break;
+            case 0x0e:
+                ch3Period = (ch3Period & 0xff) | ((val & 0x3) << 8);
+                soundRegs[relAddr] = (soundRegs[relAddr] & 0xbf) | (val & 0x40);
+                if (val & 0x80) {
+                    ch3Trigger();
+                }
+                break;
+            case 0x10:
+                ch4LenTimer = (val & 0x3f);
+                break;
+            case 0x11:
+                if (!(val & 0xf8)) {
+                    soundRegs[0x16] &= (~0x08);
+                }
+                soundRegs[relAddr] = val;
+                break;
+            case 0x13:
+                soundRegs[relAddr] = (soundRegs[relAddr] & 0xbf) | (val & 0x40);
+                if (val & 0x80) {
+                    ch4Trigger();
+                }
+                break;
+        }
     }
 }
 
