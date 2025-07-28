@@ -1,6 +1,7 @@
 #include <stdbool.h>
 
 #include "./include/apu.h"
+#include "./include/gui.h"
 
 #define FR_64_HZ 65535
 #define FR_128_HZ 32767
@@ -36,6 +37,10 @@ uint8_t soundRegs[0x30] = {
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+};
+
+uint8_t dutyWaves[0x4] = {
+    0xfe, 0x7e, 0x78, 0x81
 };
 
 // Channel 1 Functions and variables
@@ -533,6 +538,8 @@ static void ch4Tick(uint32_t cycles) {
 #define L_VOL ((soundRegs[0x14] >> 4) & 0x7)
 #define R_VOL (soundRegs[0x14] & 0x7)
 
+uint32_t sampleTimer = 0;
+
 void incApuTimer(uint32_t cycles) {
     if (!AUD_ON) return;
 
@@ -547,6 +554,50 @@ void incApuTimer(uint32_t cycles) {
     }
     if (CH4_ON) {
         ch4Tick(cycles);
+    }
+
+    sampleTimer += cycles;
+    if (sampleTimer >= SAMPLE_SIZE) {
+        sampleTimer = 0;
+        uint8_t ch1Sample = 0;
+        uint8_t ch2Sample = 0;
+        uint8_t ch3Sample = 0;
+        uint8_t ch4Sample = 0;
+
+        if (CH1_ON) {
+            if (dutyWaves[CH_1_DUTY] & (1 << (7 - ch1DutyIdx))) {
+                ch1Sample = ch1Vol;
+            }
+        }
+
+        if (CH2_ON) {
+            if (dutyWaves[CH_2_DUTY] & (1 << (7 - ch2DutyIdx))) {
+                ch2Sample = ch2Vol;
+            }
+        }
+
+        if (CH3_ON && CH_3_OUT_LV) {
+            ch3Sample = soundRegs[0x20 + (waveRamIdx >> 1)];
+            if (!(waveRamIdx & 0x01)) {
+                ch3Sample >>= 4;
+            }
+            ch3Sample &= 0xf;
+        }
+
+        if (CH4_ON) {
+            if (ch4LSFR & 0x01) {
+                ch4Sample = ch4Vol;
+            }
+        }
+
+        pushAudio(
+            soundRegs[0x15],
+            soundRegs[0x14],
+            ch1Sample,
+            ch2Sample,
+            ch3Sample,
+            ch4Sample
+        );
     }
 }
 
