@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #include "./include/apu.h"
 
 #define FR_64_HZ 65535
@@ -175,6 +173,7 @@ static void ch1Tick(uint32_t cycles) {
             ch1SweepTimer++;
             if (ch1SweepTimer >= ch1CurPace) {
                 ch1SweepTimer = 0;
+                ch1CurPace = CH_1_PACE;
                 ch1Period = ch1CalcNewPeriod();
             }
         }
