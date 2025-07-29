@@ -105,7 +105,6 @@ void initGUI() {
 }
 
 void pushAudio(uint8_t sPanning, uint8_t mVol, uint8_t ch1, uint8_t ch2, uint8_t ch3, uint8_t ch4){
-    printf("CALLED\n");
     float buff0 = 0, buff1 = 0;
     int lVol = (mVol >> 4) & 0x7;
     int rVol = mVol & 0x7;
@@ -161,10 +160,8 @@ void pushAudio(uint8_t sPanning, uint8_t mVol, uint8_t ch1, uint8_t ch2, uint8_t
         uint32_t buffSize = 1024 * sizeof(float);
 
         while (SDL_GetQueuedAudioSize(aud) > buffSize) {
-            printf("FROZEN\n");
         }
 
-        printf("QUEUED\n");
         SDL_QueueAudio(aud, soundBuffer, buffSize);
     }
 }
@@ -448,15 +445,15 @@ void renderFrame(uint8_t screen[144][160]) {
     }
     SDL_RenderPresent(rend);
 
-    // uint32_t timePassed = SDL_GetTicks() - frameTimeStart;
-    // frameCount++;
-    // if (timePassed > 1000) {
-    //     frameTimeStart = SDL_GetTicks();
-    //     printf("FPS: %d\n", frameCount);
-    //     printf("TIME: %d\n", timePassed);
-    //     frameCount = 0;
-    // }
-    frameDelay();
+    uint32_t timePassed = SDL_GetTicks() - frameTimeStart;
+    frameCount++;
+    if (timePassed > 1000) {
+        frameTimeStart = SDL_GetTicks();
+        printf("FPS: %d\n", frameCount);
+        printf("TIME: %d\n", timePassed);
+        frameCount = 0;
+    }
+    // frameDelay();
 }
 
 void closeGUI() {

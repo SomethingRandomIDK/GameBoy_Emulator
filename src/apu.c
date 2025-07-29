@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdbool.h>
 
 #include "./include/apu.h"
@@ -557,7 +558,7 @@ void incApuTimer(uint32_t cycles) {
     }
 
     sampleTimer += cycles;
-    if (sampleTimer >= SAMPLE_SIZE) {
+    if (sampleTimer >= CLOCKS_PER_SAMPLE) {
         sampleTimer = 0;
         uint8_t ch1Sample = 0;
         uint8_t ch2Sample = 0;
