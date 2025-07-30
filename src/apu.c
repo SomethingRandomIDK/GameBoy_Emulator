@@ -82,7 +82,7 @@ static void ch1Reset() {
     ch1DutyIdx = 0;
     ch1VolClock = 0;
     ch1VolTimer = 0;
-    ch1LenTimer = 0x0;
+    ch1LenTimer = 0x3f;
     ch1LenClock = 0;
     ch1CurPace = 0;
     ch1SweepClock = 0;
@@ -247,7 +247,7 @@ static void ch2Reset() {
     ch2DutyIdx = 0;
     ch2VolClock = 0;
     ch2VolTimer = 0;
-    ch2LenTimer = 0x0;
+    ch2LenTimer = 0x3f;
     ch2LenClock = 0;
 
     // Reseting external registers
@@ -347,7 +347,7 @@ static void ch3Reset() {
     ch3Period = 0x0;
     ch3CurPeriod = 0x0;
     ch3CurPeriodVal = 0x0;
-    ch3LenTimer = 0x0;
+    ch3LenTimer = 0xff;
     ch3LenClock = 0;
     waveRamIdx = 0;
 
@@ -403,7 +403,7 @@ static void ch3Tick(uint32_t cycles) {
 }
 
 // Channel 4 Functions and variables
-#define CH_4_VOL_REG (soundRegs[0x11] >> 0x04)
+#define CH_4_VOL_REG (soundRegs[0x11])
 #define CH_4_SHIFT (soundRegs[0x12] >> 0x04)
 #define CH_4_LSFR (soundRegs[0x12] & 0x08)
 #define CH_4_DIVIDER (soundRegs[0x12] & 0x07)
@@ -419,7 +419,7 @@ uint32_t ch4LenClock = 0;
 uint32_t ch4Clock = 0;
 uint32_t ch4FreqCycles = 0;
 
-uint16_t ch4LSFR = 0;
+uint16_t ch4LSFR = 0x7fff;
 
 #define CH_4_CUR_VOL (ch4VolReg >> 4)
 #define CH_4_CUR_ENV (ch4VolReg & 0x8)
@@ -430,7 +430,7 @@ static void ch4Reset() {
     ch4Vol = 0;
     ch4VolTimer = 0;
     ch4VolClock = 0;
-    ch4LenTimer = 0x0;
+    ch4LenTimer = 0x3f;
     ch4LenClock = 0;
     ch4Clock = 0;
     ch4FreqCycles = 0;
@@ -457,7 +457,7 @@ static void ch4Trigger() {
         ch4LenTimer = 0;
     }
 
-    ch4LSFR = 0;
+    ch4LSFR = 0x7fff;
 }
 
 static void ch4Tick(uint32_t cycles) {
@@ -477,7 +477,7 @@ static void ch4Tick(uint32_t cycles) {
 
         ch4LSFR >>= 1;
 
-        if (CH_4_DIVIDER) {
+        if (!CH_4_DIVIDER) {
             ch4FreqCycles = 8;
         } else {
             ch4FreqCycles = 16 * CH_4_DIVIDER;
