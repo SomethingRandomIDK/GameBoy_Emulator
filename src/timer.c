@@ -4,6 +4,7 @@
 #include "./include/serial.h"
 #include "./include/lcd.h"
 #include "./include/gui.h"
+#include "./include/apu.h"
 
 #define CLOCK 4194304
 
@@ -16,6 +17,7 @@ static uint32_t mbc3Cycles = 0;
 
 void incTimer(uint32_t cycles) {
     mbc3Cycles += cycles;
+    incApuTimer(cycles);
 
     if(mbc3Cycles >= CLOCK) {
         updateRtcRegs();

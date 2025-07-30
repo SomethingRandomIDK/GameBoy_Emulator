@@ -1,10 +1,6 @@
-#include <SDL.h>
-#include <SDL_events.h>
-#include <SDL_gamecontroller.h>
-#include <SDL_joystick.h>
-#include <SDL_render.h>
-#include <SDL_video.h>
 #include <stdio.h>
+
+#include <SDL.h>
 
 #include "./include/gui.h"
 #include "./include/cpu.h"
@@ -22,17 +18,21 @@ static SDL_Window *win = NULL;
 static SDL_Renderer *rend = NULL;
 static SDL_GameController* cont = NULL;
 static SDL_Event ev;
+static SDL_AudioDeviceID aud;
 
 static bool contConnected = false;
 
 int pixSize, startX, startY;
+
+float soundBuffer [4096] = {0};
+int soundIdx = 0;
 
 uint32_t frameStart;
 uint32_t frameCur;
 // Gameboy actually runs at 59.7 fps, but implementing that exactly will be a
 // little difficult
 // Frames should be between 58.8 fps and 62.5 fps
-const uint32_t frameTime = 1000/120;
+const uint32_t frameTime = 1000/60;
 
 static uint8_t joypadMode = 0;
 
@@ -67,7 +67,7 @@ static void setPixSize() {
     startX = extraWidth/2;
 }
 void initGUI() {
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER)) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_AUDIO)) {
         logMessage("SDL Failed to init", ERROR);
         exit(-1);
     }
@@ -91,6 +91,79 @@ void initGUI() {
 	    break;
 	}
     }
+
+    SDL_AudioSpec specs = {
+        .freq = GUI_FREQUENCY,
+        .format = AUDIO_F32SYS,
+        .channels = 2,
+        .samples = SAMPLE_SIZE,
+        .callback = NULL
+    };
+
+    aud = SDL_OpenAudioDevice(NULL, 0, &specs, NULL, SDL_AUDIO_ALLOW_ANY_CHANGE);
+    SDL_PauseAudioDevice(aud, 0);
+}
+
+void pushAudio(uint8_t sPanning, uint8_t mVol, uint8_t ch1, uint8_t ch2, uint8_t ch3, uint8_t ch4){
+    float buff0 = 0, buff1 = 0;
+    int lVol = (mVol >> 4) & 0x7;
+    int rVol = mVol & 0x7;
+
+    lVol = (128 * lVol) / 7;
+    rVol = (128 * rVol) / 7;
+
+    if (sPanning & 0x80) {
+        buff1 = ((float) ch4) / 64;
+        SDL_MixAudioFormat((Uint8 *)&buff0, (Uint8 *)&buff1, AUDIO_F32SYS, sizeof(float), lVol);
+    }
+    if (sPanning & 0x40) {
+        buff1 = ((float) ch3) / 64;
+        SDL_MixAudioFormat((Uint8 *)&buff0, (Uint8 *)&buff1, AUDIO_F32SYS, sizeof(float), lVol);
+    }
+    if (sPanning & 0x20) {
+        buff1 = ((float) ch2) / 64;
+        SDL_MixAudioFormat((Uint8 *)&buff0, (Uint8 *)&buff1, AUDIO_F32SYS, sizeof(float), lVol);
+    }
+    if (sPanning & 0x10) {
+        buff1 = ((float) ch1) / 64;
+        SDL_MixAudioFormat((Uint8 *)&buff0, (Uint8 *)&buff1, AUDIO_F32SYS, sizeof(float), lVol);
+    }
+
+    soundBuffer[soundIdx] = buff0;
+    soundIdx++;
+
+    buff0 = 0;
+    if (sPanning & 0x08) {
+        buff1 = ((float) ch4) / 64;
+        SDL_MixAudioFormat((Uint8 *)&buff0, (Uint8 *)&buff1, AUDIO_F32SYS, sizeof(float), rVol);
+    }
+    if (sPanning & 0x04) {
+        buff1 = ((float) ch3) / 64;
+        SDL_MixAudioFormat((Uint8 *)&buff0, (Uint8 *)&buff1, AUDIO_F32SYS, sizeof(float), rVol);
+    }
+    if (sPanning & 0x02) {
+        buff1 = ((float) ch2) / 64;
+        SDL_MixAudioFormat((Uint8 *)&buff0, (Uint8 *)&buff1, AUDIO_F32SYS, sizeof(float), rVol);
+    }
+    if (sPanning & 0x01) {
+        buff1 = ((float) ch1) / 64;
+        SDL_MixAudioFormat((Uint8 *)&buff0, (Uint8 *)&buff1, AUDIO_F32SYS, sizeof(float), rVol);
+    }
+
+
+    soundBuffer[soundIdx] = buff0;
+    soundIdx++;
+
+    if (soundIdx > 1023) {
+        soundIdx = 0;
+
+        uint32_t buffSize = 1024 * sizeof(float);
+
+        while (SDL_GetQueuedAudioSize(aud) > buffSize) {
+        }
+
+        SDL_QueueAudio(aud, soundBuffer, buffSize);
+    }
 }
 
 static void frameDelay() {
@@ -98,6 +171,7 @@ static void frameDelay() {
     uint32_t curTime = frameCur - frameStart;
 
     if (curTime < frameTime) {
+        // printf("WAIT TIME: %d\n", frameTime - curTime);
 	SDL_Delay(frameTime - curTime);
     }
     frameStart = SDL_GetTicks();
@@ -348,9 +422,11 @@ void incEventTimer(uint32_t cycles) {
     if (guiCycleCount >= GUI_CYCLES) {
         guiCycleCount -= GUI_CYCLES;
         pollGUIEvents();
-        frameDelay();
     }
 }
+
+uint32_t frameTimeStart = 0;
+uint32_t frameCount = 0;
 
 void renderFrame(uint8_t screen[144][160]) {
     pollGUIEvents();
@@ -368,6 +444,16 @@ void renderFrame(uint8_t screen[144][160]) {
 	rect.y += pixSize;
     }
     SDL_RenderPresent(rend);
+
+    uint32_t timePassed = SDL_GetTicks() - frameTimeStart;
+    frameCount++;
+    if (timePassed > 1000) {
+        frameTimeStart = SDL_GetTicks();
+        printf("FPS: %d\n", frameCount);
+        printf("TIME: %d\n", timePassed);
+        frameCount = 0;
+    }
+    // frameDelay();
 }
 
 void closeGUI() {
