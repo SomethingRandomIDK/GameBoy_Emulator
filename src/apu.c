@@ -660,7 +660,7 @@ void writeSound(uint16_t addr, uint8_t val) {
                 ch1Period = (ch1Period & 0x700) | (val);
                 break;
             case 0x04:
-                ch1Period = (ch1Period & 0xff) | ((val & 0x3) << 8);
+                ch1Period = (ch1Period & 0xff) | ((val & 0x7) << 8);
                 soundRegs[relAddr] = (soundRegs[relAddr] & 0xbf) | (val & 0x40);
                 if (val & 0x80) {
                     ch1Trigger();
@@ -680,7 +680,7 @@ void writeSound(uint16_t addr, uint8_t val) {
                 ch2Period = (ch2Period & 0x700) | (val);
                 break;
             case 0x09:
-                ch2Period = (ch2Period & 0xff) | ((val & 0x3) << 8);
+                ch2Period = (ch2Period & 0xff) | ((val & 0x7) << 8);
                 soundRegs[relAddr] = (soundRegs[relAddr] & 0xbf) | (val & 0x40);
                 if (val & 0x80) {
                     ch2Trigger();
@@ -702,7 +702,7 @@ void writeSound(uint16_t addr, uint8_t val) {
                 ch3Period = (ch3Period & 0x700) | val;
                 break;
             case 0x0e:
-                ch3Period = (ch3Period & 0xff) | ((val & 0x3) << 8);
+                ch3Period = (ch3Period & 0xff) | ((val & 0x7) << 8);
                 soundRegs[relAddr] = (soundRegs[relAddr] & 0xbf) | (val & 0x40);
                 if (val & 0x80) {
                     ch3Trigger();
