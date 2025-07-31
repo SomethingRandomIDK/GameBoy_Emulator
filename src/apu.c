@@ -542,21 +542,6 @@ static void ch4Tick(uint32_t cycles) {
 uint32_t sampleTimer = 0;
 
 void incApuTimer(uint32_t cycles) {
-    if (!AUD_ON) return;
-
-    if (CH1_ON) {
-        ch1Tick(cycles);
-    }
-    if (CH2_ON) {
-        ch2Tick(cycles);
-    }
-    if (CH3_ON) {
-        ch3Tick(cycles);
-    }
-    if (CH4_ON) {
-        ch4Tick(cycles);
-    }
-
     sampleTimer += cycles;
     if (sampleTimer >= CLOCKS_PER_SAMPLE) {
         sampleTimer = 0;
@@ -600,6 +585,22 @@ void incApuTimer(uint32_t cycles) {
             ch4Sample
         );
     }
+
+    if (!AUD_ON) return;
+
+    if (CH1_ON) {
+        ch1Tick(cycles);
+    }
+    if (CH2_ON) {
+        ch2Tick(cycles);
+    }
+    if (CH3_ON) {
+        ch3Tick(cycles);
+    }
+    if (CH4_ON) {
+        ch4Tick(cycles);
+    }
+
 }
 
 uint8_t readSound(uint16_t addr) {
