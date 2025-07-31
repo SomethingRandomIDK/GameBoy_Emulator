@@ -445,14 +445,14 @@ void renderFrame(uint8_t screen[144][160]) {
     }
     SDL_RenderPresent(rend);
 
-    uint32_t timePassed = SDL_GetTicks() - frameTimeStart;
-    frameCount++;
-    if (timePassed > 1000) {
-        frameTimeStart = SDL_GetTicks();
-        printf("FPS: %d\n", frameCount);
-        printf("TIME: %d\n", timePassed);
-        frameCount = 0;
-    }
+    // uint32_t timePassed = SDL_GetTicks() - frameTimeStart;
+    // frameCount++;
+    // if (timePassed > 1000) {
+    //     frameTimeStart = SDL_GetTicks();
+    //     printf("FPS: %d\n", frameCount);
+    //     printf("TIME: %d\n", timePassed);
+    //     frameCount = 0;
+    // }
     // frameDelay();
 }
 
