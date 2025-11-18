@@ -612,21 +612,28 @@ static void loadRamFile() {
 static void findNumRomBanks() {
     if (rom.header.romSize < 0x09) {
         rom.numRomBanks = 1 << (rom.header.romSize + 1);
-        return;
+    } else {
+        switch(rom.header.romSize) {
+            case 0x52:
+                rom.numRomBanks = 72;
+                break;
+            case 0x53:
+                rom.numRomBanks = 80;
+                break;
+            case 0x54:
+                rom.numRomBanks = 96;
+                break;
+            default:
+                rom.numRomBanks = 2;
+        }
     }
 
-    switch(rom.header.romSize) {
-        case 0x52:
-            rom.numRomBanks = 72;
-            break;
-        case 0x53:
-            rom.numRomBanks = 80;
-            break;
-        case 0x54:
-            rom.numRomBanks = 96;
-            break;
-        default:
-            rom.numRomBanks = 2;
+    size_t sizeNeed = rom.numRomBanks * 0x4000;
+    if (rom.cartSize < sizeNeed) {
+        uint8_t *tempCart = (uint8_t *)realloc(rom.cartridge, sizeNeed);
+        memset((tempCart + rom.cartSize), 0, (sizeNeed - rom.cartSize));
+        rom.cartridge = tempCart;
+        rom.cartSize = sizeNeed;
     }
 }
 
