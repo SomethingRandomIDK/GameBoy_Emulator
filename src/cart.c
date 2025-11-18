@@ -1141,6 +1141,15 @@ void cartInit(char *file) {
 
     fseek(f, 0, SEEK_END);
     rom.cartSize = ftell(f);
+
+    // Check to see if their are enough bytes for the program to read the game
+    // header
+    if (rom.cartSize < 0x14f) {
+        fclose(f);
+        printf("Not a valid GameBoy Rom\n");
+        exit(1);
+    }
+
     rewind(f);
     rom.cartridge = malloc(rom.cartSize);
     fread(rom.cartridge, 1, rom.cartSize, f);
