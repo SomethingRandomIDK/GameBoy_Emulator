@@ -49,7 +49,6 @@ static void checkLy() {
 
 void incLCDTimer(uint32_t cycles) {
     dmaClock += cycles;
-    lcdClock += cycles;
     while (dmaClock > 3 && dmaTransfer) {
         dmaWrite((0xfe00 | lowerAddr), busRead8((upperAddr << 8) | lowerAddr));
         lowerAddr++;
@@ -58,6 +57,7 @@ void incLCDTimer(uint32_t cycles) {
     }
 
     if (lcdRegs[LCDC] & 0x80) {
+        lcdClock += cycles;
         switch (lcdRegs[STAT] & 0x3) {
             case 0: // Horizontal Blank
                 if (lcdClock >= 456) {
@@ -154,6 +154,7 @@ void writeLCD(uint16_t addr, uint8_t val) {
                 statInter = 0;
             } else if ((val & 0x80) && !(lcdRegs[LCDC] & 0x80)) {
                 lcdRegs[STAT] = (lcdRegs[STAT] & ~(0x3)) | 0x2;
+                lcdClock = 0;
             }
             lcdRegs[LCDC] = val;
             break;
