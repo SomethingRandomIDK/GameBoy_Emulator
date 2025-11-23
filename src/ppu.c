@@ -8,10 +8,10 @@
 
 static uint8_t vram[0x2000];
 static uint8_t oam[0xa0];
-static uint8_t screen[144][160];
-static uint8_t bgScreen[144][160];
+static uint32_t screen[SCREEN_SIZE];
+static uint32_t bgScreen[SCREEN_SIZE];
 
-static uint8_t palette[4] = {0xff, 0xab, 0x55, 0x00};
+static uint32_t palette[4] = {0xffffffff, 0xabababff, 0x555555ff, 0x000000ff};
 
 static uint8_t windowLine = 0;
 
@@ -45,13 +45,13 @@ static void drawSpriteLine(uint8_t lcdc, uint8_t line) {
     uint8_t obj0PaletteNum = readLCD(0xff48);
     uint8_t obj1PaletteNum = readLCD(0xff49);
 
-    uint8_t obj0[4] = {
+    uint32_t obj0[4] = {
         palette[obj0PaletteNum & 0x3],
         palette[(obj0PaletteNum >> 2) & 0x3],
         palette[(obj0PaletteNum >> 4) & 0x3],
         palette[(obj0PaletteNum >> 6) & 0x3]
     };
-    uint8_t obj1[4] = {
+    uint32_t obj1[4] = {
         palette[obj1PaletteNum & 0x3],
         palette[(obj1PaletteNum >> 2) & 0x3],
         palette[(obj1PaletteNum >> 4) & 0x3],
@@ -133,13 +133,15 @@ static void drawSpriteLine(uint8_t lcdc, uint8_t line) {
         }
     }
 
+    int lineStart = line * 160;
+
     for (int i = 0; i < 160; i++) {
         if (spriteLine[i] & 0x80) {
-            if (!bgScreen[line][i] && !!(spriteLine[i] & 0x3)) {
-                screen[line][i] = (spriteLine[i] & 0x10) ? (obj1[(spriteLine[i] & 0x3)]): (obj0[(spriteLine[i] & 0x3)]);
+            if (!bgScreen[lineStart + i] && !!(spriteLine[i] & 0x3)) {
+                screen[lineStart + i] = (spriteLine[i] & 0x10) ? (obj1[(spriteLine[i] & 0x3)]): (obj0[(spriteLine[i] & 0x3)]);
             }
         } else if (spriteLine[i] & 0x3) {
-            screen[line][i] = (spriteLine[i] & 0x10) ? (obj1[(spriteLine[i] & 0x3)]): (obj0[(spriteLine[i] & 0x3)]);
+            screen[lineStart + i] = (spriteLine[i] & 0x10) ? (obj1[(spriteLine[i] & 0x3)]): (obj0[(spriteLine[i] & 0x3)]);
         }
     }
 }
@@ -150,7 +152,7 @@ void resetWindowLine() {
 
 static void drawWinLine(uint8_t lcdc, uint8_t line) {
     uint8_t bgPaletteNum = readLCD(0xff47);
-    uint8_t bgPalette[4] = {
+    uint32_t bgPalette[4] = {
         palette[bgPaletteNum & 0x3],
         palette[(bgPaletteNum >> 2) & 0x3],
         palette[(bgPaletteNum >> 4) & 0x3],
@@ -185,12 +187,14 @@ static void drawWinLine(uint8_t lcdc, uint8_t line) {
         uint8_t botByte = vram[rowAddr];
         uint8_t topByte = vram[rowAddr + 1];
 
+        int lineStart = line * 160;
+
         for(int i = 0; i < 8; i++) {
             uint16_t curPix = xPix + i;
             if (curPix >= 7 && curPix < 167) {
                 int color = (((topByte >> (7 - i)) & 0x1) << 1) | ((botByte >> (7 - i)) & 0x1);
-                screen[line][curPix - 7] = bgPalette[color];
-                bgScreen[line][curPix - 7] = color;
+                screen[lineStart + (curPix - 7)] = bgPalette[color];
+                bgScreen[lineStart + (curPix - 7)] = color;
             }
         }
     }
@@ -199,16 +203,18 @@ static void drawWinLine(uint8_t lcdc, uint8_t line) {
 
 static void drawBgLine(uint8_t lcdc, uint8_t line) {
     uint8_t bgPaletteNum = readLCD(0xff47);
-    uint8_t bgPalette[4] = {
+    uint32_t bgPalette[4] = {
         palette[bgPaletteNum & 0x3],
         palette[(bgPaletteNum >> 2) & 0x3],
         palette[(bgPaletteNum >> 4) & 0x3],
         palette[(bgPaletteNum >> 6) & 0x3]
     };
 
+    int lineStart = line * 160;
+
     if (!(lcdc & 0x01)) {
         for (int i = 0; i < 160; i++) {
-            screen[line][i] = bgPalette[0];
+            screen[lineStart + i] = bgPalette[0];
         }
         return;
     }
@@ -247,8 +253,8 @@ static void drawBgLine(uint8_t lcdc, uint8_t line) {
             uint16_t curPix = xPix + i;
             if (curPix >= xStart && curPix < endLine) {
                 int color = (((topByte >> (7 - i)) & 0x1) << 1) | ((botByte >> (7 - i)) & 0x1);
-                screen[line][curPix - xStart] = bgPalette[color];
-                bgScreen[line][curPix - xStart] = color;
+                screen[lineStart + (curPix - xStart)] = bgPalette[color];
+                bgScreen[lineStart + (curPix - xStart)] = color;
             }
         }
 

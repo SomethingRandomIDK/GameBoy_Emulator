@@ -16,7 +16,8 @@ static uint32_t guiCycleCount = 0;
 
 static SDL_Window *win = NULL;
 static SDL_Renderer *rend = NULL;
-static SDL_GameController* cont = NULL;
+static SDL_Texture *text = NULL;
+static SDL_GameController *cont = NULL;
 static SDL_Event ev;
 static SDL_AudioDeviceID aud;
 
@@ -77,6 +78,8 @@ void initGUI() {
     rend = SDL_CreateRenderer(win, -1, 0);
     SDL_RenderClear(rend);
     SDL_RenderPresent(rend);
+
+    text = SDL_CreateTexture(rend, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 160, 144);
 
     frameStart = SDL_GetTicks();
 
@@ -428,21 +431,12 @@ void incEventTimer(uint32_t cycles) {
 uint32_t frameTimeStart = 0;
 uint32_t frameCount = 0;
 
-void renderFrame(uint8_t screen[144][160]) {
+void renderFrame(uint32_t screen[SCREEN_SIZE]) {
     pollGUIEvents();
-    SDL_SetRenderDrawColor(rend, 0x00, 0x00, 0x00, 0xff);
     SDL_RenderClear(rend);
-    int i, j;
-    SDL_Rect rect = {.w = pixSize, .h = pixSize, .x=startX, .y=startY};
-    for (i = 0; i < 144; i++) {
-        for (j = 0; j < 160; j++) {
-            SDL_SetRenderDrawColor(rend, screen[i][j], screen[i][j], screen[i][j], 0xff);
-            SDL_RenderFillRect(rend, &rect);
-            rect.x += pixSize;
-        }
-        rect.x = startX;
-        rect.y += pixSize;
-    }
+    SDL_Rect rect = {.w = pixSize * 160, .h = pixSize * 144, .x=startX, .y=startY};
+    SDL_UpdateTexture(text, NULL, screen, 160 * sizeof(uint32_t));
+    SDL_RenderCopy(rend, text, NULL, &rect);
     SDL_RenderPresent(rend);
 
     // uint32_t timePassed = SDL_GetTicks() - frameTimeStart;
@@ -457,6 +451,7 @@ void renderFrame(uint8_t screen[144][160]) {
 }
 
 void closeGUI() {
+    SDL_DestroyTexture(text);
     SDL_DestroyRenderer(rend);
     SDL_DestroyWindow(win);
     SDL_Quit();
