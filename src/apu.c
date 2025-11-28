@@ -362,7 +362,7 @@ static void ch3Trigger() {
     waveRamIdx = 0;
 
     if (CH_3_DAC) {
-        soundRegs[0x16] |= 0x08;
+        soundRegs[0x16] |= 0x04;
     }
 
     // Need to check if volume needs to be retriggered or just changed on write
@@ -568,6 +568,7 @@ void incApuTimer(uint32_t cycles) {
                 ch3Sample >>= 4;
             }
             ch3Sample &= 0xf;
+            ch3Sample >>= CH_3_OUT_LV - 1;
         }
 
         if (CH4_ON) {
