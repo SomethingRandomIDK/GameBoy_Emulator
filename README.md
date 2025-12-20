@@ -145,7 +145,7 @@ cmake --build .
 If you would like to compile using MinGW use the following cmake command instead
 
 ```sh
-cmake -G "MinGW Makefiles" -DSDL2_DIR="C:\path\to\SDL2\cmake\folder" ..
+cmake -G "MinGW Makefiles" -DCMAKE_C_COMPILER=gcc -DSDL2_DIR="C:\path\to\SDL2\cmake\folder" ..
 cmake --build .
 ```
 
