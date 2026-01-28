@@ -612,21 +612,28 @@ static void loadRamFile() {
 static void findNumRomBanks() {
     if (rom.header.romSize < 0x09) {
         rom.numRomBanks = 1 << (rom.header.romSize + 1);
-        return;
+    } else {
+        switch(rom.header.romSize) {
+            case 0x52:
+                rom.numRomBanks = 72;
+                break;
+            case 0x53:
+                rom.numRomBanks = 80;
+                break;
+            case 0x54:
+                rom.numRomBanks = 96;
+                break;
+            default:
+                rom.numRomBanks = 2;
+        }
     }
 
-    switch(rom.header.romSize) {
-        case 0x52:
-            rom.numRomBanks = 72;
-            break;
-        case 0x53:
-            rom.numRomBanks = 80;
-            break;
-        case 0x54:
-            rom.numRomBanks = 96;
-            break;
-        default:
-            rom.numRomBanks = 2;
+    size_t sizeNeed = rom.numRomBanks * 0x4000;
+    if (rom.cartSize < sizeNeed) {
+        uint8_t *tempCart = (uint8_t *)realloc(rom.cartridge, sizeNeed);
+        memset((tempCart + rom.cartSize), 0, (sizeNeed - rom.cartSize));
+        rom.cartridge = tempCart;
+        rom.cartSize = sizeNeed;
     }
 }
 
@@ -1141,6 +1148,15 @@ void cartInit(char *file) {
 
     fseek(f, 0, SEEK_END);
     rom.cartSize = ftell(f);
+
+    // Check to see if their are enough bytes for the program to read the game
+    // header
+    if (rom.cartSize < 0x14f) {
+        fclose(f);
+        printf("Not a valid GameBoy Rom\n");
+        exit(1);
+    }
+
     rewind(f);
     rom.cartridge = malloc(rom.cartSize);
     fread(rom.cartridge, 1, rom.cartSize, f);
