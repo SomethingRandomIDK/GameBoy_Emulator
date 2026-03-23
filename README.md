@@ -1,5 +1,8 @@
 # Game Boy Emulator
 
+**As of version v0.2.0, this project is licensed under GNU GPLv3.  Previous
+versions remain under MIT.**
+
 This is a Game Boy Emulator written in C, made to run on Linux, macOS, and
 Windows devices.
 
