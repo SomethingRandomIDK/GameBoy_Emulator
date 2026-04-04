@@ -31,11 +31,11 @@ if(WIN32)
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 	    "${SDL2_LIBDIR}/SDL2.dll"
 	    $<TARGET_FILE_DIR:gbemu>)
+else()
+    include_directories(${SDL2_INCLUDE_DIRS})
+    target_link_libraries(gbemu ${SDL2_LIBRARIES})
 endif()
 
-target_link_libraries(gbemu
-    SDL2::SDL2
-)
 if (NOT MSVC)
     set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
 endif()
