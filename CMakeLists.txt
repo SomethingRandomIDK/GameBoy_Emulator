@@ -36,6 +36,9 @@ endif()
 target_link_libraries(gbemu
     SDL2::SDL2
 )
+if (NOT MSVC)
+    set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
+endif()
 
 install(TARGETS gbemu
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
