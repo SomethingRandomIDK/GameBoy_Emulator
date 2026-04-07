@@ -23,6 +23,11 @@
 #include "./include/cart.h"
 
 int main(int argc, char **argv) {
+    #ifdef NDEBUG
+    printf("GBEmu: Release Build: v0.1.1\n");
+    #else
+    printf("GBEmu: Debug Build: v0.1.1\n");
+    #endif
     if (argc == 2)
         cartInit(argv[1]);
     else {

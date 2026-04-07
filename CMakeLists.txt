@@ -4,7 +4,12 @@ project(gbemu C)
 
 include(GNUInstallDirs)
 
-find_package(SDL2 REQUIRED)
+if (MSVC)
+    find_package(SDL2 CONFIG REQUIRED)
+else()
+    find_package(SDL2 REQUIRED)
+    set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
+endif()
 
 add_executable(gbemu
     src/main.c
@@ -27,17 +32,12 @@ if(WIN32)
     add_definitions(-DSDL_MAIN_HANDLED)
     include_directories(${SDL2_INCLUDE_DIR})
     link_directories(${SDL2_LIBDIR})
-    add_custom_command(TARGET gbemu POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-	    "${SDL2_LIBDIR}/SDL2.dll"
-	    $<TARGET_FILE_DIR:gbemu>)
+    target_link_libraries(gbemu
+        SDL2::SDL2
+    )
 else()
     include_directories(${SDL2_INCLUDE_DIRS})
     target_link_libraries(gbemu ${SDL2_LIBRARIES})
-endif()
-
-if (NOT MSVC)
-    set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
 endif()
 
 install(TARGETS gbemu

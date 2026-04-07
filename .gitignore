@@ -6,6 +6,7 @@ TODO.md
 
 # Build Stuff
 build/
+vcpkg/
 redocmake.sh
 redocmake.bat
 
